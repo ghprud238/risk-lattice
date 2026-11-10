@@ -193,10 +193,11 @@ def generate_regime_switching_returns(num_days: int = 2520, seed: int = 42) -> p
         else:
             states[t] = 0 if rng.uniform() < 0.23 else 1
 
-    # Base volatility and GARCH parameters
-    omega_calm = 0.00001
-    alpha_garch = 0.08
+    # Base volatility and GARCH parameters (calm vs stress)
+    omega_calm = 0.000005
+    alpha_garch = 0.05
     beta_garch = 0.88
+    max_daily_var = 0.0064  # max 8% daily vol cap (annualized ~127%)
 
     # Macro betas for calm regime (standard factor model)
     # Generates ~0.12 calm-regime beta between semiconductors and auto OEMs
@@ -212,13 +213,14 @@ def generate_regime_switching_returns(num_days: int = 2520, seed: int = 42) -> p
             sector = n["sector"]
             # Specialized factor sensitivities per sector
             if sector == "Semiconductors":
-                factor_betas[i, 3] = rng.uniform(-0.25, -0.10) # DXY
-                factor_betas[i, 6] = rng.uniform(-0.20, -0.05) # VIX
-                factor_betas[i, 7] = rng.uniform(-0.15, -0.05) # USD_CNH
+                factor_betas[i, 3] = -0.18  # DXY
+                factor_betas[i, 6] = -0.28  # VIX
+                factor_betas[i, 7] = -0.12  # USD_CNH
             elif sector == "Automotive" or sector == "Automotive & EV":
-                factor_betas[i, 0] = rng.uniform(-0.25, -0.10) # US10Y
-                factor_betas[i, 5] = rng.uniform(-0.25, -0.10) # HY_OAS
-                factor_betas[i, 9] = rng.uniform(0.10, 0.20)   # COPPER
+                factor_betas[i, 0] = -0.15  # US10Y
+                factor_betas[i, 5] = -0.20  # HY_OAS
+                factor_betas[i, 6] = -0.16  # VIX (broad equity market beta yields ~0.12 calm beta to semiconductors)
+                factor_betas[i, 9] = 0.14   # COPPER
             elif "Airlines" in sector or "Aerospace" in sector:
                 factor_betas[i, 2] = rng.uniform(-0.45, -0.25) # BRENT_CRUDE
                 factor_betas[i, 4] = rng.uniform(0.15, 0.30)   # BALTIC_DRY
@@ -254,11 +256,14 @@ def generate_regime_switching_returns(num_days: int = 2520, seed: int = 42) -> p
     for t in range(num_days):
         regime = states[t]
 
-        # GARCH conditional variance update
+        # GARCH conditional variance update with stability cap
         if t > 0:
-            var_matrix[t] = omega_calm + alpha_garch * (returns_matrix[t - 1] ** 2) + beta_garch * var_matrix[t - 1]
+            omega = 0.00004 if regime == 1 else omega_calm
+            prev_ret_sq = np.minimum(returns_matrix[t - 1] ** 2, 0.04) # cap extreme shock squared
+            var_t = omega + alpha_garch * prev_ret_sq + beta_garch * var_matrix[t - 1]
             if regime == 1:
-                var_matrix[t] *= 2.8 # Elevated volatility during stress regime
+                var_t = var_t * 1.8
+            var_matrix[t] = np.clip(var_t, 0.00004, max_daily_var)
 
         sigma_t = np.sqrt(np.maximum(var_matrix[t], 1e-6))
 
@@ -271,11 +276,11 @@ def generate_regime_switching_returns(num_days: int = 2520, seed: int = 42) -> p
             # Calm regime: Macro factor returns drive asset returns + idiosyncratic noise
             # Supply-chain structural edges remain dormant (~0.12 beta)
             macro_returns = macro_raw * sigma_t[macro_indices]
-            calm_returns = np.dot(factor_betas, macro_returns) + idio_raw * sigma_t * 1.2
-            returns_matrix[t] = calm_returns
+            calm_returns = np.dot(factor_betas, macro_returns) + idio_raw * sigma_t * 0.9
+            returns_matrix[t] = np.clip(calm_returns, -0.15, 0.15)
         else:
             # Stress regime: Structural edges activate with multi-hop damped propagation!
-            macro_returns = macro_raw * sigma_t[macro_indices] * 1.8
+            macro_returns = macro_raw * sigma_t[macro_indices] * 1.5
             base_impulses = np.dot(factor_betas, macro_returns) + idio_raw * sigma_t
 
             # Multi-hop propagation during stress regime
