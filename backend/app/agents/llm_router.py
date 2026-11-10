@@ -50,6 +50,22 @@ class PrivacySanitizer:
             clean[k] = round(float(v / total), 4)
         return clean
 
+    @classmethod
+    def sanitize_holdings(cls, data: Any) -> Any:
+        """Recursively scrubs account IDs, dollar amounts, and share quantities."""
+        if isinstance(data, dict):
+            sanitized = {}
+            for k, v in data.items():
+                if any(priv in k.lower() for priv in ["account", "nav", "notional", "shares", "cost_basis", "dollar", "balance"]):
+                    continue
+                sanitized[k] = cls.sanitize_holdings(v)
+            return sanitized
+        elif isinstance(data, list):
+            return [cls.sanitize_holdings(item) for item in data]
+        elif isinstance(data, str):
+            return cls.sanitize_text(data)
+        return data
+
 
 class LLMRouter:
     def __init__(

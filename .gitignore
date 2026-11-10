@@ -29,6 +29,11 @@ htmlcov/
 # DuckDB local locks and wal (keep schema and synthetic seed data)
 *.duckdb.wal
 *.duckdb.tmp
+backend/data/*.duckdb
+backend/data/backups/
+backend/data/private/
+backend/data/tmp/
+backend/data/synthetic/returns.parquet
 
 # Node / Next.js
 frontend/node_modules/

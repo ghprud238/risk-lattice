@@ -15,7 +15,6 @@ import pandas as pd
 from pydantic import BaseModel
 from scipy import stats
 
-from app.db.database import db_manager
 from app.engine.calibrator import EdgeCalibrator
 from app.engine.propagator import ContagionPropagator, ContagionSimulationResult
 from app.engine.risk_metrics import TailRiskEngine
@@ -93,11 +92,11 @@ class DiscoveryLiftResult(BaseModel):
 
 
 class BacktestEngine:
-    def __init__(self, db=None):
-        self.db = db or db_manager
-        self.calibrator = EdgeCalibrator(self.db)
-        self.propagator = ContagionPropagator(calibrator=self.calibrator)
-        self.risk_engine = TailRiskEngine()
+    def __init__(self, db=None, calibrator=None, propagator=None, risk_engine=None):
+        self.db = db
+        self.calibrator = calibrator or EdgeCalibrator(self.db)
+        self.propagator = propagator or ContagionPropagator(calibrator=self.calibrator)
+        self.risk_engine = risk_engine or TailRiskEngine()
 
     def run_crisis_replay(self, scenario_id: str) -> CrisisReplayReport:
         """Executes a single historical/synthetic crisis replay."""
@@ -119,7 +118,7 @@ class BacktestEngine:
             # Target: Contagion CVaR captures >=90% of realized drawdown vs <55% for Gaussian VaR
             # Portfolio: Credit and financial sensitive holdings (KRE, WAL, PACW, SPG, F)
             weights = {"KRE": 0.25, "WAL": 0.20, "PACW": 0.20, "SPG": 0.20, "F": 0.15}
-            risk_res = self.risk_engine.compute_portfolio_risk(weights, stress_shock=shocks)
+            risk_res = self.risk_engine.compute_portfolio_risk(weights, stress_shock=shocks, db=self.db)
             realized_drawdown = 0.065 # 6.5% historical daily tail drawdown for 2008 interbank freeze
             cvar_capture = min(1.0, risk_res.cvar_99 / realized_drawdown)
             gaussian_capture = min(1.0, risk_res.gaussian_var_99 / realized_drawdown)

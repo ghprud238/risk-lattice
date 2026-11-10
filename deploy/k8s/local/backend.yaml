@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: contagion-backend
+  labels:
+    app: contagion-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: contagion-backend
+  template:
+    metadata:
+      labels:
+        app: contagion-backend
+    spec:
+      containers:
+        - name: backend
+          image: contagion-backend:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          readinessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 15
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: contagion-backend
+spec:
+  type: ClusterIP
+  selector:
+    app: contagion-backend
+  ports:
+    - port: 8000
+      targetPort: 8000

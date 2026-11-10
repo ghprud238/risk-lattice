@@ -1,0 +1,23 @@
+{
+  "schema_version": "1",
+  "model_id": "liquidity_freeze",
+  "name": "Minsky Interbank Liquidity Freeze & Collateral Degradation",
+  "description": "Stock-flow consistent dynamical model of credit spread amplification and collateral fire sales",
+  "author": "Antigravity Quantitative Systems",
+  "reviewed": true,
+  "default_steps": 500,
+  "variables": {
+    "spread": {
+      "factor_id": "SOFR_SPREAD",
+      "unit": "bps",
+      "canonical_scale": 10000.0,
+      "description": "Overnight/short-term funding spread"
+    },
+    "hy_spread": {
+      "factor_id": "HY_OAS",
+      "unit": "bps",
+      "canonical_scale": 10000.0,
+      "description": "Corporate high-yield credit spread"
+    }
+  }
+}

@@ -244,3 +244,73 @@ class ContagionPropagator:
             if len(paths) >= top_k:
                 break
         return paths
+
+
+def propagate_kernel(
+    seed: np.ndarray,
+    edges: List[Tuple[int, int, float, str]],
+    substitution: Optional[np.ndarray] = None,
+    distress: Optional[np.ndarray] = None,
+    max_hops: int = 4,
+    alpha: float = 0.65,
+    clip_min: float = -0.95,
+    clip_max: float = 2.00,
+    tolerance: float = 1e-4,
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, List[Dict[str, Any]]]:
+    """
+    Pure deterministic analytical propagation kernel per Section 9, 16.2 & 23.1.
+    
+    Each hop computes one incremental impulse using alpha=0.65 applied once per edge:
+        c = alpha * weight * impulse[edge.source]
+    Relation filtering:
+        If edge.relation == 'SUPPLY': c *= (1.0 - substitution[edge.target])
+    Signed distress amplification:
+        If c < 0.0: c *= distress[edge.target]
+    Cumulative clamping:
+        raw_total = sum(hops)
+        final_total = clip(raw_total, clip_min, clip_max)
+        reconciliation = final_total - raw_total
+    """
+    N = len(seed)
+    if substitution is None:
+        substitution = np.zeros(N, dtype=np.float64)
+    if distress is None:
+        distress = np.ones(N, dtype=np.float64)
+
+    impulse = seed.copy().astype(np.float64)
+    hops = [impulse.copy()]
+    diagnostics = []
+
+    for k in range(1, max_hops + 1):
+        next_impulse = np.zeros(N, dtype=np.float64)
+        visited_targets = set()
+        for src, tgt, weight, relation in edges:
+            if abs(impulse[src]) < tolerance:
+                continue
+            c = alpha * weight * impulse[src]
+            if relation == "SUPPLY":
+                c *= (1.0 - substitution[tgt])
+            if c < 0.0:
+                c *= distress[tgt]
+            next_impulse[tgt] += c
+            visited_targets.add(tgt)
+
+        if not np.all(np.isfinite(next_impulse)):
+            raise ValueError("Non-finite values detected in propagation impulse")
+
+        hops.append(next_impulse.copy())
+        diagnostics.append({
+            "hop": k,
+            "active_nodes": int(np.sum(np.abs(next_impulse) >= tolerance)),
+            "max_impulse": float(np.max(np.abs(next_impulse))) if len(next_impulse) else 0.0,
+            "visited_count": len(visited_targets),
+        })
+        impulse = next_impulse
+
+    hops_arr = np.array(hops)
+    raw_total = np.sum(hops_arr, axis=0)
+    final_total = np.clip(raw_total, clip_min, clip_max)
+    reconciliation = final_total - raw_total
+
+    return hops_arr, final_total, reconciliation, diagnostics
+

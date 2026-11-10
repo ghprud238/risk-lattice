@@ -104,16 +104,23 @@ def test_narrative_explainer_numeric_regex_verification():
     Verifies that the narrative explainer checks citations with regex
     to guarantee all cited percentages match deterministic engine output.
     """
+    from app.db.database import db_manager
+    from app.services.snapshot_service import snapshot_service
+
+    nodes_df, edges_df = snapshot_service.load_graph_snapshot()
     propagator = ContagionPropagator()
     sim_result = propagator.propagate(
         initial_shock={"FOUNDRY_TW": -0.70, "BALTIC_DRY": 1.80},
-        scenario_name="Taiwan Wafer Fab Halt"
+        scenario_name="Taiwan Wafer Fab Halt",
+        nodes_df=nodes_df,
+        edges_df=edges_df,
     )
 
     risk_engine = TailRiskEngine(num_simulations=1000)
     risk_result = risk_engine.compute_portfolio_risk(
         portfolio_weights={"TSLA": 0.33, "F": 0.33, "GM": 0.34},
-        stress_shock={nid: res.cumulative_shock for nid, res in sim_result.node_shocks.items()}
+        stress_shock={nid: res.cumulative_shock for nid, res in sim_result.node_shocks.items()},
+        db=db_manager,
     )
 
     explainer = NarrativeExplainer()

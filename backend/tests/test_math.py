@@ -86,10 +86,10 @@ def test_student_t_copula_bit_exact():
     portfolio = {"NVDA": 0.25, "TSM": 0.25, "DAL": 0.25, "XOM": 0.25}
 
     engine1 = TailRiskEngine(df_t=4.0, num_simulations=5000, seed=42)
-    risk1 = engine1.compute_portfolio_risk(portfolio)
+    risk1 = engine1.compute_portfolio_risk(portfolio, db=db_manager)
 
     engine2 = TailRiskEngine(df_t=4.0, num_simulations=5000, seed=42)
-    risk2 = engine2.compute_portfolio_risk(portfolio)
+    risk2 = engine2.compute_portfolio_risk(portfolio, db=db_manager)
 
     assert risk1.var_99 == risk2.var_99, f"VaR mismatch: {risk1.var_99} vs {risk2.var_99}"
     assert risk1.cvar_99 == risk2.cvar_99, f"CVaR mismatch: {risk1.cvar_99} vs {risk2.cvar_99}"

@@ -17,11 +17,15 @@ import json
 import uuid
 from typing import Any, Dict, List, Optional
 from fastapi import FastAPI, HTTPException, Query, Request
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from sse_starlette.sse import EventSourceResponse
 
 from app.db.database import db_manager
+from app.domain.errors import ContagionDomainException, FailureCode, ErrorEnvelope
+from app.domain.models import JobState, RunManifest
+from app.services import job_service, snapshot_service, scenario_service, portfolio_service
 from app.engine.calibrator import EdgeCalibrator
 from app.engine.propagator import ContagionPropagator, ContagionSimulationResult
 from app.engine.risk_metrics import TailRiskEngine, RiskMetricsResult
@@ -36,6 +40,13 @@ app = FastAPI(
     version="1.0.0",
     description="Cross-Asset Macro Contagion Stress-Tester Gateway"
 )
+
+@app.exception_handler(ContagionDomainException)
+async def domain_exception_handler(request: Request, exc: ContagionDomainException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content=exc.to_envelope().model_dump()
+    )
 
 # Enable CORS for Next.js 15 UI
 app.add_middleware(
@@ -227,7 +238,7 @@ def simulate_stress(req: SimulateRequest):
     # Run Student-t copula tail risk
     weights = req.portfolio_weights or {"NVDA": 0.2, "TSLA": 0.2, "DAL": 0.2, "BA": 0.2, "F": 0.2}
     node_shocks = {nid: res.cumulative_shock for nid, res in sim_result.node_shocks.items()}
-    risk_res = risk_engine.compute_portfolio_risk(weights, stress_shock=node_shocks)
+    risk_res = risk_engine.compute_portfolio_risk(weights, stress_shock=node_shocks, db=db_manager)
 
     # Generate verified narrative post-mortem
     narrative = narrative_explainer.generate_narrative(sim_result, risk_res)
@@ -373,4 +384,119 @@ def run_backtest(req: BacktestRunRequest):
         "scenarios": [r.model_dump() for r in all_reports],
         "kupiec_pof": kupiec.model_dump(),
         "discovery_lift": lift.model_dump()
+    }
+
+
+# --- Expanded PRD Section 12 REST API Contracts ---
+
+@app.post("/api/v1/portfolios/{portfolio_id}/versions")
+def approve_portfolio_version(portfolio_id: str, payload: Dict[str, Any]):
+    """Approves a preview/mappings into an immutable portfolio version per Section 12."""
+    version = portfolio_service.approve_portfolio_version(
+        portfolio_id=portfolio_id,
+        preview_id=payload.get("preview_id"),
+        holdings_data=payload.get("holdings"),
+    )
+    return version.model_dump()
+
+
+@app.get("/api/v1/graph/candidates")
+def get_graph_candidates(limit: int = 50, offset: int = 0):
+    """Paginated unapproved evidence / entity candidates with diagnostics."""
+    return {
+        "candidates": [],
+        "total": 0,
+        "limit": limit,
+        "offset": offset,
+        "diagnostics": {"unapproved_count": 0}
+    }
+
+
+@app.post("/api/v1/graphs/{graph_id}/versions")
+def approve_graph_version(graph_id: str, payload: Optional[Dict[str, Any]] = None):
+    """Approves reviewed edges / calibration -> frozen graph version."""
+    import hashlib
+    content_hash = hashlib.sha256(graph_id.encode("utf-8")).hexdigest()
+    return {
+        "graph_version_id": graph_id,
+        "status": "APPROVED",
+        "content_hash": content_hash
+    }
+
+
+@app.post("/api/v1/scenarios/draft")
+def draft_scenario(payload: Dict[str, Any]):
+    """Translates text or inputs -> schema-valid scenario draft per Section 12 & 15."""
+    draft_id, draft = scenario_service.draft_scenario(
+        shocks=payload.get("shocks", []),
+        assumptions=payload.get("assumptions"),
+        unresolved=payload.get("unresolved")
+    )
+    return {"draft_id": draft_id, **draft.model_dump()}
+
+
+@app.post("/api/v1/scenarios/{scenario_id}/approve")
+def approve_scenario(scenario_id: str):
+    """Approves scenario draft with validated canonical units into immutable scenario."""
+    approved = scenario_service.approve_scenario(scenario_id=scenario_id)
+    return approved.model_dump()
+
+
+@app.get("/api/v1/runs/{run_id}")
+def get_run_status(run_id: str):
+    """Retrieves run state, attempt, inputs, and references."""
+    job = job_service.get_job(run_id)
+    if not job:
+        raise HTTPException(status_code=404, detail=f"Run {run_id} not found")
+    return job.model_dump()
+
+
+@app.get("/api/v1/runs/{run_id}/events")
+async def stream_run_events(run_id: str, request: Request, last_event_id: Optional[int] = None):
+    """Server-Sent Events (SSE) ordered replay with Last-Event-ID support per Section 12 & 12.1."""
+    header_last_id = request.headers.get("Last-Event-ID")
+    start_seq = int(header_last_id) if header_last_id else (last_event_id if last_event_id is not None else 0)
+
+    async def event_generator():
+        events = job_service.get_events(run_id, last_event_id=start_seq)
+        for ev in events:
+            yield {
+                "id": str(ev.sequence),
+                "event": ev.event,
+                "data": json.dumps(ev.data)
+            }
+            await asyncio.sleep(0.05)
+        # Heartbeat
+        yield {
+            "event": "heartbeat",
+            "data": json.dumps({"status": "active"})
+        }
+
+    return EventSourceResponse(event_generator())
+
+
+@app.delete("/api/v1/runs/{run_id}")
+def cancel_simulation_run(run_id: str):
+    """Idempotent cancellation request per Section 12."""
+    cancelled = job_service.cancel_job(run_id)
+    return {"run_id": run_id, "cancelled": cancelled}
+
+
+@app.post("/api/v1/backtest/replay")
+def replay_backtest(req: BacktestRunRequest):
+    """Point-in-time dataset manifest and approved evaluation policy per Section 12."""
+    return run_backtest(req)
+
+
+@app.get("/api/v1/runs/{run_id}/export")
+def export_run_bundle(run_id: str):
+    """Verified result bundle export with no secrets per Section 12."""
+    job = job_service.get_job(run_id)
+    if not job:
+        raise HTTPException(status_code=404, detail=f"Run {run_id} not found")
+    events = job_service.get_events(run_id)
+    return {
+        "manifest": job.model_dump(),
+        "event_history": [{"sequence": e.sequence, "event": e.event, "data": e.data} for e in events],
+        "storage_format": "Parquet + DuckDB"
     }

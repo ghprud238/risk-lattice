@@ -11,15 +11,14 @@ import pandas as pd
 from scipy.sparse import csr_matrix
 from sklearn.linear_model import HuberRegressor
 
-from app.db.database import db_manager
-
-
 class EdgeCalibrator:
     def __init__(self, db=None):
-        self.db = db or db_manager
+        self.db = db
 
     def load_graph_data(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
-        """Loads nodes and structural edges from DuckDB."""
+        """Loads nodes and structural edges. Requires db handle or snapshot."""
+        if self.db is None:
+            raise ValueError("No database handle provided to EdgeCalibrator. Pass db in __init__ or provide DataFrames directly.")
         nodes_df = self.db.query_df("SELECT * FROM graph_nodes ORDER BY node_id;")
         edges_df = self.db.query_df("SELECT * FROM graph_edges ORDER BY source_id, target_id;")
         return nodes_df, edges_df

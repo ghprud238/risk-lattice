@@ -1,0 +1,8 @@
+<minsky>
+  <model name="LiquidityFreeze" version="1.0">
+    <item type="variable" name="spread" value="0.0015" />
+    <item type="variable" name="hy_spread" value="0.0350" />
+    <item type="variable" name="collateral_haircut" value="0.05" />
+    <item type="equation" target="d_spread_dt" formula="0.25 * (collateral_haircut - 0.05)" />
+  </model>
+</minsky>

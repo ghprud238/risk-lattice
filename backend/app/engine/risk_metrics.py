@@ -7,13 +7,11 @@ PRD Section 4, 5 & 6:
 - Baseline 60-day Gaussian VaR benchmark
 - Marginal risk decomposition
 """
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 import pandas as pd
 from pydantic import BaseModel
 from scipy import stats
-
-from app.db.database import db_manager
 
 
 class RiskMetricsResult(BaseModel):
@@ -37,7 +35,8 @@ class TailRiskEngine:
         self,
         portfolio_weights: Dict[str, float],
         returns_df: Optional[pd.DataFrame] = None,
-        stress_shock: Optional[Dict[str, float]] = None
+        stress_shock: Optional[Dict[str, float]] = None,
+        db: Optional[Any] = None,
     ) -> RiskMetricsResult:
         """
         Runs 10,000 Student-t copula simulations with nu=4.0 and PCG64(42) PRNG.
@@ -55,14 +54,17 @@ class TailRiskEngine:
 
         # Retrieve empirical returns for holdings
         if returns_df is None:
-            placeholders = ", ".join(f"'{h}'" for h in holdings)
-            query = f"""
-                SELECT trade_date, node_id, daily_return
-                FROM macro_returns
-                WHERE node_id IN ({placeholders})
-                ORDER BY trade_date, node_id;
-            """
-            returns_df = db_manager.query_df(query)
+            if db is not None:
+                placeholders = ", ".join(f"'{h}'" for h in holdings)
+                query = f"""
+                    SELECT trade_date, node_id, daily_return
+                    FROM macro_returns
+                    WHERE node_id IN ({placeholders})
+                    ORDER BY trade_date, node_id;
+                """
+                returns_df = db.query_df(query)
+            else:
+                returns_df = pd.DataFrame()
 
         pivoted = returns_df.pivot(index="trade_date", columns="node_id", values="daily_return").dropna()
         # Ensure ordering aligns with holdings
@@ -87,13 +89,25 @@ class TailRiskEngine:
         T, K = R.shape
 
         # Calculate sample covariance and correlation matrix
-        cov_matrix = np.cov(R, rowvar=False)
+        if K == 1:
+            cov_matrix = np.array([[float(np.var(R))]])
+            corr_matrix = np.array([[1.0]])
+        else:
+            cov_matrix = np.cov(R, rowvar=False)
+            corr_matrix = np.corrcoef(R, rowvar=False)
+            corr_matrix = np.nan_to_num(corr_matrix, nan=0.0)
+            np.fill_diagonal(corr_matrix, 1.0)
+
         std_devs = np.std(R, axis=0) + 1e-8
-        corr_matrix = np.corrcoef(R, rowvar=False)
 
         # Cholesky decomposition of correlation matrix for Student-t copula
-        # Add small regularizer to guarantee positive definiteness
-        reg_corr = corr_matrix + np.eye(K) * 1e-7
+        # Spectral repair to guarantee positive definiteness per R-02
+        reg_corr = corr_matrix + np.eye(K) * 1e-6
+        vals, vecs = np.linalg.eigh(reg_corr)
+        vals = np.maximum(vals, 1e-6)
+        reg_corr = vecs @ np.diag(vals) @ vecs.T
+        inv_d = 1.0 / np.sqrt(np.diag(reg_corr))
+        reg_corr = np.outer(inv_d, inv_d) * reg_corr
         L = np.linalg.cholesky(reg_corr)
 
         # 1. Generate uncorrelated standard normal variates
