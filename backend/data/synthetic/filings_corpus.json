@@ -1,0 +1,592 @@
+[
+  {
+    "id": "FILING_01_NVDA_FOUNDRY",
+    "company_ticker": "NVDA",
+    "section": "Item 1A. Risk Factors",
+    "text": "We rely on a single foundry for the manufacturing of all our advanced Blackwell and Hopper GPUs. Substantially all of our wafer manufacturing is performed by Taiwan Semiconductor Manufacturing Company (TSMC) at its facilities in Hsinchu and Tainan, Taiwan. Approximately 68% of our neural-engine wafers are fabricated by a single foundry in Hsinchu, Taiwan. If TSMC experiences manufacturing disruptions, earthquakes, or regional geopolitical conflict, our product shipments would be substantially halted.",
+    "ground_truth_edges": [
+      {
+        "source_id": "FOUNDRY_TW",
+        "target_id": "NVDA",
+        "relation_type": "SUPPLIER_TO",
+        "base_weight": 0.68,
+        "lag_days": 14,
+        "evidence_quote": "68% of our neural-engine wafers are fabricated by a single foundry in Hsinchu, Taiwan"
+      }
+    ],
+    "is_distractor": false
+  },
+  {
+    "id": "FILING_02_AMD_FOUNDRY",
+    "company_ticker": "AMD",
+    "section": "Item 1A. Supply Chain Dependencies",
+    "text": "Our high-performance server processors and accelerators depend critically on advanced packaging and lithography partners. A significant concentration exists where approximately 62% of our complex microprocessor dies are produced by advanced fabrication foundries in Taiwan. Disruptions in sea transit or wafer allocation would severely limit our capacity to fulfill hyperscale server demand.",
+    "ground_truth_edges": [
+      {
+        "source_id": "FOUNDRY_TW",
+        "target_id": "AMD",
+        "relation_type": "SUPPLIER_TO",
+        "base_weight": 0.62,
+        "lag_days": 14,
+        "evidence_quote": "approximately 62% of our complex microprocessor dies are produced by advanced fabrication foundries in Taiwan"
+      }
+    ],
+    "is_distractor": false
+  },
+  {
+    "id": "FILING_03_TSLA_BATTERY",
+    "company_ticker": "TSLA",
+    "section": "Item 1A. Raw Material and Battery Supply",
+    "text": "Our vehicle ramp depends upon dedicated cell manufacturing capacity. Currently, about 55% of our North American high-nickel lithium-ion cells are delivered from specialized battery gigafactory joint facilities, which in turn source refined lithium cathode precursor from South American brine extraction operations. Shortages in raw lithium feedstocks or power outages at cell gigafactories directly constrain our delivery cadence.",
+    "ground_truth_edges": [
+      {
+        "source_id": "BATTERY_CELL_GIGA",
+        "target_id": "TSLA",
+        "relation_type": "SUPPLIER_TO",
+        "base_weight": 0.55,
+        "lag_days": 21,
+        "evidence_quote": "about 55% of our North American high-nickel lithium-ion cells are delivered from specialized battery gigafactory joint facilities"
+      }
+    ],
+    "is_distractor": false
+  },
+  {
+    "id": "FILING_04_LITHIUM_BATTERY",
+    "company_ticker": "BATTERY_CELL_GIGA",
+    "section": "Footnote 18. Critical Supplier Agreements",
+    "text": "The entity maintains multi-year procurement commitments for battery-grade lithium carbonate and lithium hydroxide. Over 74% of raw lithium brine inputs are sourced directly from salar extraction basins located in South America under long-term supply agreements.",
+    "ground_truth_edges": [
+      {
+        "source_id": "LITHIUM_BRINE_SA",
+        "target_id": "BATTERY_CELL_GIGA",
+        "relation_type": "SUPPLIER_TO",
+        "base_weight": 0.74,
+        "lag_days": 30,
+        "evidence_quote": "Over 74% of raw lithium brine inputs are sourced directly from salar extraction basins located in South America"
+      }
+    ],
+    "is_distractor": false
+  },
+  {
+    "id": "FILING_05_BA_TITANIUM",
+    "company_ticker": "BA",
+    "section": "Item 1A. Aerospace Sourcing Vulnerabilities",
+    "text": "Commercial jet airframes and structural pylons require specialized titanium alloys. We procure approximately 48% of our specialized aerospace-grade titanium sponge from certified processing mills in Kazakhstan and central Eurasia. Export controls, customs delays, or trade sanctions on specialized metallurgical processors could delay 787 and 77X airframe assembly.",
+    "ground_truth_edges": [
+      {
+        "source_id": "TITANIUM_SPONGE_KZ",
+        "target_id": "BA",
+        "relation_type": "SUPPLIER_TO",
+        "base_weight": 0.48,
+        "lag_days": 45,
+        "evidence_quote": "We procure approximately 48% of our specialized aerospace-grade titanium sponge from certified processing mills in Kazakhstan"
+      }
+    ],
+    "is_distractor": false
+  },
+  {
+    "id": "FILING_06_BA_AVIONICS",
+    "company_ticker": "BA",
+    "section": "Item 1A. Flight Management Systems",
+    "text": "Modern cockpit navigation and auto-throttle assemblies require digital signal processors. Approximately 58% of critical flight computer DSP modules are supplied by a dedicated avionics signal processor vendor, creating single-source schedule vulnerability for next-generation flight deck integration.",
+    "ground_truth_edges": [
+      {
+        "source_id": "AVIONICS_DSP_SUP",
+        "target_id": "BA",
+        "relation_type": "SUPPLIER_TO",
+        "base_weight": 0.58,
+        "lag_days": 30,
+        "evidence_quote": "Approximately 58% of critical flight computer DSP modules are supplied by a dedicated avionics signal processor vendor"
+      }
+    ],
+    "is_distractor": false
+  },
+  {
+    "id": "FILING_07_DAL_FUEL",
+    "company_ticker": "DAL",
+    "section": "Item 1A. Fuel Expense and Refinery Sourcing",
+    "text": "Aircraft fuel represents our largest operating cost component after labor. We source over 65% of our Atlantic hub aviation kerosene from Gulf Coast coastal jet fuel refineries and our Monroe Trainer facility. Sudden refinery turnaround shutdowns or coastal hurricane closures cause immediate capacity curtailments.",
+    "ground_truth_edges": [
+      {
+        "source_id": "JET_FUEL_REFINERY",
+        "target_id": "DAL",
+        "relation_type": "SUPPLIER_TO",
+        "base_weight": 0.65,
+        "lag_days": 7,
+        "evidence_quote": "We source over 65% of our Atlantic hub aviation kerosene from Gulf Coast coastal jet fuel refineries"
+      }
+    ],
+    "is_distractor": false
+  },
+  {
+    "id": "FILING_08_UAL_FUEL",
+    "company_ticker": "UAL",
+    "section": "Item 1A. Fuel Supply Chain",
+    "text": "Our airline operations require secure daily delivery of jet-A aviation turbine fuel. Over 58% of our central and east coast hub fuel requirements are delivered via refined product pipelines connected directly to Gulf Coast jet fuel refinery complexes.",
+    "ground_truth_edges": [
+      {
+        "source_id": "JET_FUEL_REFINERY",
+        "target_id": "UAL",
+        "relation_type": "SUPPLIER_TO",
+        "base_weight": 0.58,
+        "lag_days": 7,
+        "evidence_quote": "Over 58% of our central and east coast hub fuel requirements are delivered via refined product pipelines connected directly to Gulf Coast jet fuel refinery complexes"
+      }
+    ],
+    "is_distractor": false
+  },
+  {
+    "id": "FILING_09_F_HARNESS",
+    "company_ticker": "F",
+    "section": "Item 1A. Assembly Component Concentration",
+    "text": "Assembly of light-duty trucks and utility vehicles requires specialized low-voltage and high-voltage wire harnesses. Approximately 52% of specialized wire harness sub-assemblies are concentrated in a dedicated automotive wiring harness cluster in northern Mexico and Eastern Europe. Labor stoppages or regional logistical halts rapidly stall final assembly within 72 hours.",
+    "ground_truth_edges": [
+      {
+        "source_id": "AUTO_WIRING_HARNESS",
+        "target_id": "F",
+        "relation_type": "SUPPLIER_TO",
+        "base_weight": 0.52,
+        "lag_days": 10,
+        "evidence_quote": "Approximately 52% of specialized wire harness sub-assemblies are concentrated in a dedicated automotive wiring harness cluster"
+      }
+    ],
+    "is_distractor": false
+  },
+  {
+    "id": "FILING_10_GM_HARNESS",
+    "company_ticker": "GM",
+    "section": "Item 1A. Supply Chain Risk Factors",
+    "text": "Vehicle manufacturing relies on synchronous component supply. Nearly 49% of our North American vehicle wiring harness bundles are manufactured by specialized automotive wiring harness cluster facilities, exposing truck manufacturing margins to border crossing delays and localized strikes.",
+    "ground_truth_edges": [
+      {
+        "source_id": "AUTO_WIRING_HARNESS",
+        "target_id": "GM",
+        "relation_type": "SUPPLIER_TO",
+        "base_weight": 0.49,
+        "lag_days": 10,
+        "evidence_quote": "Nearly 49% of our North American vehicle wiring harness bundles are manufactured by specialized automotive wiring harness cluster facilities"
+      }
+    ],
+    "is_distractor": false
+  },
+  {
+    "id": "FILING_11_F_AUTOLOAN",
+    "company_ticker": "F",
+    "section": "Footnote 14. Credit Facilities and Securitizations",
+    "text": "Ford Motor Credit funds dealership inventory flooring and retail consumer paper through revolving warehouse facilities. Approximately 64% of wholesale dealer floorplan financing is pledged to subprime auto loan warehouse SPV entities backed by syndicated bank liquidity commitments.",
+    "ground_truth_edges": [
+      {
+        "source_id": "AUTO_LOAN_SPV",
+        "target_id": "F",
+        "relation_type": "CREDIT_FACILITY_TO",
+        "base_weight": 0.64,
+        "lag_days": 3,
+        "evidence_quote": "Approximately 64% of wholesale dealer floorplan financing is pledged to subprime auto loan warehouse SPV entities"
+      }
+    ],
+    "is_distractor": false
+  },
+  {
+    "id": "FILING_12_GM_AUTOLOAN",
+    "company_ticker": "GM",
+    "section": "Footnote 16. Financing Operations",
+    "text": "GM Financial relies upon asset-backed commercial paper conduits and credit lines. Over 56% of retail auto lending receivables are securitized through auto loan warehouse SPVs tied to syndicated bank liquidity backup lines.",
+    "ground_truth_edges": [
+      {
+        "source_id": "AUTO_LOAN_SPV",
+        "target_id": "GM",
+        "relation_type": "CREDIT_FACILITY_TO",
+        "base_weight": 0.56,
+        "lag_days": 3,
+        "evidence_quote": "Over 56% of retail auto lending receivables are securitized through auto loan warehouse SPVs"
+      }
+    ],
+    "is_distractor": false
+  },
+  {
+    "id": "FILING_13_WAL_HYDESK",
+    "company_ticker": "WAL",
+    "section": "Item 1A. Liquidity and Wholesale Borrowings",
+    "text": "The bank maintains funding access across FHLB advances, broker deposits, and secondary lines. Under stress scenarios, approximately 46% of contingent non-deposit wholesale funding relies upon interbank credit from high-yield funding desks and repo counterparties.",
+    "ground_truth_edges": [
+      {
+        "source_id": "HY_FUNDING_DESK",
+        "target_id": "WAL",
+        "relation_type": "CREDIT_FACILITY_TO",
+        "base_weight": 0.46,
+        "lag_days": 2,
+        "evidence_quote": "approximately 46% of contingent non-deposit wholesale funding relies upon interbank credit from high-yield funding desks"
+      }
+    ],
+    "is_distractor": false
+  },
+  {
+    "id": "FILING_14_PACW_HYDESK",
+    "company_ticker": "PACW",
+    "section": "Item 1A. Interest Rate Risk and Funding Concentration",
+    "text": "To support loan warehouse originations, the company has tapped short-term non-core funding. Roughly 54% of emergency liquidity lines and off-balance sheet warehouse conduits are serviced by high-yield funding desk facilities subject to rapid collateral margin haircuts.",
+    "ground_truth_edges": [
+      {
+        "source_id": "HY_FUNDING_DESK",
+        "target_id": "PACW",
+        "relation_type": "CREDIT_FACILITY_TO",
+        "base_weight": 0.54,
+        "lag_days": 2,
+        "evidence_quote": "Roughly 54% of emergency liquidity lines and off-balance sheet warehouse conduits are serviced by high-yield funding desk facilities"
+      }
+    ],
+    "is_distractor": false
+  },
+  {
+    "id": "FILING_15_KRE_HYDESK",
+    "company_ticker": "KRE",
+    "section": "Item 1A. Member Bank Systemic Exposure",
+    "text": "Regional depository constituents maintain significant vulnerability to money-market funding freezes. On average, 42% of marginal interbank overnight liquidity across constituent banks depends upon credit facilities from high-yield funding desk operations.",
+    "ground_truth_edges": [
+      {
+        "source_id": "HY_FUNDING_DESK",
+        "target_id": "KRE",
+        "relation_type": "CREDIT_FACILITY_TO",
+        "base_weight": 0.42,
+        "lag_days": 2,
+        "evidence_quote": "42% of marginal interbank overnight liquidity across constituent banks depends upon credit facilities from high-yield funding desk operations"
+      }
+    ],
+    "is_distractor": false
+  },
+  {
+    "id": "FILING_16_SPG_CRE",
+    "company_ticker": "SPG",
+    "section": "Footnote 8. Mortgages and Secured Notes",
+    "text": "The trust finances joint venture retail properties using non-recourse mortgage debt and mezzanine financing. Approximately 51% of subordinate retail project tranches are backstopped by commercial real estate mezzanine debt pool syndicates requiring strict debt service covenants.",
+    "ground_truth_edges": [
+      {
+        "source_id": "CRE_MEZZANINE_FUND",
+        "target_id": "SPG",
+        "relation_type": "CREDIT_FACILITY_TO",
+        "base_weight": 0.51,
+        "lag_days": 5,
+        "evidence_quote": "Approximately 51% of subordinate retail project tranches are backstopped by commercial real estate mezzanine debt pool syndicates"
+      }
+    ],
+    "is_distractor": false
+  },
+  {
+    "id": "FILING_17_PLD_CRE",
+    "company_ticker": "PLD",
+    "section": "Footnote 12. Co-Investment Ventures Debt",
+    "text": "In logistics park acquisitions, our co-investment ventures leverage capital partner debt facilities. Nearly 38% of venture debt rollover requirements are linked to commercial real estate mezzanine debt pool terms and floating spread metrics.",
+    "ground_truth_edges": [
+      {
+        "source_id": "CRE_MEZZANINE_FUND",
+        "target_id": "PLD",
+        "relation_type": "CREDIT_FACILITY_TO",
+        "base_weight": 0.38,
+        "lag_days": 5,
+        "evidence_quote": "Nearly 38% of venture debt rollover requirements are linked to commercial real estate mezzanine debt pool terms"
+      }
+    ],
+    "is_distractor": false
+  },
+  {
+    "id": "FILING_18_FOUNDRY_NEON",
+    "company_ticker": "FOUNDRY_TW",
+    "section": "Footnote 4. Consumable Materials for Lithography",
+    "text": "Deep ultraviolet (DUV) excimer lasers require ultra-high purity noble gases. Approximately 72% of specialized neon gas purification used in our Taiwan lithography steppers is supplied by neon gas purification facilities situated in Eastern Europe and coastal hubs.",
+    "ground_truth_edges": [
+      {
+        "source_id": "NEON_PURIFICATION",
+        "target_id": "FOUNDRY_TW",
+        "relation_type": "SUPPLIER_TO",
+        "base_weight": 0.72,
+        "lag_days": 20,
+        "evidence_quote": "Approximately 72% of specialized neon gas purification used in our Taiwan lithography steppers is supplied by neon gas purification facilities"
+      }
+    ],
+    "is_distractor": false
+  },
+  {
+    "id": "FILING_19_BATTERY_COBALT",
+    "company_ticker": "BATTERY_CELL_GIGA",
+    "section": "Item 1A. Cathode Sourcing",
+    "text": "NMC chemistry cells necessitate high-purity cobalt sulfate. Approximately 66% of refined cobalt feedstock originates from centralized cobalt refining hub facilities processing Central African ore, exposing cell manufacturing to international trade corridor bottlenecks.",
+    "ground_truth_edges": [
+      {
+        "source_id": "COBALT_REFINERY_CD",
+        "target_id": "BATTERY_CELL_GIGA",
+        "relation_type": "SUPPLIER_TO",
+        "base_weight": 0.66,
+        "lag_days": 25,
+        "evidence_quote": "Approximately 66% of refined cobalt feedstock originates from centralized cobalt refining hub facilities"
+      }
+    ],
+    "is_distractor": false
+  },
+  {
+    "id": "FILING_20_CLOUD_DATA_NVDA",
+    "company_ticker": "CLOUD_DATA_HUB",
+    "section": "Footnote 9. AI Infrastructure Capital Expenditures",
+    "text": "Data center compute clusters have deployed next-generation accelerator architectures. Over 82% of hyperscale AI GPU server nodes installed in our primary Northern Virginia data centers are powered by NVIDIA accelerator systems.",
+    "ground_truth_edges": [
+      {
+        "source_id": "NVDA",
+        "target_id": "CLOUD_DATA_HUB",
+        "relation_type": "SUPPLIER_TO",
+        "base_weight": 0.82,
+        "lag_days": 14,
+        "evidence_quote": "Over 82% of hyperscale AI GPU server nodes installed in our primary Northern Virginia data centers are powered by NVIDIA accelerator systems"
+      }
+    ],
+    "is_distractor": false
+  },
+  {
+    "id": "FILING_21_NEE_TRANSFORMER",
+    "company_ticker": "NEE",
+    "section": "Item 1A. Grid Interconnection and Equipment Lead Times",
+    "text": "Renewable generation interconnection requires extra-high voltage step-up transformers. Lead times currently exceed 36 months, with 61% of specialized transformer core laminations supplied by high-voltage power transformer core manufacturers.",
+    "ground_truth_edges": [
+      {
+        "source_id": "TRANSFORMER_CORE",
+        "target_id": "NEE",
+        "relation_type": "SUPPLIER_TO",
+        "base_weight": 0.61,
+        "lag_days": 60,
+        "evidence_quote": "61% of specialized transformer core laminations supplied by high-voltage power transformer core manufacturers"
+      }
+    ],
+    "is_distractor": false
+  },
+  {
+    "id": "FILING_22_DUK_TRANSFORMER",
+    "company_ticker": "DUK",
+    "section": "Item 1A. Transmission Grid Hardening",
+    "text": "Our regulated utilities are executing multi-billion transmission upgrades. Over 54% of high-voltage transmission substation transformer cores are sourced from certified transformer core fabricators, representing a key capital expenditure supply constraint.",
+    "ground_truth_edges": [
+      {
+        "source_id": "TRANSFORMER_CORE",
+        "target_id": "DUK",
+        "relation_type": "SUPPLIER_TO",
+        "base_weight": 0.54,
+        "lag_days": 60,
+        "evidence_quote": "Over 54% of high-voltage transmission substation transformer cores are sourced from certified transformer core fabricators"
+      }
+    ],
+    "is_distractor": false
+  },
+  {
+    "id": "FILING_23_XOM_PIPELINE",
+    "company_ticker": "XOM",
+    "section": "Item 1A. Upstream Evacuation and Midstream Constraints",
+    "text": "Permian Basin crude production evacuation relies heavily on contracted pipeline transport. Approximately 47% of inland crude barrels destined for Gulf Coast refining flow through Cushing and regional crude pipeline transit networks.",
+    "ground_truth_edges": [
+      {
+        "source_id": "PIPELINE_CRUDE_OK",
+        "target_id": "XOM",
+        "relation_type": "SUPPLIER_TO",
+        "base_weight": 0.47,
+        "lag_days": 3,
+        "evidence_quote": "Approximately 47% of inland crude barrels destined for Gulf Coast refining flow through Cushing and regional crude pipeline transit networks"
+      }
+    ],
+    "is_distractor": false
+  },
+  {
+    "id": "FILING_24_CVX_PIPELINE",
+    "company_ticker": "CVX",
+    "section": "Item 1A. Midstream Logistics",
+    "text": "Midstream delivery interruptions can curtail upstream wellhead production. Nearly 44% of our domestic crude throughput relies on dedicated pipeline gathering and Cushing oil pipeline transit corridors.",
+    "ground_truth_edges": [
+      {
+        "source_id": "PIPELINE_CRUDE_OK",
+        "target_id": "CVX",
+        "relation_type": "SUPPLIER_TO",
+        "base_weight": 0.44,
+        "lag_days": 3,
+        "evidence_quote": "Nearly 44% of our domestic crude throughput relies on dedicated pipeline gathering and Cushing oil pipeline transit corridors"
+      }
+    ],
+    "is_distractor": false
+  },
+  {
+    "id": "FILING_25_OXY_PIPELINE",
+    "company_ticker": "OXY",
+    "section": "Item 1A. Permian Infrastructure Dependencies",
+    "text": "We depend upon takeaway pipeline capacity to transport oil and NGLs from our Delaware and Midland Basin operations. Approximately 63% of our regional crude volume is routed across pipeline crude corridors connected to mid-continent hubs.",
+    "ground_truth_edges": [
+      {
+        "source_id": "PIPELINE_CRUDE_OK",
+        "target_id": "OXY",
+        "relation_type": "SUPPLIER_TO",
+        "base_weight": 0.63,
+        "lag_days": 3,
+        "evidence_quote": "Approximately 63% of our regional crude volume is routed across pipeline crude corridors connected to mid-continent hubs"
+      }
+    ],
+    "is_distractor": false
+  },
+  {
+    "id": "FILING_26_NVDA_TSLA_OEM",
+    "company_ticker": "TSLA",
+    "section": "Item 1A. Full Self-Driving Hardware and Compute",
+    "text": "Our vehicle autonomy computer and Dojo training clusters utilize advanced silicon architecture. We rely on leading semiconductor designers, with approximately 45% of AI vision processing and simulation cluster acceleration depending on NVIDIA graphics processing architectures.",
+    "ground_truth_edges": [
+      {
+        "source_id": "NVDA",
+        "target_id": "TSLA",
+        "relation_type": "SUPPLIER_TO",
+        "base_weight": 0.45,
+        "lag_days": 21,
+        "evidence_quote": "approximately 45% of AI vision processing and simulation cluster acceleration depending on NVIDIA graphics processing architectures"
+      }
+    ],
+    "is_distractor": false
+  },
+  {
+    "id": "FILING_27_INTC_MEM_PACK",
+    "company_ticker": "INTC",
+    "section": "Footnote 7. Advanced Packaging Operations",
+    "text": "Foveros and EMIB advanced packaging techniques are integrated across multiple global facilities. Over 53% of client and data center substrate assembly is outsourced to specialized memory packaging fab facilities in Southeast Asia.",
+    "ground_truth_edges": [
+      {
+        "source_id": "MEM_PACKAGING_FAB",
+        "target_id": "INTC",
+        "relation_type": "SUPPLIER_TO",
+        "base_weight": 0.53,
+        "lag_days": 18,
+        "evidence_quote": "Over 53% of client and data center substrate assembly is outsourced to specialized memory packaging fab facilities"
+      }
+    ],
+    "is_distractor": false
+  },
+  {
+    "id": "FILING_28_TSM_FOUNDRY",
+    "company_ticker": "TSM",
+    "section": "Item 1A. Geopolitical and Fab Concentration Risk",
+    "text": "As the world's leading dedicated semiconductor foundry, over 85% of our 3nm and 5nm production capacity is physically located within the Taiwan advanced wafer foundry ecosystem. Any cross-strait conflict or regional maritime disruption directly halts global wafer output.",
+    "ground_truth_edges": [
+      {
+        "source_id": "FOUNDRY_TW",
+        "target_id": "TSM",
+        "relation_type": "SUPPLIER_TO",
+        "base_weight": 0.85,
+        "lag_days": 0,
+        "evidence_quote": "over 85% of our 3nm and 5nm production capacity is physically located within the Taiwan advanced wafer foundry ecosystem"
+      }
+    ],
+    "is_distractor": false
+  },
+  {
+    "id": "FILING_29_PANAMA_PORTLA",
+    "company_ticker": "LOGISTICS_PORT_LA",
+    "section": "Item 1A. Intermodal Transit Choke Points",
+    "text": "Transshipment container flows between the Atlantic and Pacific basins face canal constraints. Waterway draft restrictions at the Panama Canal shipping lane impact roughly 35% of container feeder vessel rotations routing into the Port of Los Angeles logistics corridor.",
+    "ground_truth_edges": [
+      {
+        "source_id": "PANAMA_CANAL",
+        "target_id": "LOGISTICS_PORT_LA",
+        "relation_type": "SUPPLIER_TO",
+        "base_weight": 0.35,
+        "lag_days": 12,
+        "evidence_quote": "Panama Canal shipping lane impact roughly 35% of container feeder vessel rotations routing into the Port of Los Angeles logistics corridor"
+      }
+    ],
+    "is_distractor": false
+  },
+  {
+    "id": "FILING_30_SUBSEA_CLOUD",
+    "company_ticker": "CLOUD_DATA_HUB",
+    "section": "Item 1A. Network Transit Resiliency",
+    "text": "Global cloud replication between US availability zones and Asia Pacific edge regions depends on underwater fiber infrastructure. Over 57% of trans-pacific data ingress is routed through trans-pacific fiber transit consortia cables subject to subsea seismic damage.",
+    "ground_truth_edges": [
+      {
+        "source_id": "SUBSEA_CABLE_PAC",
+        "target_id": "CLOUD_DATA_HUB",
+        "relation_type": "SUPPLIER_TO",
+        "base_weight": 0.57,
+        "lag_days": 1,
+        "evidence_quote": "Over 57% of trans-pacific data ingress is routed through trans-pacific fiber transit consortia cables"
+      }
+    ],
+    "is_distractor": false
+  },
+  {
+    "id": "FILING_31_DISTRACTOR_CASH",
+    "company_ticker": "NVDA",
+    "section": "Item 7. Management's Discussion - Liquidity",
+    "text": "Our primary sources of liquidity are cash receipts from customers and borrowings. We ended the fiscal year with substantial cash reserves, money market holdings, and marketable debt securities. We believe existing cash balances will be sufficient to meet working capital requirements for at least twelve months.",
+    "ground_truth_edges": [],
+    "is_distractor": true
+  },
+  {
+    "id": "FILING_32_DISTRACTOR_ESG",
+    "company_ticker": "DAL",
+    "section": "Item 1. Business Sustainability Initiatives",
+    "text": "We are committed to reducing greenhouse gas emissions through fleet modernization and sustainable aviation fuel adoption. We partner with agricultural cooperatives to explore biofuels and encourage recycling across passenger cabin services.",
+    "ground_truth_edges": [],
+    "is_distractor": true
+  },
+  {
+    "id": "FILING_33_DISTRACTOR_PATENTS",
+    "company_ticker": "TSLA",
+    "section": "Item 1. Intellectual Property",
+    "text": "We own patents, trademarks, copyrights, and trade secrets related to vehicle design, battery architectures, and charging systems. While we protect our proprietary technology, our open patent pledge allows good-faith use of electric vehicle patents.",
+    "ground_truth_edges": [],
+    "is_distractor": true
+  },
+  {
+    "id": "FILING_34_DISTRACTOR_GOV",
+    "company_ticker": "NEE",
+    "section": "Item 1. Environmental Regulation Compliance",
+    "text": "Our operations are subject to extensive federal, state, and local environmental statutes regarding air quality, water discharge, and endangered species protection. Compliance requires routine monitoring and capital expenditures without material adverse effect on operations.",
+    "ground_truth_edges": [],
+    "is_distractor": true
+  },
+  {
+    "id": "FILING_35_DISTRACTOR_HR",
+    "company_ticker": "BA",
+    "section": "Item 1. Human Capital Resources",
+    "text": "At year-end, we employed approximately 170,000 employees globally. We emphasize safety culture, engineering excellence, diversity, and technical training programs across manufacturing sites and engineering design offices.",
+    "ground_truth_edges": [],
+    "is_distractor": true
+  },
+  {
+    "id": "FILING_36_DISTRACTOR_TAX",
+    "company_ticker": "XOM",
+    "section": "Footnote 19. Income Taxes",
+    "text": "Taxes on income are determined based on statutory rates in domestic and international jurisdictions. Deferred income taxes reflect net tax effects of temporary differences between carrying amounts of assets and liabilities for financial reporting purposes.",
+    "ground_truth_edges": [],
+    "is_distractor": true
+  },
+  {
+    "id": "FILING_37_DISTRACTOR_CYBER",
+    "company_ticker": "WAL",
+    "section": "Item 1C. Cybersecurity",
+    "text": "The company maintains defense-in-depth cybersecurity protocols, perimeter firewalls, and incident response playbooks. Security operations centers perform 24/7 monitoring and periodic third-party penetration testing to mitigate data breach risks.",
+    "ground_truth_edges": [],
+    "is_distractor": true
+  },
+  {
+    "id": "FILING_38_DISTRACTOR_LEASING",
+    "company_ticker": "SPG",
+    "section": "Item 2. Properties and Lease Expirations",
+    "text": "Our retail properties feature diversified tenant mixes including department stores, luxury apparel, entertainment centers, and dining venues. No single tenant accounted for more than 3.0% of total annualized minimum base rent across properties.",
+    "ground_truth_edges": [],
+    "is_distractor": true
+  },
+  {
+    "id": "FILING_39_DISTRACTOR_AUDIT",
+    "company_ticker": "GM",
+    "section": "Item 9A. Controls and Procedures",
+    "text": "Management assessed the effectiveness of our internal control over financial reporting as of fiscal year-end based on the COSO framework. Based on this evaluation, management concluded our financial reporting controls were effective.",
+    "ground_truth_edges": [],
+    "is_distractor": true
+  },
+  {
+    "id": "FILING_40_DISTRACTOR_DIVIDEND",
+    "company_ticker": "CVX",
+    "section": "Item 5. Market for Registrant's Common Equity",
+    "text": "The company has paid consecutive quarterly cash dividends for decades. Decisions on dividend declarations remain at the discretion of the Board of Directors and depend upon earnings, cash flows, and capital allocation priorities.",
+    "ground_truth_edges": [],
+    "is_distractor": true
+  }
+]
