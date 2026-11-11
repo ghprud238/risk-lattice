@@ -1,4 +1,4 @@
-# ContagionGraph: Cross-Asset Macro Contagion Stress-Tester
+# RiskLattice: Cross-Asset Macro Contagion Stress-Tester
 
 A hybrid neuro-symbolic financial risk platform combining local-first LLM semantic extraction with a deterministic multi-hop graph propagation and Monte Carlo tail-risk engine.
 
@@ -12,7 +12,7 @@ A hybrid neuro-symbolic financial risk platform combining local-first LLM semant
 
 ## 1. System Architecture
 
-ContagionGraph operates on a **strict neuro-symbolic division of labor**:
+RiskLattice operates on a **strict neuro-symbolic division of labor**:
 - **Deterministic Python Math Engine**: All quantitative risk metrics, Huber robust regressions, 4-hop damped message-passing, balance-sheet distress amplifiers ($\lambda_v$), and 10,000-path Student-$t$ Copula CVaR calculations are executed exclusively by NumPy, SciPy, and DuckDB. Zero LLM involvement in numeric computation.
 - **Probabilistic Semantic AI (LiteLLM)**: Confined strictly to parsing unstructured SEC Form 10-K filings into typed triples, translating natural-language user scenario prompts into initial impulse vectors $s^{(0)}$, and generating post-mortem narrative explanations with regex-verified citations.
 - **Privacy Boundary**: Dollar balances, share quantities, and account IDs remain inside Tier 1 & Tier 2 (DuckDB). External LLMs receive only ticker symbols, public filing text, and normalized unit-free graph paths.
@@ -66,7 +66,7 @@ $$\Delta s_v^{(k)} = \alpha^{k-1} \sum_u W_{uv} \cdot \Delta s_u^{(k-1)} \cdot (
 ### One-Command Setup & Launch
 ```bash
 # Clone and enter directory
-cd /Users/dpcubed/projects/contagion-graph
+cd /Users/dpcubed/projects/risk-lattice
 
 # Run the unified start script (seeds DuckDB, launches FastAPI & Next.js)
 ./start.sh

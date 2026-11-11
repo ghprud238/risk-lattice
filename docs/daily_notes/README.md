@@ -1,6 +1,6 @@
 # Daily Engineering Notes Index
 
-This directory maintains comprehensive daily engineering logs documenting the architectural decisions, implementation milestones, debugging procedures, and verification results for **ContagionGraph**.
+This directory maintains comprehensive daily engineering logs documenting the architectural decisions, implementation milestones, debugging procedures, and verification results for **RiskLattice** (formerly ContagionGraph).
 
 ---
 

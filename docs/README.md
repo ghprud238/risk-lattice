@@ -1,6 +1,6 @@
-# ContagionGraph Documentation Hub
+# RiskLattice Documentation Hub
 
-Welcome to the engineering documentation for **ContagionGraph**, a hybrid neuro-symbolic financial stress-testing platform.
+Welcome to the engineering documentation for **RiskLattice** (formerly ContagionGraph), a hybrid neuro-symbolic financial stress-testing platform.
 
 ---
 

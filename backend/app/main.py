@@ -36,7 +36,7 @@ from app.agents.shock_translator import ShockTranslator, ShockTranslationRespons
 from app.agents.explainer import NarrativeExplainer, NarrativeReport
 
 app = FastAPI(
-    title="ContagionGraph API",
+    title="RiskLattice API",
     version="1.0.0",
     description="Cross-Asset Macro Contagion Stress-Tester Gateway"
 )

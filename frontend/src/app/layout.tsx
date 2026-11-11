@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ContagionGraph | Cross-Asset Macro Contagion Stress-Tester",
+  title: "RiskLattice | Cross-Asset Macro Contagion Stress-Tester",
   description: "Hybrid neuro-symbolic financial risk platform combining local LLM semantic extraction with deterministic multi-hop graph propagation and Student-t copula tail risk.",
 };
 

@@ -1,37 +1,37 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: contagion-frontend
+  name: risk-lattice-frontend
   labels:
-    app: contagion-frontend
+    app: risk-lattice-frontend
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: contagion-frontend
+      app: risk-lattice-frontend
   template:
     metadata:
       labels:
-        app: contagion-frontend
+        app: risk-lattice-frontend
     spec:
       containers:
         - name: frontend
-          image: contagion-frontend:latest
+          image: risk-lattice-frontend:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 3000
           env:
             - name: NEXT_PUBLIC_API_URL
-              value: "http://contagion-backend:8000"
+              value: "http://risk-lattice-backend:8000"
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: contagion-frontend
+  name: risk-lattice-frontend
 spec:
   type: NodePort
   selector:
-    app: contagion-frontend
+    app: risk-lattice-frontend
   ports:
     - port: 3000
       targetPort: 3000

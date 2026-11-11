@@ -5,7 +5,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "$DIR"
 
 echo "================================================================="
-echo " Starting ContagionGraph: Cross-Asset Macro Contagion Stress-Tester"
+echo " Starting RiskLattice: Cross-Asset Macro Contagion Stress-Tester"
 echo "================================================================="
 
 # Check DuckDB seed
@@ -33,7 +33,7 @@ FRONTEND_PID=$!
 cd ..
 
 echo "================================================================="
-echo " ContagionGraph is RUNNING!"
+echo " RiskLattice is RUNNING!"
 echo " Frontend UI: http://localhost:3000"
 echo " Backend API: http://localhost:8000/docs"
 echo " Press Ctrl+C to stop both servers."

@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: contagion-backend
+  name: risk-lattice-backend
   labels:
-    app: contagion-backend
+    app: risk-lattice-backend
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: contagion-backend
+      app: risk-lattice-backend
   template:
     metadata:
       labels:
-        app: contagion-backend
+        app: risk-lattice-backend
     spec:
       containers:
         - name: backend
-          image: contagion-backend:latest
+          image: risk-lattice-backend:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8000
@@ -36,11 +36,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: contagion-backend
+  name: risk-lattice-backend
 spec:
   type: ClusterIP
   selector:
-    app: contagion-backend
+    app: risk-lattice-backend
   ports:
     - port: 8000
       targetPort: 8000

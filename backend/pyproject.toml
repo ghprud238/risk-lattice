@@ -1,7 +1,7 @@
 [project]
-name = "contagion-graph-backend"
+name = "risk-lattice-backend"
 version = "0.1.0"
-description = "ContagionGraph Cross-Asset Macro Contagion Stress-Tester Backend"
+description = "RiskLattice Cross-Asset Macro Contagion Stress-Tester Backend"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
