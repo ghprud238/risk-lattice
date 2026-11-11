@@ -239,6 +239,58 @@ A live JSON event stream over `/simulate/stream` emitting progressive execution 
 
 ---
 
+### 3.3 Executive Plain-English Translation: How a Non-Mathematical Person Reads the Output
+
+While the underlying engine runs advanced mathematical calculations (multivariate Student-$t$ Copula integrals, Huber loss regressions, and sparse matrix message-passing), **no decision-maker needs a quantitative finance degree to understand the stress test**. 
+
+RiskLattice translates complex stochastic results into **four plain-English business answers** and intuitive visual metaphors:
+
+```
+┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                              THE 4 EXECUTIVE QUESTIONS ANSWERED BY RISKLATTICE                         │
+├─────────────────────────────────────────────────┬──────────────────────────────────────────────────────┤
+│ 1. "HOW MUCH MONEY COULD WE LOSE?"              │ Bottom-line stressed dollar loss: -$100.8M (-22.4%)  │
+│ 2. "WHERE DID THE DAMAGE COME FROM?"            │ 3-stage PnL waterfall: Direct -> Supplier -> Contagion│
+│ 3. "WHY DID ASSETS WE THOUGHT SAFE GET HIT?"    │ Plain-English narrative explaining the hidden dominoes│
+│ 4. "WHAT EXACTLY SHOULD WE DO TO PROTECT OURS?" │ Concrete tail-risk hedges (options, swaps, ETF puts) │
+└─────────────────────────────────────────────────┴──────────────────────────────────────────────────────┘
+```
+
+#### 1. "How Much Money Could We Lose?" (The Bottom Line)
+- **What You See**: A clear, prominent headline card:
+  $$\mathbf{-\$100,800,000 \quad (-22.40\% \text{ Portfolio Drawdown})}$$
+- **Non-Technical Meaning**: In this crisis scenario, your $\$450\text{M}$ portfolio is expected to lose approximately $\$100.8\text{M}$. You don't need to read any equations to know your total financial exposure.
+
+#### 2. "Where Did the Damage Come From?" (The 3-Bucket Waterfall)
+Instead of displaying dense matrix algebra, RiskLattice splits your total loss into **three simple business buckets**:
+- **Bucket 1: Direct Headline Damage (1st-Order)** $\to$ *Loss: $-\$35.0\text{M}$*  
+  *"The companies you directly owned that were hit by the immediate news (e.g., TSMC chip exports halted)."*
+- **Bucket 2: Immediate Supplier Squeeze (2nd-Order)** $\to$ *Loss: $-\$53.5\text{M}$*  
+  *"The companies you owned that couldn't get components from TSMC (e.g., Nvidia and Apple ran out of GPU wafers)."*
+- **Bucket 3: The Hidden Domino Cascade (3rd/4th-Order)** $\to$ *Loss: $-\$12.3\text{M}$*  
+  *"Companies that appeared completely unrelated, but had heavy corporate debt and suffered when their tier-2 suppliers stalled (e.g., Ford car factories halted due to missing microcontrollers)."*
+
+#### 3. "Why Did Companies We Thought Were Safe Crash?" (The Plain-English Story)
+Instead of showing covariance matrices, the **Narrative Explainer** gives a 3-bullet briefing written for a Board of Directors:
+> 1. **What Started It**: *"Taiwanese wafer export volumes dropped 70%, while container freight rates spiked 180% due to African transit rerouting."*
+> 2. **The Hidden Bottleneck**: *"Although you do not own semiconductor foundries directly, your automotive holding (Ford) was severely impacted. Ford's Tier-1 supplier (NXP) relies exclusively on TSMC for microcontrollers. Because Ford carries high leverage ($\text{Net Debt/EBITDA} = 4.8$), an unexpected 3-week factory halt compounds its borrowing costs and credit downgrade risk."*
+> 3. **The Protection Plan**: *"Buy put options on the Semiconductor Sector ETF (SOXX) and enter long freight futures on the Baltic Dry Index to hedge $78M of the downside."*
+
+#### 4. The Visual "Domino Effect" Metaphor (Traffic-Light System)
+On the interactive network canvas, non-technical users follow a simple universal color code:
+- 🟢 **Green (Safe)**: Shock is $< 5\%$. The business has healthy cash buffers and alternative suppliers.
+- 🟡 **Amber (Warning)**: Shock is $5\% - 15\%$. The business is absorbing cost pressures; monitor inventory levels.
+- 🔴 **Crimson (Severe Crisis)**: Shock is $> 15\%$. Solvency threshold breached; assembly lines halting or credit lines freezing.
+- **Pulsing Arrows**: Show the exact domino path showing who infected whom.
+
+#### 5. The "Seatbelt Test" (Explaining Tail Risk Without Equations)
+Traditional bank risk models (Gaussian Normal VaR) assume financial crises are rare and gentle. RiskLattice uses a real-world metaphor:
+- *"Standard models tell you: 'A standard 3-point seatbelt is enough—your max loss is only **$\$28.8\text{M}$**.'*
+- *RiskLattice reveals: 'In a real-world systemic crisis, the airbag must deploy—because when one domino falls, all dominoes fall together. Your true worst-case loss is **$\$114.6\text{M}$** ($12.2\times$ heavier tail risk).'*"
+- **The Non-Mathematical Takeaway**: You now know that standard risk models would have left you dangerously underinsured by over $\$85\text{M}$.
+
+---
+
 ## 4. Local LLM Architecture & Privacy Firewall
 
 RiskLattice is architected to run completely locally with **zero external API dependencies**, satisfying institutional data privacy requirements.
