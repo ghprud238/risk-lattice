@@ -13,12 +13,45 @@ A hybrid neuro-symbolic financial risk platform combining local-first LLM semant
 
 ## 1. System Architecture
 
-RiskLattice operates on a **strict neuro-symbolic division of labor** designed for institutional financial risk environments:
+RiskLattice operates on a **strict neuro-symbolic division of labor** designed for institutional financial risk environments.
 
-- **Deterministic Python Math Engine**: All quantitative risk metrics, Huber robust regressions, 4-hop damped message-passing, balance-sheet distress amplifiers ($\lambda_v$), portfolio convex valuation, and 10,000-path Student-$t$ Copula CVaR simulations are executed exclusively by NumPy, SciPy, and DuckDB. Zero LLM involvement in numerical calculations.
-- **Probabilistic Semantic AI (Local Ollama / LiteLLM)**: Confined strictly to parsing unstructured SEC Form 10-K filings into typed triples, translating free-form natural language scenario prompts into bounded impulse vectors $s^{(0)}$, and synthesizing post-mortem narrative explanations with regex-verified citations.
-- **Strict Privacy Firewall (Rule P-01)**: Institutional portfolio share counts, cash balances, dollar values, and account IDs remain permanently locked inside the local environment (Tier 1 & Tier 2). External or local LLM tiers receive only public ticker symbols, filing text, and normalized unit-free graph paths.
-- **AST-Verified Engine Isolation**: Python Abstract Syntax Tree (AST) unit tests enforce that modules in `backend/app/engine/` contain **zero** imports of database drivers (`duckdb`, `sqlite3`), HTTP clients (`requests`, `httpx`), or LLM libraries (`litellm`).
+---
+
+### 1.1 What is "Neuro-Symbolic Division"?
+
+In computer science and artificial intelligence:
+- **"Neuro" (Connectionist / Deep Learning / LLMs)** refers to probabilistic artificial neural networks. They excel at **perception, semantic understanding, and unstructured text parsing** (e.g., reading a messy 100-page SEC 10-K filing, or understanding a colloquial prompt like *"what happens if a typhoon shuts down Taiwanese ports?"*). However, neural networks are fundamentally probabilistic token predictors: they **hallucinate**, cannot reliably perform matrix multiplication, lack exact floating-point precision, and fail regulatory auditability.
+- **"Symbolic" (Classical Logic / Deterministic Mathematics / Graph Theory)** refers to systems based on **explicit mathematical equations, graph algorithms, and formal logic**. They excel at **rigorous, bit-exact, deterministic computation** (e.g., sparse matrix message passing, Huber loss regressions, Copula probability integrals, and portfolio balance-sheet revaluations). However, symbolic systems are completely brittle when facing unstructured real-world language: they cannot read an annual report or interpret breaking geopolitical news on their own.
+
+**"Neuro-Symbolic Division of Labor"** is the architectural principle of strictly assigning each task exclusively to the paradigm that is mathematically and practically suited for it:
+
+```
+┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                NEURO-SYMBOLIC DIVISION OF LABOR IN RISKLATTICE                         │
+├─────────────────────────────────────────────────┬──────────────────────────────────────────────────────┤
+│               "NEURO" (Semantic AI)             │             "SYMBOLIC" (Deterministic Math)          │
+│          Probabilistic • Semantic • Fuzzy       │            Deterministic • Verifiable • Bit-Exact    │
+├─────────────────────────────────────────────────┼──────────────────────────────────────────────────────┤
+│ • Ingests unstructured SEC 10-K disclosures     │ • 4-hop sparse matrix graph message-passing (W)      │
+│ • Translates natural language scenarios to s^(0)│ • Outlier-resistant Huber regression calibration     │
+│ • Synthesizes executive narrative summaries     │ • Non-linear corporate leverage multipliers (lambda) │
+│ • Generates contextual tail-risk hedge ideas    │ • 10,000-path Student-t Copula Monte Carlo (nu = 5)  │
+│ • Must pass verbatim source substring checks    │ • Non-linear portfolio PnL & waterfall attribution   │
+│                                                 │ • Basel / Kupiec POF regulatory statistical tests    │
+├─────────────────────────────────────────────────┴──────────────────────────────────────────────────────┤
+│ ❌ THE NEURAL TIER NEVER DOES MATH: Cannot multiply, cannot simulate, cannot touch portfolio dollars.  │
+│ ❌ THE SYMBOLIC TIER NEVER PARSES TEXT: Operates purely on typed numbers, matrices, and DataFrames.   │
+└────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+#### Why This Division is Mandatory in Institutional Finance:
+1. **Regulatory Auditability (Basel III, Dodd-Frank, SEC)**: Risk managers must explain every basis point of capital reserve to bank examiners. An LLM generating an unverified loss figure is illegal under model risk management standards (SR 11-7). In RiskLattice, every Value at Risk (VaR) and Expected Shortfall (CVaR) number is generated by deterministic NumPy/SciPy math that can be audited down to the individual floating-point bit.
+2. **Zero-Hallucination Guarantees**: By physically isolating the mathematical engine from the LLM via Abstract Syntax Tree (AST) unit tests, the LLM cannot hallucinate portfolio losses, change graph weights, or alter risk distributions.
+3. **Local Privacy Firewall (Rule P-01)**: Hedge funds and asset managers cannot upload client position sizes, cash balances, or trade blotters to external AI models. Because the neural tier only handles semantic translation, private holdings never leave the symbolic DuckDB database.
+
+---
+
+### 1.2 System Subsystems & Communication Flow
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
