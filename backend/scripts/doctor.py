@@ -54,11 +54,11 @@ def main():
     status_filings = "PASS" if filings_ok else "WARN"
     print(f"[{status_filings}] SEC Filings Corpus: {filings_path} ({'Found' if filings_ok else 'Missing'})")
 
-    # 4. Port availability check (8000 and 3000)
-    p8000_free = check_port_free(8000)
-    p3000_free = check_port_free(3000)
-    print(f"[{'PASS' if p8000_free else 'WARN'}] Port 8000 (Backend API): {'Free' if p8000_free else 'In use / occupied'}")
-    print(f"[{'PASS' if p3000_free else 'WARN'}] Port 3000 (Frontend Web): {'Free' if p3000_free else 'In use / occupied'}")
+    # 4. Port availability check (5051 backend, 5050 frontend)
+    p5051_free = check_port_free(5051)
+    p5050_free = check_port_free(5050)
+    print(f"[{'PASS' if p5051_free else 'WARN'}] Port 5051 (Backend API): {'Free' if p5051_free else 'In use / occupied'}")
+    print(f"[{'PASS' if p5050_free else 'WARN'}] Port 5050 (Frontend Web): {'Free' if p5050_free else 'In use / occupied'}")
 
     # 5. Core dependencies check
     deps = ["numpy", "scipy", "duckdb", "pandas", "fastapi", "litellm", "pydantic"]

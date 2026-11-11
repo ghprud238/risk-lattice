@@ -19,17 +19,17 @@ spec:
           image: risk-lattice-backend:latest
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 8000
+            - containerPort: 5051
           readinessProbe:
             httpGet:
               path: /api/v1/health
-              port: 8000
+              port: 5051
             initialDelaySeconds: 5
             periodSeconds: 10
           livenessProbe:
             httpGet:
               path: /api/v1/health
-              port: 8000
+              port: 5051
             initialDelaySeconds: 10
             periodSeconds: 15
 ---
@@ -42,5 +42,5 @@ spec:
   selector:
     app: risk-lattice-backend
   ports:
-    - port: 8000
-      targetPort: 8000
+    - port: 5051
+      targetPort: 5051

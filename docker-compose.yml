@@ -1,0 +1,39 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: risk-lattice-backend
+    restart: unless-stopped
+    ports:
+      - "5051:5051"
+    environment:
+      - PORT=5051
+      - HOST=0.0.0.0
+      - MOCK_LLM=true
+      - MINSKY_ENABLED=false
+    volumes:
+      - ./backend/data:/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:5051/api/v1/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - NEXT_PUBLIC_API_URL=http://localhost:5051
+    container_name: risk-lattice-frontend
+    restart: unless-stopped
+    ports:
+      - "5050:5050"
+    environment:
+      - PORT=5050
+      - NEXT_PUBLIC_API_URL=http://localhost:5051
+    depends_on:
+      backend:
+        condition: service_healthy

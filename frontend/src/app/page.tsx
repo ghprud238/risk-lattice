@@ -22,7 +22,7 @@ import BacktestComparison from "@/components/BacktestComparison";
 import PortfolioImporter from "@/components/PortfolioImporter";
 import NarrativePostMortem from "@/components/NarrativePostMortem";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5051";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<"canvas" | "backtest" | "importer">("canvas");

@@ -39,13 +39,26 @@ test-perf:
 	cd backend && ../.venv/bin/pytest tests/test_performance_gate.py -s -v
 
 backend:
-	cd backend && ../.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+	cd backend && ../.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 5051 --reload
 
 frontend:
-	cd frontend && npm run dev -- -p 3000
+	cd frontend && NEXT_PUBLIC_API_URL=http://localhost:5051 npm run dev -- -p 5050
 
 build:
 	cd frontend && npm run build
 
+docker-build:
+	docker compose build
+
+docker-up:
+	docker compose up -d
+
+docker-down:
+	docker compose down
+
+docker-logs:
+	docker compose logs -f
+
 dev:
+	./start.sh
 	./start.sh

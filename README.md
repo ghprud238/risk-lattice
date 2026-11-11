@@ -604,35 +604,66 @@ Given directed graph $G = (V, E, W)$ with $N = 50$ nodes and adjacency sensitivi
 
 ---
 
-## 8. Quickstart Guide (Local Execution)
+## 8. Quickstart Guide (Local & Docker Execution)
 
 ### Prerequisites
 - Python 3.12+ (or managed via `uv`)
 - Node.js 18+ & npm
+- *(Optional)* Docker & Docker Compose for containerized deployment
 - *(Optional)* Ollama for local LLM inference (`curl -fsSL https://ollama.com/install.sh | sh`)
 
-### One-Command Setup & Launch
+---
+
+### Option A: Dockerized One-Command Launch (Recommended for Clean Containers)
+
+RiskLattice is fully containerized with pre-configured healthchecks and isolated volume mounts:
+
 ```bash
-# Clone and enter directory
 cd /Users/dpcubed/projects/risk-lattice
 
-# Run unified start script (seeds DuckDB, launches FastAPI & Next.js)
+# Build images and start all services in detached mode
+docker compose up -d --build
+```
+
+- **Frontend Web UI**: [http://localhost:5050](http://localhost:5050)
+- **FastAPI OpenAPI Swagger**: [http://localhost:5051/docs](http://localhost:5051/docs)
+- **View Live Container Logs**:
+  ```bash
+  docker compose logs -f
+  ```
+- **Stop Containers**:
+  ```bash
+  docker compose down
+  ```
+
+> [!NOTE]
+> **Why Ports 5050 & 5051?**
+> Standard ports like `8000` (often used by local APIs) and `3000` (common Next.js default) frequently conflict with existing development servers. Furthermore, port `5000` is reserved on macOS by Apple's AirPlay Receiver (`ControlCenter`). RiskLattice defaults to **Port 5050 (Frontend)** and **Port 5051 (Backend)** to guarantee zero port collisions.
+
+---
+
+### Option B: Local Native Launch (Fastest for Local Development)
+
+```bash
+cd /Users/dpcubed/projects/risk-lattice
+
+# Run unified start script (seeds DuckDB, launches FastAPI & Next.js on ports 5051 & 5050)
 ./start.sh
 ```
 
-- **Frontend Terminal**: [http://localhost:3000](http://localhost:3000)
-- **FastAPI OpenAPI Swagger**: [http://localhost:8000/docs](http://localhost:8000/docs)
+- **Frontend Terminal**: [http://localhost:5050](http://localhost:5050)
+- **FastAPI OpenAPI Swagger**: [http://localhost:5051/docs](http://localhost:5051/docs)
 
 ### Running Backend and Frontend Independently
 
 ```bash
 # Backend (Terminal 1)
-cd /Users/dpcubed/projects/risk-lattice
-.venv/bin/uvicorn backend.app.main:app --host 0.0.0.0 --port 8000 --reload
+cd /Users/dpcubed/projects/risk-lattice/backend
+../.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 5051 --reload
 
 # Frontend (Terminal 2)
 cd /Users/dpcubed/projects/risk-lattice/frontend
-npm run dev -- -p 3000
+NEXT_PUBLIC_API_URL=http://localhost:5051 npm run dev -- -p 5050
 ```
 
 ---
