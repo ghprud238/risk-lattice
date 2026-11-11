@@ -75,7 +75,7 @@ class LLMRouter:
         use_mock_fallback: bool = True
     ):
         # Default to local Ollama or mock
-        self.model = model or os.getenv("CONTAGION_LLM_MODEL", "ollama/qwen2.5:14b-instruct-q4_K_M")
+        self.model = model or os.getenv("RISK_LATTICE_LLM_MODEL") or os.getenv("CONTAGION_LLM_MODEL", "ollama/qwen2.5:14b-instruct-q4_K_M")
         self.api_base = api_base or os.getenv("OLLAMA_API_BASE", "http://localhost:11434")
         self.use_mock_fallback = use_mock_fallback
         self.sanitizer = PrivacySanitizer()

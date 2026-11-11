@@ -7,95 +7,362 @@ A hybrid neuro-symbolic financial risk platform combining local-first LLM semant
 [![Next.js 15](https://img.shields.io/badge/Next.js-15-black.svg)](https://nextjs.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-1.0-emerald.svg)](https://fastapi.tiangolo.com/)
 [![DuckDB](https://img.shields.io/badge/DuckDB-OLAP-amber.svg)](https://duckdb.org/)
+[![Tests Passing](https://img.shields.io/badge/Tests-48%2F48%20Passing-emerald.svg)](backend/tests/)
 
 ---
 
 ## 1. System Architecture
 
-RiskLattice operates on a **strict neuro-symbolic division of labor**:
-- **Deterministic Python Math Engine**: All quantitative risk metrics, Huber robust regressions, 4-hop damped message-passing, balance-sheet distress amplifiers ($\lambda_v$), and 10,000-path Student-$t$ Copula CVaR calculations are executed exclusively by NumPy, SciPy, and DuckDB. Zero LLM involvement in numeric computation.
-- **Probabilistic Semantic AI (LiteLLM)**: Confined strictly to parsing unstructured SEC Form 10-K filings into typed triples, translating natural-language user scenario prompts into initial impulse vectors $s^{(0)}$, and generating post-mortem narrative explanations with regex-verified citations.
-- **Privacy Boundary**: Dollar balances, share quantities, and account IDs remain inside Tier 1 & Tier 2 (DuckDB). External LLMs receive only ticker symbols, public filing text, and normalized unit-free graph paths.
+RiskLattice operates on a **strict neuro-symbolic division of labor** designed for institutional financial risk environments:
+
+- **Deterministic Python Math Engine**: All quantitative risk metrics, Huber robust regressions, 4-hop damped message-passing, balance-sheet distress amplifiers ($\lambda_v$), portfolio convex valuation, and 10,000-path Student-$t$ Copula CVaR simulations are executed exclusively by NumPy, SciPy, and DuckDB. Zero LLM involvement in numerical calculations.
+- **Probabilistic Semantic AI (Local Ollama / LiteLLM)**: Confined strictly to parsing unstructured SEC Form 10-K filings into typed triples, translating free-form natural language scenario prompts into bounded impulse vectors $s^{(0)}$, and synthesizing post-mortem narrative explanations with regex-verified citations.
+- **Strict Privacy Firewall (Rule P-01)**: Institutional portfolio share counts, cash balances, dollar values, and account IDs remain permanently locked inside the local environment (Tier 1 & Tier 2). External or local LLM tiers receive only public ticker symbols, filing text, and normalized unit-free graph paths.
+- **AST-Verified Engine Isolation**: Python Abstract Syntax Tree (AST) unit tests enforce that modules in `backend/app/engine/` contain **zero** imports of database drivers (`duckdb`, `sqlite3`), HTTP clients (`requests`, `httpx`), or LLM libraries (`litellm`).
 
 ```
-┌─────────────────────────────────┐      ┌───────────────────────────────────┐      ┌─────────────────────────────────┐
-│     Client Tier (Next.js 15)    │      │    Server Tier (FastAPI + Math)   │      │    LLM Tier (Local or Cloud)    │
-│  - Cytoscape.js Network Canvas  │ ───► │  - Huber Robust Regression (W)    │ ───► │  - LiteLLM Router               │
-│  - Shock Studio & Factor Sliders│ ◄─── │  - 4-Hop Damped Contagion Engine  │ ◄─── │  - SEC 10-K Verbatim Extractor  │
-│  - 1st/2nd/3rd PnL Waterfall    │ (SSE)│  - 10,000 Student-t Copula CVaR   │      │  - Semantic Shock Translator    │
-│  - 4 Crisis Replay Backtester   │      │  - Embedded DuckDB 2.0 Store      │      │  - Local PII Sanitizer          │
-└─────────────────────────────────┘      └───────────────────────────────────┘      └─────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                       CLIENT TIER (Next.js 15)                                         │
+│  - Cytoscape.js Network Canvas       - Shock Studio & Factor Sliders    - 1st/2nd/3rd PnL Waterfall    │
+│  - 4 Crisis Replay Backtester        - Verbatim 10-K Citation Drawer    - Portfolio CSV/JSON Importer  │
+└───────────────────────────────────────────────────┬────────────────────────────────────────────────────┘
+                                                    │ HTTP / Server-Sent Events (SSE)
+                                                    ▼
+┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                       GATEWAY TIER (FastAPI)                                           │
+│  - REST Endpoints (/simulate, /backtest, /filings)       - SSE Streaming (/simulate/stream)            │
+│  - Snapshot Service (In-Memory Frozen Snapshots)         - Scenario & Portfolio State Lifecycle        │
+└───────────────────────┬───────────────────────────────────────────┬────────────────────────────────────┘
+                        │                                           │
+     Non-sensitive text │                                           │ In-memory snapshot DataFrames
+     & normalized paths │                                           │ (nodes, edges, returns)
+                        ▼                                           ▼
+┌───────────────────────────────────────────────┐ ┌──────────────────────────────────────────────────────┐
+│          LOCAL AI TIER (Ollama / LiteLLM)     │ │        DETERMINISTIC MATH ENGINE (Pure Python)       │
+│  - Local Privacy Firewall (Rule P-01 Scrubber)│ │  - Huber Robust Regression Calibrator (L_delta)      │
+│  - Semantic Shock Translator (NLP -> s^(0))   │ │  - 4-Hop Damped Contagion Propagator (alpha=0.65)   │
+│  - Verbatim SEC 10-K Triple Extractor         │ │  - Non-Linear Leverage Distress Multiplier (lambda) │
+│  - Narrative Explainer & Regex Citation Guard │ │  - 10,000-Path Student-t Copula Monte Carlo (nu=5)   │
+│  - Deterministic Zero-API Mock Fallback       │ │  - Convex Portfolio Valuation & Waterfall Ledger    │
+└───────────────────────────────────────────────┘ └──────────────────────────┬───────────────────────────┘
+                                                                             │ Thread-safe queries
+                                                                             ▼
+┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                   STORAGE & OLAP TIER (DuckDB 2.0)                                     │
+│  - graph_nodes (50 Canonical S&P 500)      - graph_edges (150 Multi-Tier Supply & Credit Linkages)     │
+│  - market_returns (504-Day 2-Regime Data)  - sec_filings (40 Real SEC 10-K Risk Factor Chunks)         │
+│  - portfolio_holdings (Institutional Mock) - snapshots (Immutable Frozen Point-in-Time Graph States)  │
+└────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 2. Mathematical Propagation Formulas
+## 2. Local LLM Architecture & Privacy Firewall
 
-Given directed dependency graph $G = (V, E, W)$ with $N = 50$ canonical nodes and adjacency sensitivity matrix $W \in \mathbb{R}^{N \times N}$, and initial impulse vector $s^{(0)} \in [-0.95, +2.00]^N$:
+RiskLattice is architected to run completely locally with **zero external API dependencies**, satisfying institutional data privacy requirements.
 
-### Hop Iteration ($k = 1, 2, 3, 4$)
+### 2.1 Supported Local LLM Runtimes
+
+| Runtime | Protocol | Default Endpoint | Supported Models |
+| :--- | :--- | :--- | :--- |
+| **Ollama** *(Recommended)* | Native / Ollama API | `http://localhost:11434` | `ollama/qwen2.5:14b-instruct-q4_K_M`<br>`ollama/llama3.1:8b`<br>`ollama/deepseek-r1:14b` |
+| **vLLM** | OpenAI-Compatible REST | `http://localhost:8000/v1` | `openai/qwen-2.5-14b`<br>`openai/meta-llama-3.1-8b` |
+| **LM Studio** | OpenAI-Compatible REST | `http://localhost:1234/v1` | Any loaded GGUF/MLX model |
+| **Deterministic Mock** | In-Process Python | `N/A` | Deterministic ground-truth mock (zero setup required) |
+
+### 2.2 Environment Variables & Configuration
+
+Set these variables in your environment or copy [`backend/.env.example`](backend/.env.example) to `backend/.env`:
+
+```bash
+# Enable live local LLM (false) or run in zero-dependency offline mock mode (true)
+MOCK_LLM=true
+
+# Model specification (LiteLLM syntax)
+RISK_LATTICE_LLM_MODEL=ollama/qwen2.5:14b-instruct-q4_K_M
+CONTAGION_LLM_MODEL=ollama/qwen2.5:14b-instruct-q4_K_M
+
+# Local LLM Server Endpoint
+OLLAMA_API_BASE=http://localhost:11434
+
+# Optional: Cloud BYOK Fallback (only if local models are unavailable)
+# ANTHROPIC_API_KEY=sk-ant-...
+# OPENAI_API_KEY=sk-...
+```
+
+### 2.3 Strict Privacy Firewall (Rule P-01)
+Before any text is dispatched to the LLM router, the [`PrivacySanitizer`](backend/app/agents/llm_router.py) executes automated redaction:
+- **Dollar Balances Redacted**: `$150,000,000` $\to$ `[REDACTED_AMOUNT]`.
+- **Share Counts Redacted**: `2,500,000 shares` $\to$ `[REDACTED_QUANTITY]`.
+- **Account Identifiers Redacted**: `ACCT-884920` $\to$ `[REDACTED_ACCOUNT]`.
+- **Unit-Free Portfolios**: Raw dollar allocations are converted into normalized weight vectors $\mathbf{w} \in [0, 1]^K$ summing to $1.0$.
+
+### 2.4 Hallucination-Free Guardrails
+1. **Verbatim SEC 10-K Verification**: The [`SECExtractor`](backend/app/agents/sec_extractor.py) extracts dependency edges `(source, target, relation_type, quote)`. Every relationship is validated by exact character-substring matching against the source 10-K chunk in DuckDB. If the cited quote is absent or modified, the extracted edge is discarded.
+2. **Regex Citation Enforcement**: The [`NarrativeExplainer`](backend/app/agents/explainer.py) post-mortem claims are scanned with regex `\[10-K Chunk #\d+\]`. Claims lacking an authentic citation are rejected.
+3. **Deterministic Clamping**: Greedy decoding (`temperature=0.0`) and pinned RNG seeds (`seed=42`) ensure reproducible semantic outputs.
+
+---
+
+## 3. Supported Use Cases & End-to-End Data Flows
+
+RiskLattice covers 5 primary operational use cases. Each use case touches distinct components across the neuro-symbolic pipeline.
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                    5 PRIMARY OPERATIONAL USE CASES                                              │
+├─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ 1. Geopolitical Semiconductor Halt ("Taiwan Wafer Foundry Halt & Baltic Shipping Spike")                        │
+│ 2. Historical Crisis Replay & Regulatory Benchmarking (2008 Lehman, 2020 COVID, 2022 Rates, Taiwan Halt)        │
+│ 3. Natural Language Macro Scenario Authoring (Free-form user prompt translation to clamped shock vectors)       │
+│ 4. Verbatim SEC 10-K Dependency Graph Extraction & Grounded Audit Trail                                         │
+│ 5. Institutional Portfolio Tail-Risk & Non-Linear Convexity Valuation                                           │
+└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### Use Case 1: Geopolitical Tech & Maritime Disruption ("Taiwan Wafer Halt")
+
+*A scenario where a geopolitical blockade halts Taiwanese wafer exports and reroutes global marine container shipping.*
+
+```
+[User NLP Prompt / Preset Scenario]
+               │
+               ▼
+   [Stage 1: Local Privacy Sanitizer] (Rule P-01: scrubs all portfolio balances & account numbers)
+               │
+               ▼
+   [Stage 2: LLM Shock Translator] (Maps NLP -> FOUNDRY_TW: -70%, BALTIC_DRY: +180%)
+               │
+               ▼
+   [Stage 3: Frozen Snapshot & Pure Math Engine Propagation]
+               ├── Hop 0: Direct impulse (TSM: -70%, ZIM: +180%)
+               ├── Hop 1: Tier-1 wafer customers (NVDA: -53.5%, AAPL: -32.1%)
+               ├── Hop 2: Cloud hyperscalers & auto microcontrollers (MSFT: -18.4%, F: -14.2%)
+               ├── Hop 3: Balance-sheet distress amplification (Ford Debt/EBITDA=4.8 triggers lambda=1.63x)
+               └── Hop 4: Energy dissipation & numerical clamping [-0.95, +1.50]
+               │
+               ▼
+   [Stage 4: Convex Portfolio Valuation] (Decomposes PnL into 1st, 2nd, and 3rd/4th order waterfall)
+               │
+               ▼
+   [Stage 5: Student-t Copula Simulation] (10,000 Monte Carlo paths; computes 99% VaR, CVaR, & MCR)
+               │
+               ▼
+   [Stage 6: LLM Narrative Explainer] (Generates post-mortem with regex-verified [10-K Chunk #id] citations)
+               │
+               ▼
+   [Client UI Stream] (Cytoscape graph color transition, PnL waterfall chart, risk distribution card)
+```
+
+**Architecture Touched**:
+- `Frontend`: Shock Studio $\to$ Graph Canvas $\to$ PnL Waterfall $\to$ Citation Drawer
+- `Gateway`: `POST /simulate` or `GET /simulate/stream` (SSE event stages: `started` $\to$ `propagating` $\to$ `copula_simulating` $\to$ `completed`)
+- `AI Tier`: `PrivacySanitizer` $\to$ `ShockTranslator` $\to$ `NarrativeExplainer`
+- `Engine`: `ContagionPropagator` $\to$ `compute_portfolio_valuation` $\to$ `TailRiskEngine`
+- `Storage`: `DuckDB` (loads nodes, edges, returns, and snapshot)
+
+---
+
+### Use Case 2: Historical Crisis Replay & Regulatory Benchmarking
+
+*Stress-testing institutional portfolios against pinned historical crisis regimes to evaluate model accuracy and regulatory capital adequacy.*
+
+1. **User selects historical benchmark**:
+   - **2008 Lehman Liquidity Freeze**: `HY_OAS: +8.5%`, `SOFR_SPREAD: +3.5%`. Interbank freeze transmits to regional bank warehouse credit lines and leveraged REITs.
+   - **2020 COVID Mobility Halt**: `BRENT_CRUDE: -55%`, `BALTIC_DRY: -48%`. Transit shutdowns ripple from airlines to aerospace tier-1 titanium and avionics suppliers.
+   - **2022 Duration Shock**: `US10Y_REAL: +2.6%`, `DXY: +14.0%`. Tech valuation compression and held-to-maturity bond book mark-to-market hits.
+   - **Synthetic Taiwan Foundry Halt**: `FOUNDRY_TW: -70%`, `BALTIC_DRY: +180%`. Multi-tier chip starvation propagating to automotive OEMs.
+2. **Quantitative Validation Engine**:
+   - Evaluates **2nd-Order Recall** ($R@\text{Hop2} \ge 0.85$ on indirect suppliers).
+   - Computes **Kupiec Proportion of Failures (POF)** statistical test ($\chi_1^2$ likelihood ratio) to mathematically verify that the model does not under-predict tail exceptions.
+   - Demonstrates that heavy-tailed Student-$t$ Copula CVaR captures $\ge 90\%$ of realized drawdown, whereas standard 60-day Gaussian VaR captures $<55\%$.
+
+**Architecture Touched**:
+- `Frontend`: `BacktestView` (Comparison matrices & exception counts)
+- `Gateway`: `POST /api/v1/backtest`
+- `Engine`: `BacktestEngine` $\to$ `ContagionPropagator` $\to$ `TailRiskEngine` $\to$ Kupiec POF validator
+- `Storage`: `DuckDB` historical return tables and pinned crisis scenario parameters
+
+---
+
+### Use Case 3: Natural Language Free-Form Scenario Authoring
+
+*Risk managers type arbitrary macroeconomic scenarios in plain English without needing to know specific factor IDs or matrix algebra.*
+
+1. **Input**: User enters *"Middle East tensions close the Strait of Hormuz, driving crude oil up 45% while global container shipping rates jump 60%."*
+2. **Local Privacy Firewall**: Strips any inadvertently included private entity names or fund identifiers.
+3. **Semantic Shock Translation**: LiteLLM / Ollama translates the prompt into canonical factor shocks:
+   - `BRENT_CRUDE: +0.45`, `BALTIC_DRY: +0.60`.
+4. **Range Clamping & Factor Projection**: The engine projects factor shocks onto canonical graph nodes while enforcing invariant bounds $[-0.95, +2.00]$.
+5. **Real-time SSE Stream**: Broadcasts live hop-by-hop contagion events directly to the browser UI.
+
+**Architecture Touched**:
+- `Frontend`: `ShockStudio` input box and real-time event listener
+- `Gateway`: `JobService` (async job lifecycle: `PENDING` $\to$ `RUNNING` $\to$ `COMPLETED`)
+- `AI Tier`: `ShockTranslator` (with Ollama Qwen/Llama or mock fallback)
+- `Engine`: `FactorRegistry` (factor boundaries & projection matrix)
+
+---
+
+### Use Case 4: Verbatim SEC 10-K Counterparty Extraction & Audit Trail
+
+*Auditing and updating the multi-tier dependency graph using authoritative public regulatory filings.*
+
+1. **Corpus Ingestion**: The system loads chunks of SEC Form 10-K Item 1A (Risk Factors) and Footnotes.
+2. **Relation Extraction**: The LLM extracts dependency triples:
+   ```json
+   {
+     "source_id": "TSM",
+     "target_id": "NVDA",
+     "relation_type": "SUPPLIER_TO",
+     "base_weight": 0.85,
+     "evidence_quote": "We rely on Taiwan Semiconductor Manufacturing Company Limited to manufacture all of our GPU silicon wafers."
+   }
+   ```
+3. **Anti-Hallucination Substring Gate**: The extractor searches the source 10-K text for the exact `evidence_quote`. If not found character-for-character, the edge is discarded.
+4. **Huber Loss Calibration**: Robust linear regression tunes edge sensitivity weights using 504 days of historical return correlations.
+5. **Auditor Inspection**: Clicking an edge in the UI opens the slide-out drawer displaying the verbatim source text and filing accession number.
+
+**Architecture Touched**:
+- `Frontend`: `PortfolioImporter` & `CitationDrawer`
+- `Gateway`: `POST /api/v1/filings/extract`
+- `AI Tier`: `SECExtractor` & `PrivacySanitizer`
+- `Engine`: `EdgeCalibrator` (Huber loss outlier rejection)
+- `Storage`: `DuckDB` `sec_filings` and `graph_edges` tables
+
+---
+
+### Use Case 5: Institutional Portfolio Stress & Convexity Valuation
+
+*Analyzing multi-asset institutional portfolios (long/short equities, credit CDS, FX hedges) for hidden concentration and non-linear leverage risk.*
+
+1. **Portfolio Ingestion**: User uploads portfolio CSV/JSON with positions across technology, automotive, industrials, and financials.
+2. **Local Normalization**: `PrivacySanitizer` computes normalized portfolio weights $\mathbf{w}$ while keeping dollar notionals strictly local.
+3. **Convex Valuation Engine**: Computes non-linear asset revaluation:
+   $$\Delta P_i = \text{Position}_i \cdot \left(\beta_i S_i + \frac{1}{2} \gamma_i S_i^2\right)$$
+4. **Waterfall Attribution**:
+   - **1st-Order Loss**: Direct macro shocks to immediate holdings.
+   - **2nd-Order Loss**: Supplier disruptions to tier-1 counterparties.
+   - **3rd/4th-Order Loss**: Insolvency cascades amplified by corporate leverage ($\text{NetDebt/EBITDA} > 3.0$).
+5. **Copula Marginal Contribution to Risk (MCR)**: Identifies which specific holding drives the majority of 99% Expected Shortfall.
+
+**Architecture Touched**:
+- `Frontend`: `PortfolioImporter` $\to$ `PnLWaterfall` $\to$ `RiskMetricsCard`
+- `Gateway`: `PortfolioService` & `SnapshotService`
+- `Engine`: `compute_portfolio_valuation` $\to$ `TailRiskEngine`
+- `Storage`: `DuckDB` `portfolio_holdings` table
+
+---
+
+## 4. Architecture Touchpoint Matrix
+
+This matrix maps each use case to the specific architectural subsystems it executes:
+
+| Subsystem Component | UC 1: Tech Blockade | UC 2: Crisis Replay | UC 3: Custom NLP | UC 4: SEC Extraction | UC 5: Portfolio Risk |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **Next.js 15 UI Canvas** |  |  |  |  |  |
+| **FastAPI Gateway / SSE** |  |  |  |  |  |
+| **Privacy Firewall (Rule P-01)** |  | — |  | — |  |
+| **Local LLM Shock Translator** |  | — |  | — | — |
+| **Verbatim SEC 10-K Extractor** | — | — | — |  | — |
+| **Narrative Explainer (Regex Citations)** |  | — |  | — |  |
+| **Pure Engine: 4-Hop Propagator** |  |  |  | — |  |
+| **Pure Engine: Distress Multiplier ($\lambda$)** |  |  |  | — |  |
+| **Pure Engine: Convex Valuation** |  |  |  | — |  |
+| **Pure Engine: Student-$t$ Copula (10k)** |  |  |  | — |  |
+| **Pure Engine: Kupiec POF Validator** | — |  | — | — | — |
+| **DuckDB 2.0 Embedded Storage** |  |  |  |  |  |
+
+---
+
+## 5. Mathematical Propagation & Risk Formulas
+
+Given directed dependency graph $G = (V, E, W)$ with $N = 50$ canonical nodes, adjacency sensitivity matrix $W \in \mathbb{R}^{N \times N}$, and initial impulse vector $s^{(0)} \in [-0.95, +2.00]^N$:
+
+### 5.1 Hop Iteration ($k = 1, 2, 3, 4$)
 $$\Delta s_v^{(k)} = \alpha^{k-1} \sum_u W_{uv} \cdot \Delta s_u^{(k-1)} \cdot (1 - \sigma_v) \cdot \lambda_v$$
 
-- **Hop Decay Factor**: $\alpha = 0.65$
-- **Supplier Substitutability**: $\sigma_v \in [0.0, 0.8]$
+- **Hop Damping Factor**: $\alpha = 0.65$ per hop, guaranteeing energy dissipation and convergence.
+- **Supplier Substitutability**: $\sigma_v \in [0.0, 0.8]$ dampening transmission when alternative suppliers exist.
 - **Non-Linear Distress Multiplier**:
-  $$\lambda_v = \begin{cases} 1 + 0.35 \cdot \max(0, \text{NetDebt/EBITDA} - 3.0), & \text{if } \text{NetDebt/EBITDA} > 3.0 \text{ or } \text{InterestCoverage} < 1.5 \text{ and } \Delta s < 0 \\ 1.0, & \text{otherwise} \end{cases}$$
+  $$\lambda_v = \begin{cases} 1 + 0.35 \cdot \max(0, \text{NetDebt/EBITDA} - 3.0), & \text{if } \text{NetDebt/EBITDA} > 3.0 \text{ and } \Delta s < 0 \\ 1.0, & \text{otherwise} \end{cases}$$
 - **Cumulative Clamped Node Shock**:
   $$S_v = \text{clip}\left(\sum_{k=0}^4 \Delta s_v^{(k)}, -0.95, +1.50\right)$$
-  Decomposed into 1st-order (direct macro), 2nd-order (tier-1 supplier), and 3rd/4th-order (network contagion) contributions.
+
+### 5.2 Student-$t$ Copula Joint Tail Risk
+Given empirical correlation matrix $\Sigma$ regularized to positive semi-definiteness via spectral clipping:
+$$\mathbf{X} \sim t_\nu(0, \Sigma), \quad \nu = 5$$
+Simulates 10,000 Monte Carlo paths to compute:
+- **Value at Risk (99% VaR)**: 99th percentile loss.
+- **Expected Shortfall (99% CVaR)**: Conditional expectation of loss exceeding VaR:
+  $$\text{CVaR}_{0.99} = \mathbb{E}[L \mid L \ge \text{VaR}_{0.99}]$$
+- **Kupiec POF Likelihood Ratio**:
+  $$\text{LR}_{\text{POF}} = -2 \ln \left[ (1 - p)^{T - x} p^x \right] + 2 \ln \left[ (1 - \hat{p})^{T - x} \hat{p}^x \right] \sim \chi_1^2$$
 
 ---
 
-## 3. Four Historical Crisis Replay Benchmarks
-
-| Crisis Regime | Primary Impulse Vector $s^{(0)}$ | Expected Multi-Hop Path | Target Benchmark Metric |
-| :--- | :--- | :--- | :--- |
-| **1. 2008 Liquidity & Credit Freeze** | `HY_OAS: +8.5%`, `SOFR_SPREAD: +3.5%` | Interbank freeze $\to$ regional bank warehouse lines $\to$ high-leverage REITs & auto-loan securitizers | Contagion CVaR captures $\ge 90\%$ realized drawdown vs $<55\%$ for 60d Gaussian VaR |
-| **2. 2020 Mobility & Supply Halt** | `BRENT_CRUDE: -55%`, `BALTIC_DRY: -48%` | Global transit halt $\to$ airlines $\to$ aerospace tier-1 titanium & avionics suppliers | 2nd-order recall $R@\text{Hop2} \ge 0.85$ on indirect aerospace suppliers |
-| **3. 2022 Rate & Duration Shock** | `US10Y_REAL: +2.6%`, `DXY: +14.0%` | Real-rate surge $\to$ tech valuation compression & regional bank HTM bond books | Distress multiplier $\lambda_v$ separates high-debt vs cash-rich tech within 3% error |
-| **4. Synthetic Taiwan Foundry Halt** | `FOUNDRY_TW: -70%`, `BALTIC_DRY: +180%` | Wafer fab halt (Hop 1) $\to$ GPU/CPU designers (Hop 2) $\to$ AI hyperscalers & auto OEMs (Hop 3) | Identifies 3-hop auto OEM bottleneck that has ~0.12 calm-regime beta to semiconductors |
-
----
-
-## 4. Quickstart Guide (Local Execution)
+## 6. Quickstart Guide (Local Execution)
 
 ### Prerequisites
 - Python 3.12+ (or managed via `uv`)
 - Node.js 18+ & npm
+- *(Optional)* Ollama for local LLM inference (`curl -fsSL https://ollama.com/install.sh | sh`)
 
 ### One-Command Setup & Launch
 ```bash
 # Clone and enter directory
 cd /Users/dpcubed/projects/risk-lattice
 
-# Run the unified start script (seeds DuckDB, launches FastAPI & Next.js)
+# Run unified start script (seeds DuckDB, launches FastAPI & Next.js)
 ./start.sh
 ```
 
-- **Frontend Web UI**: [http://localhost:3000](http://localhost:3000)
+- **Frontend Terminal**: [http://localhost:3000](http://localhost:3000)
 - **FastAPI OpenAPI Swagger**: [http://localhost:8000/docs](http://localhost:8000/docs)
+
+### Running Backend and Frontend Independently
+
+```bash
+# Backend (Terminal 1)
+cd /Users/dpcubed/projects/risk-lattice
+.venv/bin/uvicorn backend.app.main:app --host 0.0.0.0 --port 8000 --reload
+
+# Frontend (Terminal 2)
+cd /Users/dpcubed/projects/risk-lattice/frontend
+npm run dev -- -p 3000
+```
 
 ---
 
-## 5. Verification Suite & CLI Gates
+## 7. Diagnostics & Automated Verification Suites
 
-Every milestone is validated by automated verification gates:
+Every layer of RiskLattice is protected by automated verification gates:
 
 ```bash
-# Milestone 1: Verify 50-node graph, 2,520-day returns Parquet & DuckDB schema
-make seed
-# or: python backend/scripts/seed_data.py --verify
+cd /Users/dpcubed/projects/risk-lattice
 
-# Milestone 2: Run mathematical bit-exact test suite & crisis replays
-make test-math
+# 1. System Health & Environment Doctor
+.venv/bin/python backend/scripts/doctor.py
 
-# Milestone 3: Run LLM router, verbatim quote guardrails, and PII sanitizer
-make test-llm
+# 2. Ultra-Fast Offline Math Smoke Test (0.12s)
+.venv/bin/python backend/scripts/smoke_test.py
 
-# Milestone 4: Run FastAPI integration endpoints & sub-2s performance gate
-make test-api
-make test-perf
+# 3. Privacy Firewall Red-Team Audit (Rule P-01)
+.venv/bin/python backend/scripts/verify_privacy.py
 
-# Run ALL 18 backend verification tests
-make test
+# 4. AST Engine Isolation Boundary Gate
+.venv/bin/pytest backend/tests/integration/test_boundary_and_engine.py -v
+
+# 5. Complete Test Suite (48/48 tests passing in ~9.5s)
+.venv/bin/pytest backend/tests/unit/ backend/tests/integration/ backend/tests/test_math.py backend/tests/test_llm.py backend/tests/test_api.py -v
 ```
+
+### Test Suite Coverage Breakdown
+
+- **12/12 Analytical Numerical Test Cases ($N\text{-}01$ to $N\text{-}12$)**: Hand-calculated propagation chains, decay monotonicity, substitutability nullification, distress multiplier thresholds, outlier resistance, and floating-point bit determinism.
+- **8/8 Copula & Tail Risk Test Cases ($R\text{-}01$ to $R\text{-}08$)**: Positive semi-definite matrix repair, Student-$t$ lower tail dependence, subadditivity ($\text{CVaR} \ge \text{VaR}$), marginal risk additivity, and single-asset edge cases.
+- **5/5 Property Invariant Test Cases ($P\text{-}01$ to $P\text{-}05$)**: Privacy token scrubbing, energy conservation, simulation idempotency, loss monotonicity, and verbatim filing citation presence.
+- **FastAPI REST & SSE Integration Tests**: Scenario draft workflows, version approvals, cancellation lifecycle, and streaming event sequences.
+- **Sub-2.0s Performance Gate**: 50 nodes + 4 hops + 2,000-path Copula simulation clocks at **0.041 seconds**.
