@@ -90,11 +90,66 @@ In computer science and artificial intelligence:
 
 ---
 
-## 2. Local LLM Architecture & Privacy Firewall
+## 2. What Are We Really Stress-Testing?
+
+Traditional enterprise risk management systems (such as standard Parametric Value at Risk, 60-day historical simulation, or linear factor models like Barra) suffer from a critical flaw: **they assume the financial world is linear, normally distributed, and static**. They answer: *"If the benchmark drops 2%, what is our portfolio drawdown based on trailing linear correlations?"*
+
+In real-world financial crises (the 2008 Lehman interbank freeze, the 2020 COVID supply shutdown, the 2022 duration shock, or a sudden Taiwan Strait blockade), **linear correlation models fail catastrophically**. Correlations jump to 1.0, multi-tier supply chains snap, and leveraged balance sheets experience sudden, non-linear insolvency cascades.
+
+RiskLattice stress-tests **5 distinct layers of systemic financial fragility**:
+
+```
+┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                              THE 5 LAYERS OF FINANCIAL FRAGILITY IN RISKLATTICE                        │
+├─────────────────────────────────────────────────┬──────────────────────────────────────────────────────┤
+│ 1. Multi-Hop Network Contagion                  │ Cascades propagating across 2nd, 3rd, & 4th tiers    │
+│ 2. Balance-Sheet Leverage Non-Linearity         │ Solvency cliffs when NetDebt/EBITDA > 3.0 (lambda)   │
+│ 3. Irreplaceable Vendor Bottlenecks             │ Single-points-of-failure with zero substitution (1-s)│
+│ 4. Heavy-Tailed Joint Crash Clustering          │ Multivariate Student-t Copula lower tail dependence  │
+│ 5. Portfolio PnL Waterfall Attribution          │ 1st- vs 2nd- vs 3rd-order losses & Marginal Risk     │
+└─────────────────────────────────────────────────┴──────────────────────────────────────────────────────┘
+```
+
+### 2.1 Multi-Hop Network Contagion (Beyond 1st-Order Exposures)
+- **The Blind Spot in Traditional Models**: Standard models only evaluate direct, 1st-order counterparty links or aggregate sector betas. If a portfolio does not directly hold TSMC, its historical beta to Taiwanese semiconductors might appear near zero ($\beta \approx 0.12$).
+- **What RiskLattice Tests**: Recursive multi-tier contagion through directed dependency graphs:
+  $$\text{Hop 0 (Direct Shock)} \longrightarrow \text{Hop 1 (Tier-1 Suppliers)} \longrightarrow \text{Hop 2 (Downstream OEMs)} \longrightarrow \text{Hop 3/4 (Network Contagion)}$$
+- **Real-World Case**: Automotive manufacturers (Ford, GM) do not purchase silicon wafers directly from TSMC; they purchase microcontroller modules from Tier-1 suppliers (NXP, Infineon, Bosch). When TSMC halts, the shock ripples through Tier-1 suppliers to Tier-2 assembly plants, halting vehicle production lines worldwide. RiskLattice uncovers these hidden multi-hop transmission channels.
+
+### 2.2 Balance-Sheet Leverage & Solvency Non-Linearities ($\lambda_v$)
+- **The Blind Spot in Traditional Models**: Assumes corporate equity returns respond linearly and symmetrically to revenue shocks ($r_i = \beta_i \cdot r_m$).
+- **What RiskLattice Tests**: **Credit covenant breach thresholds and debt-burden amplification**:
+  $$\lambda_v = \begin{cases} 1 + 0.35 \cdot \max(0, \text{NetDebt/EBITDA} - 3.0), & \text{if } \text{NetDebt/EBITDA} > 3.0 \text{ and } \Delta s < 0 \\ 1.0, & \text{otherwise} \end{cases}$$
+- **Real-World Case**: A cash-rich firm (e.g. Apple with deep cash reserves) absorbs macroeconomic supply disruptions with linear resilience ($\lambda=1.0$). In contrast, a capital-intensive, leveraged firm (e.g. an auto OEM with $\text{NetDebt/EBITDA} = 4.8$) faces credit rating downgrades, widening bond spreads, and commercial paper market lockout, compounding incoming shocks by **$1.63\times$ to $2.05\times$**.
+
+### 2.3 Irreplaceable Supply-Chain Bottlenecks (Substitutability $\sigma_v$)
+- **The Blind Spot in Traditional Models**: Treats all supplier relationships as fungible, commoditized cost inputs.
+- **What RiskLattice Tests**: **Structural vendor lock-in and single points of operational failure**:
+  $$\text{Transmitted Shock} \propto (1 - \sigma_v)$$
+- **Real-World Case**: If a standard commodity steel supplier fails, an industrial manufacturer can substitute an alternate vendor within days ($\sigma_v = 0.8$, absorbing only 20% of the shock). However, if a proprietary extreme ultraviolet (EUV) lithography monopoly (ASML) or advanced 3nm foundry (TSMC) goes offline, substitutability is zero ($\sigma_v = 0.0$), forcing downstream customers to absorb 100% of the disruption.
+
+### 2.4 Extreme Tail Dependence & Correlation Breakdown (Student-$t$ Copula)
+- **The Blind Spot in Traditional Models**: Gaussian (Normal) Value at Risk assumes extreme joint crashes are virtually impossible (a $6\sigma$ event occurring once every 10,000 years, yet observed multiple times every decade).
+- **What RiskLattice Tests**: **Asymmetric lower-tail joint crash clustering** using a 10,000-path multivariate Student-$t$ Copula ($\nu = 5$ degrees of freedom):
+  - In normal market regimes, assets appear uncorrelated and diversified.
+  - In systemic crisis regimes, diversification breaks down—all asset prices drop simultaneously.
+  - RiskLattice tests whether an institutional portfolio can withstand joint tail crashes where simultaneous downside risk is **$12\times$ higher** than Gaussian models assume.
+
+### 2.5 Portfolio PnL Waterfall & Marginal Risk Attribution (MCR)
+- **The Blind Spot in Traditional Models**: Produces a single aggregate loss figure without explaining the causal transmission mechanism or which asset is driving the ruin.
+- **What RiskLattice Tests**: Non-linear convex revaluation decomposed into an additive **PnL Waterfall**:
+  - **1st-Order Loss**: Direct macro hits to owned assets.
+  - **2nd-Order Loss**: Disruptions propagated through immediate tier-1 customers and suppliers.
+  - **3rd/4th-Order Loss**: Compound drawdowns triggered by network contagion and counterparty leverage distress.
+  - **Marginal Contribution to Risk (MCR)**: Decomposes 99% Expected Shortfall (CVaR) position-by-position, identifying the exact portfolio holding that serves as the primary transmission amplifier.
+
+---
+
+## 3. Local LLM Architecture & Privacy Firewall
 
 RiskLattice is architected to run completely locally with **zero external API dependencies**, satisfying institutional data privacy requirements.
 
-### 2.1 Supported Local LLM Runtimes
+### 3.1 Supported Local LLM Runtimes
 
 | Runtime | Protocol | Default Endpoint | Supported Models |
 | :--- | :--- | :--- | :--- |
@@ -103,7 +158,7 @@ RiskLattice is architected to run completely locally with **zero external API de
 | **LM Studio** | OpenAI-Compatible REST | `http://localhost:1234/v1` | Any loaded GGUF/MLX model |
 | **Deterministic Mock** | In-Process Python | `N/A` | Deterministic ground-truth mock (zero setup required) |
 
-### 2.2 Environment Variables & Configuration
+### 3.2 Environment Variables & Configuration
 
 Set these variables in your environment or copy [`backend/.env.example`](backend/.env.example) to `backend/.env`:
 
@@ -123,21 +178,21 @@ OLLAMA_API_BASE=http://localhost:11434
 # OPENAI_API_KEY=sk-...
 ```
 
-### 2.3 Strict Privacy Firewall (Rule P-01)
+### 3.3 Strict Privacy Firewall (Rule P-01)
 Before any text is dispatched to the LLM router, the [`PrivacySanitizer`](backend/app/agents/llm_router.py) executes automated redaction:
 - **Dollar Balances Redacted**: `$150,000,000` $\to$ `[REDACTED_AMOUNT]`.
 - **Share Counts Redacted**: `2,500,000 shares` $\to$ `[REDACTED_QUANTITY]`.
 - **Account Identifiers Redacted**: `ACCT-884920` $\to$ `[REDACTED_ACCOUNT]`.
 - **Unit-Free Portfolios**: Raw dollar allocations are converted into normalized weight vectors $\mathbf{w} \in [0, 1]^K$ summing to $1.0$.
 
-### 2.4 Hallucination-Free Guardrails
+### 3.4 Hallucination-Free Guardrails
 1. **Verbatim SEC 10-K Verification**: The [`SECExtractor`](backend/app/agents/sec_extractor.py) extracts dependency edges `(source, target, relation_type, quote)`. Every relationship is validated by exact character-substring matching against the source 10-K chunk in DuckDB. If the cited quote is absent or modified, the extracted edge is discarded.
 2. **Regex Citation Enforcement**: The [`NarrativeExplainer`](backend/app/agents/explainer.py) post-mortem claims are scanned with regex `\[10-K Chunk #\d+\]`. Claims lacking an authentic citation are rejected.
 3. **Deterministic Clamping**: Greedy decoding (`temperature=0.0`) and pinned RNG seeds (`seed=42`) ensure reproducible semantic outputs.
 
 ---
 
-## 3. Supported Use Cases & End-to-End Data Flows
+## 4. Supported Use Cases & End-to-End Data Flows
 
 RiskLattice covers 5 primary operational use cases. Each use case touches distinct components across the neuro-symbolic pipeline.
 
@@ -289,7 +344,7 @@ RiskLattice covers 5 primary operational use cases. Each use case touches distin
 
 ---
 
-## 4. Architecture Touchpoint Matrix
+## 5. Architecture Touchpoint Matrix
 
 This matrix maps each use case to the specific architectural subsystems it executes:
 
@@ -310,11 +365,11 @@ This matrix maps each use case to the specific architectural subsystems it execu
 
 ---
 
-## 5. Mathematical Propagation & Risk Formulas
+## 6. Mathematical Propagation & Risk Formulas
 
 Given directed dependency graph $G = (V, E, W)$ with $N = 50$ canonical nodes, adjacency sensitivity matrix $W \in \mathbb{R}^{N \times N}$, and initial impulse vector $s^{(0)} \in [-0.95, +2.00]^N$:
 
-### 5.1 Hop Iteration ($k = 1, 2, 3, 4$)
+### 6.1 Hop Iteration ($k = 1, 2, 3, 4$)
 $$\Delta s_v^{(k)} = \alpha^{k-1} \sum_u W_{uv} \cdot \Delta s_u^{(k-1)} \cdot (1 - \sigma_v) \cdot \lambda_v$$
 
 - **Hop Damping Factor**: $\alpha = 0.65$ per hop, guaranteeing energy dissipation and convergence.
@@ -324,7 +379,7 @@ $$\Delta s_v^{(k)} = \alpha^{k-1} \sum_u W_{uv} \cdot \Delta s_u^{(k-1)} \cdot (
 - **Cumulative Clamped Node Shock**:
   $$S_v = \text{clip}\left(\sum_{k=0}^4 \Delta s_v^{(k)}, -0.95, +1.50\right)$$
 
-### 5.2 Student-$t$ Copula Joint Tail Risk
+### 6.2 Student-$t$ Copula Joint Tail Risk
 Given empirical correlation matrix $\Sigma$ regularized to positive semi-definiteness via spectral clipping:
 $$\mathbf{X} \sim t_\nu(0, \Sigma), \quad \nu = 5$$
 Simulates 10,000 Monte Carlo paths to compute:
@@ -336,7 +391,7 @@ Simulates 10,000 Monte Carlo paths to compute:
 
 ---
 
-## 6. Quickstart Guide (Local Execution)
+## 7. Quickstart Guide (Local Execution)
 
 ### Prerequisites
 - Python 3.12+ (or managed via `uv`)
@@ -369,7 +424,7 @@ npm run dev -- -p 3000
 
 ---
 
-## 7. Diagnostics & Automated Verification Suites
+## 8. Diagnostics & Automated Verification Suites
 
 Every layer of RiskLattice is protected by automated verification gates:
 
