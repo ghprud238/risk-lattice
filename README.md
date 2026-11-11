@@ -145,11 +145,105 @@ RiskLattice stress-tests **5 distinct layers of systemic financial fragility**:
 
 ---
 
-## 3. Local LLM Architecture & Privacy Firewall
+## 3. Input & Output Specification
+
+A clear reference of what data enters RiskLattice and what intelligence and risk artifacts exit the system.
+
+```
+┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                       INPUT & OUTPUT SUMMARY                                           │
+├─────────────────────────────────────────────────┬──────────────────────────────────────────────────────┤
+│                     INPUTS                      │                       OUTPUTS                        │
+├─────────────────────────────────────────────────┼──────────────────────────────────────────────────────┤
+│ 1. Macro Scenario (NLP Text or Factor Sliders)  │ 1. Multi-Hop Graph State & Node Shocks (0 to 4 hops) │
+│ 2. Institutional Portfolio Holdings (CSV/JSON)  │ 2. PnL Waterfall Breakdown (1st, 2nd, 3rd+ orders)   │
+│ 3. SEC 10-K Regulatory Filings (Background)     │ 3. Student-t Copula 99% VaR & Expected Shortfall     │
+│ 4. 504-Day Return Series & Balance Sheet Ratios │ 4. Marginal Contribution to Risk (MCR per holding)   │
+│                                                 │ 5. Verbatim-Cited Narrative Report ([10-K Chunk #])  │
+│                                                 │ 6. Real-Time Server-Sent Events (SSE) Stream         │
+└─────────────────────────────────────────────────┴──────────────────────────────────────────────────────┘
+```
+
+### 3.1 System Inputs
+
+RiskLattice accepts inputs across three operational dimensions:
+
+#### 1. The Macroeconomic Scenario (Shock Trigger)
+The user can trigger stress tests via three alternative modalities:
+- **Free-Form Natural Language Prompt**: Plain English description of a geopolitical, macroeconomic, or industrial shock (e.g., *"Taiwan Strait blockade halts chip exports by 70% and spikes shipping freight by 180%"*).
+- **Historical Crisis Benchmark**: Pre-configured historical vectors (e.g., *2008 Lehman Liquidity Freeze*, *2020 COVID Mobility Halt*, *2022 Duration Shock*).
+- **Manual Factor Sliders**: Direct numerical adjustments across 8 canonical macro factors:
+  - `FOUNDRY_TW` (Taiwan Wafer Export Shock: $[-0.95, +1.00]$)
+  - `BALTIC_DRY` (Dry Bulk Shipping Freight Surge: $[-0.80, +2.00]$)
+  - `BRENT_CRUDE` (Crude Oil Price Shock: $[-0.80, +1.50]$)
+  - `SOFR_SPREAD` (Interbank Liquidity Spread: $[0.00, +0.05]$)
+  - `HY_OAS` (High-Yield Option-Adjusted Spread: $[0.00, +0.12]$)
+  - `US10Y_REAL` (10-Year Real Yield Shift: $[-0.03, +0.05]$)
+  - `DXY` (US Dollar Index Surge: $[-0.20, +0.30]$)
+  - `VIX` (Equity Volatility Index Shock: $[-0.50, +2.00]$)
+
+#### 2. Institutional Portfolio Holdings (Position Ledger)
+Imported via CSV, JSON, or loaded from DuckDB (`portfolio_holdings`):
+- **Ticker Identifiers**: Canonical ticker symbols (e.g., `NVDA`, `TSM`, `AAPL`, `MSFT`, `F`, `JPM`).
+- **Asset Classes**: Multi-asset support for **Equity (Long/Short)**, **Credit Default Swaps (CDS)**, and **FX Currency Hedges**.
+- **Dollar Notionals**: Position sizes (e.g., $+\$100\text{M}$ NVDA, $+\$50\text{M}$ TSM, $-\$30\text{M}$ Ford short).
+  > **Privacy Note**: Dollar amounts and share counts remain inside Tier 1 (DuckDB). Only normalized weight vectors $\mathbf{w}$ are used in risk calculations; the LLM tier never sees positions or balances.
+
+#### 3. Financial & Regulatory Corpus (Background Ground Truth)
+Stored in embedded DuckDB 2.0:
+- **SEC Form 10-K Corpus**: 40 full chunks from Item 1A (Risk Factors) and Footnotes for major S&P 500 corporations.
+- **504 Trading Days Historical Returns**: 2-regime Markov-switching daily return matrix calibrated with heavy-tailed Student-$t$ margins.
+- **Corporate Balance Sheet Fundamentals**: Net Debt/EBITDA, Interest Coverage Ratio, Cash Buffer, and Supplier Substitutability ($\sigma_v$).
+
+---
+
+### 3.2 System Outputs
+
+RiskLattice produces five deterministic and qualitative output artifacts:
+
+#### 1. Interactive Multi-Hop Contagion Graph
+- **Hop-by-Hop Node Shock Vectors**: Exact shock values at each transmission stage:
+  $$\Delta s_v^{(0)} \text{ (Macro)}, \quad \Delta s_v^{(1)} \text{ (Direct Tier-1)}, \quad \Delta s_v^{(2)} \text{ (Downstream)}, \quad \Delta s_v^{(3/4)} \text{ (Contagion)}$$
+- **Cumulative Clamped Shock ($S_v$)**: Bounded in $[-0.95, +1.50]$ with node status indicators:
+  - Healthy (Green: $|S_v| < 5\%$)
+  - Alert (Amber: $5\% \le |S_v| < 15\%$)
+  - Severe Distress (Crimson: $|S_v| \ge 15\%$)
+- **Critical Transmission Bottlenecks**: Highlights the specific high-leverage nodes where $\lambda_v > 1.0$ compounded the cascade.
+
+#### 2. Portfolio PnL & Additive Waterfall Breakdown
+- **Total Portfolio Loss**: Stressed dollar PnL (e.g., $-\$100.8\text{M}$) and percentage drawdown (e.g., $-22.4\%$).
+- **Additive Order-of-Impact Waterfall**:
+  - **1st-Order Loss**: Dollar damage from direct macro hits to owned assets.
+  - **2nd-Order Loss**: Losses triggered by immediate supplier and customer bottlenecks.
+  - **3rd/4th-Order Loss**: Cascading network insolvency driven by counterparty balance-sheet distress.
+
+#### 3. Student-$t$ Copula Tail-Risk Distribution & Metrics
+- **Value at Risk (99% VaR)**: Parametric (Gaussian) vs. Historical vs. Student-$t$ Copula VaR.
+- **Expected Shortfall (99% CVaR)**: Conditional average loss in the worst 1% of joint crash outcomes.
+- **Tail Ratio**: Ratio of Copula CVaR to Gaussian VaR (e.g., $12.2\times$), proving tail risk underestimation.
+- **Marginal Contribution to Risk (MCR)**: Ranked percentage breakdown identifying which holding drives the majority of portfolio tail loss (e.g., `NVDA`: 48.2%, `TSM`: 31.4%).
+
+#### 4. Grounded Narrative Post-Mortem Report
+- A 3-bullet executive briefing synthesized in natural language:
+  - **Macro Trigger**: What initial event catalyzed the stress.
+  - **Transmission Bottleneck**: Which non-obvious multi-hop supplier link amplified the disruption.
+  - **Tail-Risk Hedges**: Specific hedge recommendations (e.g., put options on semiconductor ETFs, long freight-rate futures).
+- **Verbatim SEC 10-K Citations**: Every factual relationship is accompanied by a clickable citation (e.g., `[10-K Chunk #14]`) verified by exact substring match against official SEC disclosures.
+
+#### 5. Real-Time Server-Sent Events (SSE) Stream
+A live JSON event stream over `/simulate/stream` emitting progressive execution stages:
+- `event: started` $\to$ Job initialization and frozen snapshot generation.
+- `event: propagating` $\to$ Hop-by-hop node activation counts and transmission vectors.
+- `event: copula_simulating` $\to$ 10,000 Monte Carlo path completion progress.
+- `event: completed` $\to$ Full simulation payload delivered to the client terminal.
+
+---
+
+## 4. Local LLM Architecture & Privacy Firewall
 
 RiskLattice is architected to run completely locally with **zero external API dependencies**, satisfying institutional data privacy requirements.
 
-### 3.1 Supported Local LLM Runtimes
+### 4.1 Supported Local LLM Runtimes
 
 | Runtime | Protocol | Default Endpoint | Supported Models |
 | :--- | :--- | :--- | :--- |
@@ -158,7 +252,7 @@ RiskLattice is architected to run completely locally with **zero external API de
 | **LM Studio** | OpenAI-Compatible REST | `http://localhost:1234/v1` | Any loaded GGUF/MLX model |
 | **Deterministic Mock** | In-Process Python | `N/A` | Deterministic ground-truth mock (zero setup required) |
 
-### 3.2 Environment Variables & Configuration
+### 4.2 Environment Variables & Configuration
 
 Set these variables in your environment or copy [`backend/.env.example`](backend/.env.example) to `backend/.env`:
 
@@ -178,21 +272,21 @@ OLLAMA_API_BASE=http://localhost:11434
 # OPENAI_API_KEY=sk-...
 ```
 
-### 3.3 Strict Privacy Firewall (Rule P-01)
+### 4.3 Strict Privacy Firewall (Rule P-01)
 Before any text is dispatched to the LLM router, the [`PrivacySanitizer`](backend/app/agents/llm_router.py) executes automated redaction:
 - **Dollar Balances Redacted**: `$150,000,000` $\to$ `[REDACTED_AMOUNT]`.
 - **Share Counts Redacted**: `2,500,000 shares` $\to$ `[REDACTED_QUANTITY]`.
 - **Account Identifiers Redacted**: `ACCT-884920` $\to$ `[REDACTED_ACCOUNT]`.
 - **Unit-Free Portfolios**: Raw dollar allocations are converted into normalized weight vectors $\mathbf{w} \in [0, 1]^K$ summing to $1.0$.
 
-### 3.4 Hallucination-Free Guardrails
+### 4.4 Hallucination-Free Guardrails
 1. **Verbatim SEC 10-K Verification**: The [`SECExtractor`](backend/app/agents/sec_extractor.py) extracts dependency edges `(source, target, relation_type, quote)`. Every relationship is validated by exact character-substring matching against the source 10-K chunk in DuckDB. If the cited quote is absent or modified, the extracted edge is discarded.
 2. **Regex Citation Enforcement**: The [`NarrativeExplainer`](backend/app/agents/explainer.py) post-mortem claims are scanned with regex `\[10-K Chunk #\d+\]`. Claims lacking an authentic citation are rejected.
 3. **Deterministic Clamping**: Greedy decoding (`temperature=0.0`) and pinned RNG seeds (`seed=42`) ensure reproducible semantic outputs.
 
 ---
 
-## 4. Supported Use Cases & End-to-End Data Flows
+## 5. Supported Use Cases & End-to-End Data Flows
 
 RiskLattice covers 5 primary operational use cases. Each use case touches distinct components across the neuro-symbolic pipeline.
 
@@ -344,7 +438,7 @@ RiskLattice covers 5 primary operational use cases. Each use case touches distin
 
 ---
 
-## 5. Architecture Touchpoint Matrix
+## 6. Architecture Touchpoint Matrix
 
 This matrix maps each use case to the specific architectural subsystems it executes:
 
@@ -365,11 +459,11 @@ This matrix maps each use case to the specific architectural subsystems it execu
 
 ---
 
-## 6. Mathematical Propagation & Risk Formulas
+## 7. Mathematical Propagation & Risk Formulas
 
 Given directed dependency graph $G = (V, E, W)$ with $N = 50$ canonical nodes, adjacency sensitivity matrix $W \in \mathbb{R}^{N \times N}$, and initial impulse vector $s^{(0)} \in [-0.95, +2.00]^N$:
 
-### 6.1 Hop Iteration ($k = 1, 2, 3, 4$)
+### 7.1 Hop Iteration ($k = 1, 2, 3, 4$)
 $$\Delta s_v^{(k)} = \alpha^{k-1} \sum_u W_{uv} \cdot \Delta s_u^{(k-1)} \cdot (1 - \sigma_v) \cdot \lambda_v$$
 
 - **Hop Damping Factor**: $\alpha = 0.65$ per hop, guaranteeing energy dissipation and convergence.
@@ -379,7 +473,7 @@ $$\Delta s_v^{(k)} = \alpha^{k-1} \sum_u W_{uv} \cdot \Delta s_u^{(k-1)} \cdot (
 - **Cumulative Clamped Node Shock**:
   $$S_v = \text{clip}\left(\sum_{k=0}^4 \Delta s_v^{(k)}, -0.95, +1.50\right)$$
 
-### 6.2 Student-$t$ Copula Joint Tail Risk
+### 7.2 Student-$t$ Copula Joint Tail Risk
 Given empirical correlation matrix $\Sigma$ regularized to positive semi-definiteness via spectral clipping:
 $$\mathbf{X} \sim t_\nu(0, \Sigma), \quad \nu = 5$$
 Simulates 10,000 Monte Carlo paths to compute:
@@ -391,7 +485,7 @@ Simulates 10,000 Monte Carlo paths to compute:
 
 ---
 
-## 7. Quickstart Guide (Local Execution)
+## 8. Quickstart Guide (Local Execution)
 
 ### Prerequisites
 - Python 3.12+ (or managed via `uv`)
@@ -424,7 +518,7 @@ npm run dev -- -p 3000
 
 ---
 
-## 8. Diagnostics & Automated Verification Suites
+## 9. Diagnostics & Automated Verification Suites
 
 Every layer of RiskLattice is protected by automated verification gates:
 
