@@ -14,28 +14,36 @@ if [ ! -f "backend/data/contagion.duckdb" ]; then
     .venv/bin/python backend/scripts/seed_data.py --verify
 fi
 
+# Detect available backend port (falls back to 8001 if 8000 is occupied)
+BACKEND_PORT=${PORT:-8000}
+if lsof -i :$BACKEND_PORT >/dev/null 2>&1; then
+    echo "⚠️  Port $BACKEND_PORT is currently occupied. Switching backend to port 8001..."
+    BACKEND_PORT=8001
+fi
+FRONTEND_PORT=${FRONTEND_PORT:-3000}
+
 # Trap SIGINT to kill background servers on exit
 trap 'kill $(jobs -p) 2>/dev/null || true; exit 0' SIGINT SIGTERM EXIT
 
-echo "Starting FastAPI Backend on http://localhost:8000..."
+echo "Starting FastAPI Backend on http://localhost:$BACKEND_PORT..."
 cd backend
-../.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000 &
+../.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port $BACKEND_PORT &
 BACKEND_PID=$!
 cd ..
 
 # Wait for backend health
 sleep 1.5
 
-echo "Starting Next.js Frontend on http://localhost:3000..."
+echo "Starting Next.js Frontend on http://localhost:$FRONTEND_PORT..."
 cd frontend
-npm run dev -- -p 3000 &
+NEXT_PUBLIC_API_URL="http://localhost:$BACKEND_PORT" npm run dev -- -p $FRONTEND_PORT &
 FRONTEND_PID=$!
 cd ..
 
 echo "================================================================="
 echo " RiskLattice is RUNNING!"
-echo " Frontend UI: http://localhost:3000"
-echo " Backend API: http://localhost:8000/docs"
+echo " Frontend UI: http://localhost:$FRONTEND_PORT"
+echo " Backend API: http://localhost:$BACKEND_PORT/docs"
 echo " Press Ctrl+C to stop both servers."
 echo "================================================================="
 
