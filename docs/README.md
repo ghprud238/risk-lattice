@@ -9,6 +9,7 @@ Welcome to the engineering documentation for **RiskLattice** (formerly Contagion
 - [**Daily Engineering Notes**](./daily_notes/README.md): Chronological record of all project interactions, implementations, data flow walkthroughs, debugging guides, and milestones.
   - [**2026-11-10: System Architecture & Implementation**](./daily_notes/2026-11-10.md): Complete record of Milestones 1–4 and Expanded PRD v2.1 implementation.
   - [**2026-11-11: Operations, Data Flow & Debugging Manual**](./daily_notes/2026-11-11.md): End-to-end Taiwan Foundry case walkthrough, 5-tier debugging protocol, and UI guide.
+  - [**2026-11-12: Dockerization, B2B Commercial Proposal, & Competitive Analysis**](./daily_notes/2026-11-12.md): Docker architecture, port 5050/5051 routing, 4 B2B pillars, buyer personas, economic ROI, and competitive teardown vs Aladdin/Barra.
 - [**Architecture Decision Records (ADRs)**](./adrs/): Formal records of core architectural and technical decisions.
   - [ADR-001: Embedded DuckDB Storage](./adrs/ADR-001-storage.md)
   - [ADR-002: Pure Compute Isolation for Engine](./adrs/ADR-002-compute.md)
