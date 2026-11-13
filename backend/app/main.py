@@ -25,7 +25,8 @@ from sse_starlette.sse import EventSourceResponse
 from app.db.database import db_manager
 from app.domain.errors import ContagionDomainException, FailureCode, ErrorEnvelope
 from app.domain.models import JobState, RunManifest
-from app.services import job_service, snapshot_service, scenario_service, portfolio_service
+from app.services import job_service, snapshot_service, scenario_service, portfolio_service, auth_service
+from app.services.auth_service import UserRole
 from app.engine.calibrator import EdgeCalibrator
 from app.engine.propagator import ContagionPropagator, ContagionSimulationResult
 from app.engine.risk_metrics import TailRiskEngine, RiskMetricsResult
@@ -500,3 +501,53 @@ def export_run_bundle(run_id: str):
         "event_history": [{"sequence": e.sequence, "event": e.event, "data": e.data} for e in events],
         "storage_format": "Parquet + DuckDB"
     }
+
+
+# --- Authentication & Google SSO Endpoints ---
+
+class GoogleAuthRequest(BaseModel):
+    credential: Optional[str] = Field(None, description="Google OAuth ID Token JWT")
+    email: Optional[str] = Field(None, description="Email for institutional sandbox persona")
+    name: Optional[str] = Field(None, description="Display name for institutional persona")
+    picture: Optional[str] = Field(None, description="User avatar image URL")
+    role: Optional[UserRole] = Field(None, description="Institutional RBAC role")
+    organization: Optional[str] = Field(None, description="Institutional employer / fund name")
+
+
+@app.post("/api/v1/auth/google")
+def authenticate_google_user(req: GoogleAuthRequest):
+    """Authenticates via Google Workspace OAuth ID token or institutional sandbox credential."""
+    try:
+        auth_resp = auth_service.authenticate_google(
+            credential=req.credential,
+            email=req.email,
+            name=req.name,
+            picture=req.picture,
+            role=req.role,
+            organization=req.organization,
+        )
+        return auth_resp
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.get("/api/v1/auth/me")
+def get_current_user(request: Request, token: Optional[str] = Query(None)):
+    """Returns profile and RBAC permissions for the authenticated session."""
+    auth_header = request.headers.get("Authorization") or token or ""
+    if not auth_header:
+        raise HTTPException(status_code=401, detail="Authentication token required")
+    
+    user = auth_service.get_user_from_token(auth_header)
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid or expired session token")
+    
+    return {"user": user}
+
+
+@app.post("/api/v1/auth/logout")
+def logout_user(request: Request, token: Optional[str] = Query(None)):
+    """Terminates active session."""
+    auth_header = request.headers.get("Authorization") or token or ""
+    success = auth_service.logout(auth_header)
+    return {"status": "success", "logged_out": success}

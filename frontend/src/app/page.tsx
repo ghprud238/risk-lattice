@@ -13,7 +13,9 @@ import {
   RefreshCw,
   Terminal,
   Cpu,
-  Layers
+  Layers,
+  LogOut,
+  User,
 } from "lucide-react";
 import CytoscapeGraph from "@/components/CytoscapeGraph";
 import ShockStudio from "@/components/ShockStudio";
@@ -21,10 +23,13 @@ import PnLWaterfall from "@/components/PnLWaterfall";
 import BacktestComparison from "@/components/BacktestComparison";
 import PortfolioImporter from "@/components/PortfolioImporter";
 import NarrativePostMortem from "@/components/NarrativePostMortem";
+import LoginScreen from "@/components/LoginScreen";
+import { AuthProvider, useAuth } from "@/context/AuthContext";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5051";
 
-export default function Home() {
+function RiskLatticeDashboard() {
+  const { user, isAuthenticated, isLoading, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<"canvas" | "backtest" | "importer">("canvas");
 
   // State
@@ -206,6 +211,21 @@ export default function Home() {
     .filter((n: any) => n.node_type === "ASSET" && n.cumulative_shock < 0)
     .sort((a: any, b: any) => a.cumulative_shock - b.cumulative_shock);
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#070b12] flex items-center justify-center">
+        <div className="flex flex-col items-center space-y-3">
+          <div className="w-8 h-8 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin" />
+          <span className="text-xs text-slate-400 font-mono">Authenticating institutional session...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <LoginScreen />;
+  }
+
   return (
     <div className="min-h-screen bg-[#070b12] text-slate-100 flex flex-col font-sans selection:bg-cyan-500 selection:text-slate-950">
       {/* Top Header */}
@@ -229,7 +249,7 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Navigation Tabs & Status */}
+        {/* Navigation Tabs, Status & User Profile */}
         <div className="flex items-center space-x-3">
           <div className="flex items-center space-x-1 bg-slate-900/90 rounded-xl p-1 border border-slate-800 text-xs">
             <button
@@ -274,6 +294,32 @@ export default function Home() {
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
             <span className="text-slate-300 text-[11px]">{backendStatus}</span>
           </div>
+
+          {/* User Profile & Sign Out */}
+          {user && (
+            <div className="flex items-center space-x-2 pl-2 border-l border-slate-800">
+              <div className="flex items-center space-x-2">
+                <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-cyan-600 to-blue-600 text-white flex items-center justify-center font-bold text-[11px] shadow">
+                  {user.name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()}
+                </div>
+                <div className="hidden xl:block text-left">
+                  <div className="text-[11px] font-bold text-slate-200 leading-tight">
+                    {user.name}
+                  </div>
+                  <div className="text-[9px] text-cyan-400 font-mono">
+                    {user.role.replace(/_/g, " ")}
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={logout}
+                title="Sign out of session"
+                className="p-1.5 rounded-lg bg-slate-900 hover:bg-rose-950/60 hover:text-rose-400 border border-slate-800 text-slate-400 transition"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
         </div>
       </header>
 
@@ -338,5 +384,13 @@ export default function Home() {
         </div>
       </footer>
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <AuthProvider>
+      <RiskLatticeDashboard />
+    </AuthProvider>
   );
 }
