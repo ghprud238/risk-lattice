@@ -114,7 +114,8 @@ class EdgeCalibrator:
                 u = node_to_idx[src]
                 v = node_to_idx[tgt]
                 # Enforce bound ABS(base_weight) <= 1.0
-                weight = float(np.clip(row["base_weight"], -1.0, 1.0))
+                raw_w = row["base_weight"] if "base_weight" in row else row.get("weight", 0.0)
+                weight = float(np.clip(raw_w, -1.0, 1.0))
                 W[u, v] = weight
 
         sparse_W = csr_matrix(W)

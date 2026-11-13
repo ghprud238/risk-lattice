@@ -89,8 +89,23 @@ class HoldingItem(BaseModel):
     ticker: str
     notional: FiniteFloat
     weight: FiniteFloat
-    asset_class: str
+    asset_class: str = "EQUITY"
     currency: str = "USD"
+    instrument_type: Optional[str] = None
+    side: Optional[Literal["LONG", "SHORT", "BUY", "SELL"]] = "LONG"
+    option_type: Optional[Literal["CALL", "PUT"]] = None
+    strike: Optional[FiniteFloat] = None
+    underlying_price: Optional[FiniteFloat] = None
+    implied_vol: Optional[FiniteFloat] = None
+    maturity_years: Optional[FiniteFloat] = None
+    duration: Optional[FiniteFloat] = None
+    convexity: Optional[FiniteFloat] = None
+    spread_bps: Optional[FiniteFloat] = None
+    covenant_max_leverage: Optional[FiniteFloat] = None
+    current_leverage: Optional[FiniteFloat] = None
+    recovery_rate: Optional[FiniteFloat] = None
+    attachment_point: Optional[FiniteFloat] = None
+    detachment_point: Optional[FiniteFloat] = None
 
 
 class PortfolioVersion(BaseModel):

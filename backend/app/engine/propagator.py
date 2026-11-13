@@ -85,11 +85,15 @@ class ContagionPropagator:
         scenario_name: str = "Custom Scenario",
         portfolio_weights: Optional[Dict[str, float]] = None,
         nodes_df: Optional[pd.DataFrame] = None,
-        edges_df: Optional[pd.DataFrame] = None
+        edges_df: Optional[pd.DataFrame] = None,
+        horizon_days: int = 20,
+        node_inventory_days: Optional[Dict[str, float]] = None,
     ) -> ContagionSimulationResult:
         """
         Executes bit-exact 4-hop damped propagation.
         initial_shock: mapping of node_id -> shock value clamped to [-0.95, +2.00]
+        horizon_days: disruption duration in days
+        node_inventory_days: optional dictionary of node_id -> days of inventory buffer
         """
         if nodes_df is None or edges_df is None:
             nodes_df, edges_df = self.calibrator.load_graph_data()
@@ -110,6 +114,20 @@ class ContagionPropagator:
             idx = node_to_idx[row["node_id"]]
             substitutabilities[idx] = float(np.clip(row.get("substitutability", 0.3), 0.0, 0.8))
 
+        # Inventory buffer absorption factors
+        inventory_factors = np.ones(N, dtype=np.float64)
+        for _, row in nodes_df.iterrows():
+            idx = node_to_idx[row["node_id"]]
+            inv_days = 0.0
+            if node_inventory_days and row["node_id"] in node_inventory_days:
+                inv_days = float(node_inventory_days[row["node_id"]])
+            elif "inventory_days" in row and pd.notna(row["inventory_days"]):
+                inv_days = float(row["inventory_days"])
+            
+            if inv_days > 0 and horizon_days > 0:
+                absorption_ratio = max(0.0, (horizon_days - inv_days) / horizon_days)
+                inventory_factors[idx] = float(np.clip(absorption_ratio, 0.0, 1.0))
+
         # Distress multipliers lambda_v
         lambdas = self.compute_distress_multipliers(nodes_df)
 
@@ -118,7 +136,7 @@ class ContagionPropagator:
         delta_s[0] = s0
 
         # Hop iteration k = 1, 2, 3, 4
-        # Delta s_v^(k) = alpha^(k-1) * sum_u (W_uv * Delta s_u^(k-1)) * (1 - sigma_v) * lambda_v
+        # Delta s_v^(k) = alpha^(k-1) * sum_u (W_uv * Delta s_u^(k-1)) * (1 - sigma_v) * lambda_v * inv_buffer
         for k in range(1, self.max_hops + 1):
             prev_impulse = delta_s[k - 1]
             # Matrix multiplication: prev_impulse @ W gives incoming sum_u (W_uv * prev_impulse_u)
@@ -136,7 +154,8 @@ class ContagionPropagator:
                 sub_factor = 1.0 - substitutabilities[v]
                 # Non-linear distress multiplier: amplifies negative shocks
                 multiplier = lambdas[v] if raw_v < 0 else 1.0
-                hop_k[v] = decay * raw_v * sub_factor * multiplier
+                inv_factor = inventory_factors[v] if raw_v < 0 else 1.0
+                hop_k[v] = decay * raw_v * sub_factor * multiplier * inv_factor
 
             delta_s[k] = hop_k
 
@@ -256,6 +275,8 @@ def propagate_kernel(
     clip_min: float = -0.95,
     clip_max: float = 2.00,
     tolerance: float = 1e-4,
+    inventory_buffers: Optional[np.ndarray] = None,
+    horizon_days: float = 20.0,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, List[Dict[str, Any]]]:
     """
     Pure deterministic analytical propagation kernel per Section 9, 16.2 & 23.1.
@@ -264,6 +285,8 @@ def propagate_kernel(
         c = alpha * weight * impulse[edge.source]
     Relation filtering:
         If edge.relation == 'SUPPLY': c *= (1.0 - substitution[edge.target])
+    Inventory buffer mitigation:
+        If inventory_buffers is provided: c *= max(0.0, (horizon_days - inv_days) / horizon_days)
     Signed distress amplification:
         If c < 0.0: c *= distress[edge.target]
     Cumulative clamping:
@@ -290,6 +313,10 @@ def propagate_kernel(
             c = alpha * weight * impulse[src]
             if relation == "SUPPLY":
                 c *= (1.0 - substitution[tgt])
+                if inventory_buffers is not None and horizon_days > 0:
+                    inv_days = float(inventory_buffers[tgt])
+                    buf_ratio = max(0.0, (horizon_days - inv_days) / horizon_days)
+                    c *= min(1.0, buf_ratio)
             if c < 0.0:
                 c *= distress[tgt]
             next_impulse[tgt] += c
