@@ -16,6 +16,9 @@ import {
   Layers,
   LogOut,
   User,
+  ShieldCheck,
+  Clock,
+  GitCompare,
 } from "lucide-react";
 import CytoscapeGraph from "@/components/CytoscapeGraph";
 import ShockStudio from "@/components/ShockStudio";
@@ -23,6 +26,11 @@ import PnLWaterfall from "@/components/PnLWaterfall";
 import BacktestComparison from "@/components/BacktestComparison";
 import PortfolioImporter from "@/components/PortfolioImporter";
 import NarrativePostMortem from "@/components/NarrativePostMortem";
+import HedgeOptimizer from "@/components/HedgeOptimizer";
+import TimelinePlayer from "@/components/TimelinePlayer";
+import ScenarioDiffViewer from "@/components/ScenarioDiffViewer";
+import ExecutiveMemoModal from "@/components/ExecutiveMemoModal";
+import RegulatorySignoffModal from "@/components/RegulatorySignoffModal";
 import LoginScreen from "@/components/LoginScreen";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 
@@ -30,7 +38,13 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5051";
 
 function RiskLatticeDashboard() {
   const { user, isAuthenticated, isLoading, logout } = useAuth();
-  const [activeTab, setActiveTab] = useState<"canvas" | "backtest" | "importer">("canvas");
+  const [activeTab, setActiveTab] = useState<
+    "canvas" | "optimizer" | "timeline" | "diff" | "backtest" | "importer"
+  >("canvas");
+
+  // Enterprise Governance & Reporting Modals
+  const [isMemoOpen, setIsMemoOpen] = useState<boolean>(false);
+  const [isSignoffOpen, setIsSignoffOpen] = useState<boolean>(false);
 
   // State
   const [graphData, setGraphData] = useState<{ nodes: any[]; edges: any[] }>({ nodes: [], edges: [] });
@@ -249,8 +263,8 @@ function RiskLatticeDashboard() {
           </div>
         </div>
 
-        {/* Navigation Tabs, Status & User Profile */}
-        <div className="flex items-center space-x-3">
+        {/* Navigation Tabs, Quick Actions, Status & User Profile */}
+        <div className="flex flex-wrap items-center gap-2">
           <div className="flex items-center space-x-1 bg-slate-900/90 rounded-xl p-1 border border-slate-800 text-xs">
             <button
               onClick={() => setActiveTab("canvas")}
@@ -261,7 +275,40 @@ function RiskLatticeDashboard() {
               }`}
             >
               <Layers className="w-3.5 h-3.5" />
-              <span>Stress Canvas</span>
+              <span>Canvas</span>
+            </button>
+            <button
+              onClick={() => setActiveTab("optimizer")}
+              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg transition font-medium ${
+                activeTab === "optimizer"
+                  ? "bg-cyan-500 text-slate-950 font-bold shadow"
+                  : "text-slate-400 hover:text-white"
+              }`}
+            >
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>Hedge Optimizer</span>
+            </button>
+            <button
+              onClick={() => setActiveTab("timeline")}
+              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg transition font-medium ${
+                activeTab === "timeline"
+                  ? "bg-cyan-500 text-slate-950 font-bold shadow"
+                  : "text-slate-400 hover:text-white"
+              }`}
+            >
+              <Clock className="w-3.5 h-3.5" />
+              <span>Timeline (0-90d)</span>
+            </button>
+            <button
+              onClick={() => setActiveTab("diff")}
+              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg transition font-medium ${
+                activeTab === "diff"
+                  ? "bg-cyan-500 text-slate-950 font-bold shadow"
+                  : "text-slate-400 hover:text-white"
+              }`}
+            >
+              <GitCompare className="w-3.5 h-3.5" />
+              <span>A/B Diff</span>
             </button>
             <button
               onClick={() => {
@@ -275,7 +322,7 @@ function RiskLatticeDashboard() {
               }`}
             >
               <History className="w-3.5 h-3.5" />
-              <span>Crisis Backtest</span>
+              <span>Backtest</span>
             </button>
             <button
               onClick={() => setActiveTab("importer")}
@@ -286,7 +333,27 @@ function RiskLatticeDashboard() {
               }`}
             >
               <ShieldAlert className="w-3.5 h-3.5" />
-              <span>Portfolio &amp; 10-K</span>
+              <span>10-K &amp; Portfolio</span>
+            </button>
+          </div>
+
+          {/* Institutional Fast Action Modals */}
+          <div className="flex items-center space-x-1.5">
+            <button
+              onClick={() => setIsMemoOpen(true)}
+              title="Generate Board-Ready Executive Stress Memo"
+              className="flex items-center space-x-1 px-2.5 py-1.5 rounded-xl bg-slate-900/90 border border-slate-800 hover:border-cyan-500/60 text-slate-300 hover:text-white transition text-xs font-semibold"
+            >
+              <FileText className="w-3.5 h-3.5 text-cyan-400" />
+              <span className="hidden xl:inline">Board Memo</span>
+            </button>
+            <button
+              onClick={() => setIsSignoffOpen(true)}
+              title="Four-Eyes Governance &amp; Regulatory Audit Sign-off"
+              className="flex items-center space-x-1 px-2.5 py-1.5 rounded-xl bg-slate-900/90 border border-slate-800 hover:border-emerald-500/60 text-slate-300 hover:text-white transition text-xs font-semibold"
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+              <span className="hidden xl:inline">Audit Vault</span>
             </button>
           </div>
 
@@ -355,6 +422,41 @@ function RiskLatticeDashboard() {
           </>
         )}
 
+        {activeTab === "optimizer" && (
+          <HedgeOptimizer
+            unhedgedPnl={portfolioPnl?.total_pnl ?? -23450000}
+            nodeShocks={
+              nodeShocks && Object.keys(nodeShocks).length > 0
+                ? Object.fromEntries(
+                    Object.entries(nodeShocks).map(([k, v]: [string, any]) => [
+                      k,
+                      typeof v === "object" ? v.cumulative_shock : v,
+                    ])
+                  )
+                : { TSM: -0.4, NVDA: -0.32, AAPL: -0.26, F: -0.22 }
+            }
+            portfolioNotional={100000000}
+          />
+        )}
+
+        {activeTab === "timeline" && (
+          <TimelinePlayer
+            initialShocks={
+              nodeShocks && Object.keys(nodeShocks).length > 0
+                ? Object.fromEntries(
+                    Object.entries(nodeShocks).map(([k, v]: [string, any]) => [
+                      k,
+                      typeof v === "object" ? v.cumulative_shock : v,
+                    ])
+                  )
+                : { TSM: -0.4 }
+            }
+            portfolioNotional={100000000}
+          />
+        )}
+
+        {activeTab === "diff" && <ScenarioDiffViewer />}
+
         {activeTab === "backtest" && (
           <BacktestComparison
             onRunBacktest={handleRunBacktest}
@@ -370,6 +472,26 @@ function RiskLatticeDashboard() {
           />
         )}
       </main>
+
+      {/* Executive Board-Ready Memorandum Modal */}
+      <ExecutiveMemoModal
+        isOpen={isMemoOpen}
+        onClose={() => setIsMemoOpen(false)}
+        scenarioName="Taiwan Strait Blockade & Semiconductor Shock"
+        portfolioNotional={100000000}
+        pnlLoss={portfolioPnl?.total_pnl ?? -23450000}
+        cvar99={riskMetrics?.cvar_99 ?? 29312500}
+      />
+
+      {/* Four-Eyes Governance Sign-off & Audit Vault Modal */}
+      <RegulatorySignoffModal
+        isOpen={isSignoffOpen}
+        onClose={() => setIsSignoffOpen(false)}
+        runId="run-citadel-202611-001"
+        scenarioName="Taiwan Foundry Disruption - High Severity"
+        pnlImpact={portfolioPnl?.total_pnl ?? -23450000}
+        cvar99={riskMetrics?.cvar_99 ?? 29312500}
+      />
 
       {/* Terminal Footer */}
       <footer className="px-6 py-3 bg-[#0b101b] border-t border-slate-800/80 text-[11px] font-mono text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-2">

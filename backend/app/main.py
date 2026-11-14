@@ -15,6 +15,7 @@ PRD Milestone 4:
 import asyncio
 import json
 import uuid
+from dataclasses import asdict
 from typing import Any, Dict, List, Optional
 from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
@@ -35,6 +36,11 @@ from app.agents.llm_router import PrivacySanitizer, llm_router
 from app.agents.sec_extractor import ExtractedEdge, SECExtractor
 from app.agents.shock_translator import ShockTranslator, ShockTranslationResponse
 from app.agents.explainer import NarrativeExplainer, NarrativeReport
+from app.engine.optimizer import TailRiskHedgeOptimizer, ReverseStressTester
+from app.engine.timeline import MultiPeriodTimelineEngine
+from app.engine.diffing import ScenarioDiffEngine
+from app.services.audit_vault_service import audit_vault_service, AuditStatus
+from app.services.report_generator_service import report_generator_service
 
 app = FastAPI(
     title="RiskLattice API",
@@ -66,6 +72,10 @@ backtest_engine = BacktestEngine(db_manager)
 sec_extractor = SECExtractor()
 shock_translator = ShockTranslator(router=llm_router, db=db_manager)
 narrative_explainer = NarrativeExplainer(router=llm_router)
+hedge_optimizer = TailRiskHedgeOptimizer()
+reverse_stress_tester = ReverseStressTester()
+timeline_engine = MultiPeriodTimelineEngine()
+scenario_diff_engine = ScenarioDiffEngine()
 
 
 # --- Request & Response Models ---
@@ -551,3 +561,328 @@ def logout_user(request: Request, token: Optional[str] = Query(None)):
     auth_header = request.headers.get("Authorization") or token or ""
     success = auth_service.logout(auth_header)
     return {"status": "success", "logged_out": success}
+
+
+# --- Advanced Stress Testing & Enterprise Risk Endpoints ---
+
+class HedgeOptimizationRequest(BaseModel):
+    portfolio_notional: float = 100_000_000.0
+    unhedged_pnl: float = -23_450_000.0
+    node_shocks: Dict[str, float] = Field(default_factory=dict)
+    budget_limit: float = 500_000.0
+    target_drawdown_pct: Optional[float] = None
+
+
+@app.post("/api/v1/optimize/hedge")
+def run_hedge_optimization(req: HedgeOptimizationRequest):
+    """Solves for minimum-cost tail risk hedging basket using SLSQP convex optimization."""
+    result = hedge_optimizer.optimize_hedge(
+        portfolio_notional=req.portfolio_notional,
+        unhedged_pnl=req.unhedged_pnl,
+        node_shocks=req.node_shocks,
+        budget_limit=req.budget_limit,
+        target_drawdown_pct=req.target_drawdown_pct,
+    )
+    return {
+        "initial_pnl": result.initial_pnl,
+        "hedged_pnl": result.hedged_pnl,
+        "pnl_improvement": result.pnl_improvement,
+        "total_hedge_cost": result.total_hedge_cost,
+        "initial_cvar_99": result.initial_cvar_99,
+        "hedged_cvar_99": result.hedged_cvar_99,
+        "cvar_reduction_pct": result.cvar_reduction_pct,
+        "recommendations": [
+            {
+                "candidate_id": r.candidate_id,
+                "instrument_name": r.instrument_name,
+                "target_node": r.target_node,
+                "action": r.action,
+                "allocated_notional": r.allocated_notional,
+                "estimated_cost": r.estimated_cost,
+                "pnl_protection": r.pnl_protection,
+                "description": r.description,
+            }
+            for r in result.recommendations
+        ],
+        "efficient_frontier": list(result.efficient_frontier),
+    }
+
+
+class ReverseStressRequest(BaseModel):
+    portfolio_notional: float = 100_000_000.0
+    target_loss_pct: float = Field(0.20, description="Target portfolio drawdown (e.g. 0.20 = 20%)")
+    factor_sensitivities: Optional[Dict[str, float]] = None
+
+
+@app.post("/api/v1/stress/reverse")
+def run_reverse_stress_test(req: ReverseStressRequest):
+    """Identifies the minimal plausible factor shock vector causing a specified portfolio breach."""
+    result = reverse_stress_tester.find_breaking_point(
+        portfolio_notional=req.portfolio_notional,
+        target_loss_pct=req.target_loss_pct,
+        factor_sensitivities=req.factor_sensitivities,
+    )
+    return {
+        "target_loss_pct": result.target_loss_pct,
+        "achieved_loss_pct": result.achieved_loss_pct,
+        "minimal_shocks": result.minimal_shocks,
+        "norm_l2": result.norm_l2,
+        "critical_factor": result.critical_factor,
+        "top_vulnerable_nodes": list(result.top_vulnerable_nodes),
+        "iterations": result.iterations,
+    }
+
+
+class TimelineSimulationRequest(BaseModel):
+    initial_shocks: Dict[str, float]
+    portfolio_notional: float = 100_000_000.0
+    time_horizon_days: Optional[List[int]] = None
+    inventory_days: Optional[Dict[str, float]] = None
+
+
+@app.post("/api/v1/stress/timeline")
+def run_timeline_simulation(req: TimelineSimulationRequest):
+    """Simulates multi-period propagation waves (0-90 days) tracking inventory depletion and milestones."""
+    result = timeline_engine.simulate(
+        initial_shocks=req.initial_shocks,
+        portfolio_notional=req.portfolio_notional,
+        time_horizon_days=req.time_horizon_days,
+        inventory_days=req.inventory_days,
+    )
+    return {
+        "initial_pnl": result.initial_pnl,
+        "peak_drawdown_pnl": result.peak_drawdown_pnl,
+        "peak_drawdown_day": result.peak_drawdown_day,
+        "peak_drawdown_pct": result.peak_drawdown_pct,
+        "total_milestones": result.total_milestones,
+        "steps": [
+            {
+                "day": s.day,
+                "cumulative_pnl": s.cumulative_pnl,
+                "drawdown_pct": s.drawdown_pct,
+                "cvar_99": s.cvar_99,
+                "active_nodes_count": s.active_nodes_count,
+                "node_shocks": s.node_shocks,
+                "inventory_levels": s.inventory_levels,
+                "milestones": [
+                    {
+                        "day": m.day,
+                        "event_type": m.event_type,
+                        "node_id": m.node_id,
+                        "severity": m.severity,
+                        "description": m.description,
+                    }
+                    for m in s.milestones
+                ],
+            }
+            for s in result.steps
+        ],
+    }
+
+
+class ScenarioDiffRequest(BaseModel):
+    scenario_a_name: str
+    scenario_b_name: str
+    shocks_a: Dict[str, float]
+    shocks_b: Dict[str, float]
+    positions: Dict[str, float]
+    pnl_a: Optional[float] = None
+    pnl_b: Optional[float] = None
+    cvar_a: Optional[float] = None
+    cvar_b: Optional[float] = None
+
+
+@app.post("/api/v1/scenario/diff")
+def run_scenario_diff(req: ScenarioDiffRequest):
+    """Calculates side-by-side differential metrics, delta PnL, and node risk shifts between two runs."""
+    result = scenario_diff_engine.diff_scenarios(
+        scenario_a_name=req.scenario_a_name,
+        scenario_b_name=req.scenario_b_name,
+        shocks_a=req.shocks_a,
+        shocks_b=req.shocks_b,
+        positions=req.positions,
+        pnl_a=req.pnl_a,
+        pnl_b=req.pnl_b,
+        cvar_a=req.cvar_a,
+        cvar_b=req.cvar_b,
+    )
+    return {
+        "scenario_a_name": result.scenario_a_name,
+        "scenario_b_name": result.scenario_b_name,
+        "pnl_a": result.pnl_a,
+        "pnl_b": result.pnl_b,
+        "delta_pnl": result.delta_pnl,
+        "cvar_99_a": result.cvar_99_a,
+        "cvar_99_b": result.cvar_99_b,
+        "delta_cvar_99": result.delta_cvar_99,
+        "net_improvement_pct": result.net_improvement_pct,
+        "amplified_nodes_count": result.amplified_nodes_count,
+        "de_risked_nodes_count": result.de_risked_nodes_count,
+        "unchanged_nodes_count": result.unchanged_nodes_count,
+        "node_diffs": [
+            {
+                "node_id": d.node_id,
+                "shock_a": d.shock_a,
+                "shock_b": d.shock_b,
+                "delta_shock": d.delta_shock,
+                "pnl_a": d.pnl_a,
+                "pnl_b": d.pnl_b,
+                "delta_pnl": d.delta_pnl,
+                "status": d.status.value,
+                "relative_change_pct": d.relative_change_pct,
+            }
+            for d in result.node_diffs
+        ],
+        "top_de_risked_nodes": [
+            {
+                "node_id": d.node_id,
+                "delta_pnl": d.delta_pnl,
+                "status": d.status.value,
+                "relative_change_pct": d.relative_change_pct,
+            }
+            for d in result.top_de_risked_nodes
+        ],
+        "top_amplified_nodes": [
+            {
+                "node_id": d.node_id,
+                "delta_pnl": d.delta_pnl,
+                "status": d.status.value,
+                "relative_change_pct": d.relative_change_pct,
+            }
+            for d in result.top_amplified_nodes
+        ],
+    }
+
+
+# --- Four-Eyes Audit Vault Endpoints ---
+
+class AuditSubmitRequest(BaseModel):
+    run_id: str
+    scenario_name: str
+    submitted_by: str
+    submitted_by_role: str
+    pnl_impact: float
+    cvar_99: float
+    shock_summary: Dict[str, float]
+    comments: Optional[str] = None
+
+
+@app.post("/api/v1/audit/submit")
+def submit_stress_run_for_audit(req: AuditSubmitRequest):
+    """Submits a stress run for Four-Eyes CRO governance sign-off."""
+    entry = audit_vault_service.submit_for_review(
+        run_id=req.run_id,
+        scenario_name=req.scenario_name,
+        submitted_by=req.submitted_by,
+        submitted_by_role=req.submitted_by_role,
+        pnl_impact=req.pnl_impact,
+        cvar_99=req.cvar_99,
+        shock_summary=req.shock_summary,
+        comments=req.comments,
+    )
+    return {"entry": asdict(entry)}
+
+
+class AuditApproveRequest(BaseModel):
+    run_id: str
+    approver_email: str
+    approver_role: str
+    comments: Optional[str] = None
+
+
+@app.post("/api/v1/audit/approve")
+def approve_stress_run(req: AuditApproveRequest):
+    """Enforces Four-Eyes principle: CRO signs off on scenario run, generating cryptographic seal."""
+    try:
+        entry = audit_vault_service.approve_run(
+            run_id=req.run_id,
+            approver_email=req.approver_email,
+            approver_role=req.approver_role,
+            comments=req.comments,
+        )
+        return {"entry": asdict(entry)}
+    except (ValueError, PermissionError) as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+class AuditLockRequest(BaseModel):
+    run_id: str
+    auditor_email: str
+
+
+@app.post("/api/v1/audit/lock")
+def lock_stress_run_for_regulators(req: AuditLockRequest):
+    """Locks an approved run into an immutable regulatory audit packet."""
+    try:
+        packet = audit_vault_service.lock_for_regulatory_audit(
+            run_id=req.run_id,
+            auditor_email=req.auditor_email,
+        )
+        return packet
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.get("/api/v1/audit/entries")
+def list_audit_entries():
+    """Lists all governance sign-off entries in the audit vault."""
+    entries = audit_vault_service.list_all_entries()
+    return {"entries": [asdict(e) for e in entries]}
+
+
+@app.get("/api/v1/audit/vault/{run_id}")
+def get_audit_entry(run_id: str):
+    """Retrieves audit entry and verification seal by run_id."""
+    entry = audit_vault_service.get_run(run_id)
+    if not entry:
+        raise HTTPException(status_code=404, detail=f"Audit entry for run {run_id} not found")
+    return {"entry": asdict(entry)}
+
+
+# --- Executive Board-Ready Memo Endpoints ---
+
+class ExecutiveReportRequest(BaseModel):
+    scenario_name: str
+    portfolio_notional: float = 100_000_000.0
+    pnl_loss: float = -23_450_000.0
+    cvar_99: float = 29_312_500.0
+    var_95: float = 21_200_000.0
+    node_shocks: Optional[Dict[str, float]] = None
+    cro_name: Optional[str] = "Sarah Chen, Ph.D."
+    cro_title: Optional[str] = "Chief Risk Officer"
+    firm_name: Optional[str] = "Citadel Global Equities & Quantitative Strategies"
+
+
+@app.post("/api/v1/report/executive")
+def generate_executive_report(req: ExecutiveReportRequest):
+    """Generates print-ready HTML and structured JSON executive memo for board risk committees."""
+    memo = report_generator_service.generate_memo(
+        scenario_name=req.scenario_name,
+        portfolio_notional=req.portfolio_notional,
+        pnl_loss=req.pnl_loss,
+        cvar_99=req.cvar_99,
+        var_95=req.var_95,
+        node_shocks=req.node_shocks,
+        cro_name=req.cro_name or "Sarah Chen, Ph.D.",
+        cro_title=req.cro_title or "Chief Risk Officer",
+        firm_name=req.firm_name or "Citadel Global Equities & Quantitative Strategies",
+    )
+    return {
+        "memo_id": memo.memo_id,
+        "title": memo.title,
+        "classification": memo.classification,
+        "generated_at": memo.generated_at,
+        "scenario_name": memo.scenario_name,
+        "portfolio_notional": memo.portfolio_notional,
+        "total_pnl_loss": memo.total_pnl_loss,
+        "drawdown_pct": memo.drawdown_pct,
+        "cvar_99": memo.cvar_99,
+        "var_95": memo.var_95,
+        "top_losses": memo.top_losses,
+        "critical_paths": memo.critical_paths,
+        "recommended_hedges": memo.recommended_hedges,
+        "sec_citations": memo.sec_citations,
+        "signoff": memo.signoff,
+        "html_content": memo.html_content,
+    }
+
