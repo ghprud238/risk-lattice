@@ -2,23 +2,20 @@
 
 import React, { useState, useEffect } from "react";
 import {
-  Activity,
-  BarChart3,
-  GitBranch,
   ShieldAlert,
-  Sliders,
   History,
   FileText,
   Network,
-  RefreshCw,
   Terminal,
-  Cpu,
   Layers,
   LogOut,
-  User,
   ShieldCheck,
   Clock,
   GitCompare,
+  Globe,
+  Bot,
+  Coins,
+  GitFork,
 } from "lucide-react";
 import CytoscapeGraph from "@/components/CytoscapeGraph";
 import ShockStudio from "@/components/ShockStudio";
@@ -31,6 +28,10 @@ import TimelinePlayer from "@/components/TimelinePlayer";
 import ScenarioDiffViewer from "@/components/ScenarioDiffViewer";
 import ExecutiveMemoModal from "@/components/ExecutiveMemoModal";
 import RegulatorySignoffModal from "@/components/RegulatorySignoffModal";
+import GeospatialMap from "@/components/GeospatialMap";
+import StressCopilot from "@/components/StressCopilot";
+import LiquidityStudio from "@/components/LiquidityStudio";
+import SupplyChainMutationStudio from "@/components/SupplyChainMutationStudio";
 import LoginScreen from "@/components/LoginScreen";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 
@@ -39,7 +40,16 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5051";
 function RiskLatticeDashboard() {
   const { user, isAuthenticated, isLoading, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<
-    "canvas" | "optimizer" | "timeline" | "diff" | "backtest" | "importer"
+    | "canvas"
+    | "geospatial"
+    | "copilot"
+    | "liquidity"
+    | "mutation"
+    | "optimizer"
+    | "timeline"
+    | "diff"
+    | "backtest"
+    | "importer"
   >("canvas");
 
   // Enterprise Governance & Reporting Modals
@@ -265,10 +275,10 @@ function RiskLatticeDashboard() {
 
         {/* Navigation Tabs, Quick Actions, Status & User Profile */}
         <div className="flex flex-wrap items-center gap-2">
-          <div className="flex items-center space-x-1 bg-slate-900/90 rounded-xl p-1 border border-slate-800 text-xs">
+          <div className="flex flex-wrap items-center gap-1 bg-slate-900/90 rounded-xl p-1 border border-slate-800 text-xs">
             <button
               onClick={() => setActiveTab("canvas")}
-              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg transition font-medium ${
+              className={`flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg transition font-medium ${
                 activeTab === "canvas"
                   ? "bg-cyan-500 text-slate-950 font-bold shadow"
                   : "text-slate-400 hover:text-white"
@@ -278,8 +288,52 @@ function RiskLatticeDashboard() {
               <span>Canvas</span>
             </button>
             <button
+              onClick={() => setActiveTab("geospatial")}
+              className={`flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg transition font-medium ${
+                activeTab === "geospatial"
+                  ? "bg-cyan-500 text-slate-950 font-bold shadow"
+                  : "text-slate-400 hover:text-white"
+              }`}
+            >
+              <Globe className="w-3.5 h-3.5" />
+              <span>Geospatial</span>
+            </button>
+            <button
+              onClick={() => setActiveTab("copilot")}
+              className={`flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg transition font-medium ${
+                activeTab === "copilot"
+                  ? "bg-cyan-500 text-slate-950 font-bold shadow"
+                  : "text-slate-400 hover:text-white"
+              }`}
+            >
+              <Bot className="w-3.5 h-3.5" />
+              <span>AI Copilot</span>
+            </button>
+            <button
+              onClick={() => setActiveTab("liquidity")}
+              className={`flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg transition font-medium ${
+                activeTab === "liquidity"
+                  ? "bg-cyan-500 text-slate-950 font-bold shadow"
+                  : "text-slate-400 hover:text-white"
+              }`}
+            >
+              <Coins className="w-3.5 h-3.5" />
+              <span>Liquidity</span>
+            </button>
+            <button
+              onClick={() => setActiveTab("mutation")}
+              className={`flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg transition font-medium ${
+                activeTab === "mutation"
+                  ? "bg-cyan-500 text-slate-950 font-bold shadow"
+                  : "text-slate-400 hover:text-white"
+              }`}
+            >
+              <GitFork className="w-3.5 h-3.5" />
+              <span>Mutation ROI</span>
+            </button>
+            <button
               onClick={() => setActiveTab("optimizer")}
-              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg transition font-medium ${
+              className={`flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg transition font-medium ${
                 activeTab === "optimizer"
                   ? "bg-cyan-500 text-slate-950 font-bold shadow"
                   : "text-slate-400 hover:text-white"
@@ -290,18 +344,18 @@ function RiskLatticeDashboard() {
             </button>
             <button
               onClick={() => setActiveTab("timeline")}
-              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg transition font-medium ${
+              className={`flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg transition font-medium ${
                 activeTab === "timeline"
                   ? "bg-cyan-500 text-slate-950 font-bold shadow"
                   : "text-slate-400 hover:text-white"
               }`}
             >
               <Clock className="w-3.5 h-3.5" />
-              <span>Timeline (0-90d)</span>
+              <span>Timeline</span>
             </button>
             <button
               onClick={() => setActiveTab("diff")}
-              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg transition font-medium ${
+              className={`flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg transition font-medium ${
                 activeTab === "diff"
                   ? "bg-cyan-500 text-slate-950 font-bold shadow"
                   : "text-slate-400 hover:text-white"
@@ -315,7 +369,7 @@ function RiskLatticeDashboard() {
                 setActiveTab("backtest");
                 if (!backtestData) handleRunBacktest();
               }}
-              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg transition font-medium ${
+              className={`flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg transition font-medium ${
                 activeTab === "backtest"
                   ? "bg-cyan-500 text-slate-950 font-bold shadow"
                   : "text-slate-400 hover:text-white"
@@ -326,14 +380,14 @@ function RiskLatticeDashboard() {
             </button>
             <button
               onClick={() => setActiveTab("importer")}
-              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg transition font-medium ${
+              className={`flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg transition font-medium ${
                 activeTab === "importer"
                   ? "bg-cyan-500 text-slate-950 font-bold shadow"
                   : "text-slate-400 hover:text-white"
               }`}
             >
               <ShieldAlert className="w-3.5 h-3.5" />
-              <span>10-K &amp; Portfolio</span>
+              <span>10-K &amp; PMS</span>
             </button>
           </div>
 
@@ -421,6 +475,14 @@ function RiskLatticeDashboard() {
             <NarrativePostMortem narrative={narrative} />
           </>
         )}
+
+        {activeTab === "geospatial" && <GeospatialMap />}
+
+        {activeTab === "copilot" && <StressCopilot />}
+
+        {activeTab === "liquidity" && <LiquidityStudio />}
+
+        {activeTab === "mutation" && <SupplyChainMutationStudio />}
 
         {activeTab === "optimizer" && (
           <HedgeOptimizer

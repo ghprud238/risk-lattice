@@ -39,8 +39,14 @@ from app.agents.explainer import NarrativeExplainer, NarrativeReport
 from app.engine.optimizer import TailRiskHedgeOptimizer, ReverseStressTester
 from app.engine.timeline import MultiPeriodTimelineEngine
 from app.engine.diffing import ScenarioDiffEngine
+from app.engine.liquidity import EndogenousLiquidityEngine, LiquidationPosition
+from app.engine.mutation import GraphMutationEngine, GraphMutation, MutationType
 from app.services.audit_vault_service import audit_vault_service, AuditStatus
 from app.services.report_generator_service import report_generator_service
+from app.services.edgar_crawler_service import edgar_crawler_service
+from app.services.institutional_adapters_service import institutional_adapters_service
+from app.services.alerting_service import alerting_service
+from app.agents.stress_copilot import stress_copilot
 
 app = FastAPI(
     title="RiskLattice API",
@@ -76,6 +82,8 @@ hedge_optimizer = TailRiskHedgeOptimizer()
 reverse_stress_tester = ReverseStressTester()
 timeline_engine = MultiPeriodTimelineEngine()
 scenario_diff_engine = ScenarioDiffEngine()
+liquidity_engine = EndogenousLiquidityEngine()
+mutation_engine = GraphMutationEngine()
 
 
 # --- Request & Response Models ---
@@ -885,4 +893,242 @@ def generate_executive_report(req: ExecutiveReportRequest):
         "signoff": memo.signoff,
         "html_content": memo.html_content,
     }
+
+
+# --- Advanced Enterprise Risk Expansion Endpoints ---
+
+class LiquidityStressRequest(BaseModel):
+    positions: Optional[List[Dict[str, Any]]] = None
+    liquidation_pct: float = Field(0.20, description="Percentage of notional liquidated for margin/redemptions")
+    participation_rate: float = Field(0.10, description="Max daily participation rate of ADV")
+    fund_unencumbered_cash: float = 15_000_000.0
+    portfolio_unhedged_pnl: float = -23_450_000.0
+    gross_derivative_notional: float = 50_000_000.0
+
+
+@app.post("/api/v1/liquidity/simulate")
+def run_liquidity_simulation(req: LiquidityStressRequest):
+    """Computes Almgren-Chriss endogenous market impact and ISDA SIMM margin call spirals."""
+    raw_positions = req.positions or [
+        {"asset_id": "NVDA", "target_notional": 25_000_000.0, "adv_30d": 120_000_000.0, "volatility_ann": 0.45, "bid_ask_spread_bps": 3.5, "liquidation_urgency": "HIGH"},
+        {"asset_id": "TSM", "target_notional": 20_000_000.0, "adv_30d": 65_000_000.0, "volatility_ann": 0.38, "bid_ask_spread_bps": 4.0, "liquidation_urgency": "HIGH"},
+        {"asset_id": "AAPL", "target_notional": 20_000_000.0, "adv_30d": 180_000_000.0, "volatility_ann": 0.28, "bid_ask_spread_bps": 2.0, "liquidation_urgency": "MEDIUM"},
+        {"asset_id": "F", "target_notional": 10_000_000.0, "adv_30d": 35_000_000.0, "volatility_ann": 0.35, "bid_ask_spread_bps": 5.0, "liquidation_urgency": "FIRE_SALE"},
+    ]
+    typed_positions = [
+        LiquidationPosition(
+            asset_id=p["asset_id"],
+            target_notional=float(p["target_notional"]),
+            adv_30d=float(p["adv_30d"]),
+            volatility_ann=float(p["volatility_ann"]),
+            bid_ask_spread_bps=float(p["bid_ask_spread_bps"]),
+            liquidation_urgency=p.get("liquidation_urgency", "MEDIUM"),
+        )
+        for p in raw_positions
+    ]
+    result = liquidity_engine.evaluate_liquidation(
+        positions=typed_positions,
+        liquidation_pct=req.liquidation_pct,
+        participation_rate=req.participation_rate,
+        fund_unencumbered_cash=req.fund_unencumbered_cash,
+        portfolio_unhedged_pnl=req.portfolio_unhedged_pnl,
+        gross_derivative_notional=req.gross_derivative_notional,
+    )
+    return {
+        "total_notional_liquidated": result.total_notional_liquidated,
+        "total_market_impact_loss": result.total_market_impact_loss,
+        "blended_price_discount_pct": result.blended_price_discount_pct,
+        "fire_sale_contagion_multiplier": result.fire_sale_contagion_multiplier,
+        "margin_summary": asdict(result.margin_summary),
+        "asset_impacts": [asdict(a) for a in result.asset_impacts],
+    }
+
+
+class MutationRequest(BaseModel):
+    mutation_name: str = "Taiwan Decoupling & Arizona Sourcing"
+    mutations: Optional[List[Dict[str, Any]]] = None
+    base_shocks: Optional[Dict[str, float]] = None
+    positions: Optional[Dict[str, float]] = None
+
+
+@app.post("/api/v1/mutation/evaluate")
+def run_mutation_evaluation(req: MutationRequest):
+    """Simulates topological supply chain interventions (severing/adding edges) and computes Resilience ROI."""
+    raw_mutations = req.mutations or [
+        {
+            "mutation_type": "REWEIGHT_EDGE",
+            "source_id": "TSM",
+            "target_id": "NVDA",
+            "new_weight": 0.15,
+            "capex_cost": 2_500_000.0,
+            "lead_time_months": 12,
+            "rationale": "Re-allocate 60% packaging to TSMC Fab 21 in Phoenix, Arizona",
+        },
+        {
+            "mutation_type": "ADD_EDGE",
+            "source_id": "INTC",
+            "target_id": "NVDA",
+            "new_weight": 0.20,
+            "capex_cost": 1_200_000.0,
+            "lead_time_months": 8,
+            "rationale": "Secondary foundry qualification with Intel Foundry Services",
+        },
+    ]
+    typed_mutations = [
+        GraphMutation(
+            mutation_type=MutationType(m.get("mutation_type", "REWEIGHT_EDGE")),
+            source_id=m["source_id"],
+            target_id=m["target_id"],
+            new_weight=float(m.get("new_weight", 0.20)),
+            capex_cost=float(m.get("capex_cost", 1_000_000.0)),
+            lead_time_months=int(m.get("lead_time_months", 6)),
+            rationale=m.get("rationale", ""),
+        )
+        for m in raw_mutations
+    ]
+    base_shocks = req.base_shocks or {"TSM": -0.40, "NVDA": -0.35, "AAPL": -0.28, "F": -0.22}
+    positions = req.positions or {"TSM": 20_000_000.0, "NVDA": 25_000_000.0, "AAPL": 20_000_000.0, "F": 10_000_000.0}
+    base_edges = {("TSM", "NVDA"): 0.38, ("TSM", "AAPL"): 0.34, ("F", "APTV"): 0.32}
+
+    res = mutation_engine.evaluate_mutation(
+        mutation_name=req.mutation_name,
+        mutations=typed_mutations,
+        base_shocks=base_shocks,
+        positions=positions,
+        base_edges=base_edges,
+    )
+    return asdict(res)
+
+
+@app.get("/api/v1/edgar/status")
+def get_edgar_crawler_status():
+    """Returns status and recent extractions from autonomous SEC EDGAR continuous crawler."""
+    return edgar_crawler_service.get_status()
+
+
+class EdgarIngestRequest(BaseModel):
+    ticker: str
+    filing_type: str = "10-K"
+    accession_number: str
+    filing_text: str
+
+
+@app.post("/api/v1/edgar/ingest")
+def ingest_filing_text(req: EdgarIngestRequest):
+    """Parses raw SEC filing text and extracts confidence-scored transmission edges."""
+    discovered = edgar_crawler_service.ingest_filing_text(
+        ticker=req.ticker,
+        filing_type=req.filing_type,
+        accession_number=req.accession_number,
+        filing_text=req.filing_text,
+    )
+    return {"ticker": req.ticker, "discovered_edges": [asdict(e) for e in discovered]}
+
+
+class AladdinImportRequest(BaseModel):
+    csv_content: str
+
+
+@app.post("/api/v1/pms/aladdin/import")
+def import_aladdin_portfolio(req: AladdinImportRequest):
+    """Ingests BlackRock Aladdin CSV portfolio export."""
+    positions = institutional_adapters_service.parse_aladdin_csv(req.csv_content)
+    return {"total_positions": len(positions), "positions": [asdict(p) for p in positions]}
+
+
+class CCARReportRequest(BaseModel):
+    portfolio_notional: float = 100_000_000.0
+    pnl_loss: float = -23_450_000.0
+    cvar_99: float = 29_312_500.0
+    var_95: float = 21_200_000.0
+    scenario_name: Optional[str] = "Federal Reserve Supervisory Severely Adverse Scenario"
+    institution_name: Optional[str] = "Citadel Global Equities & Quantitative Strategies"
+
+
+@app.post("/api/v1/regulatory/ccar/export")
+def export_fed_ccar_schedule(req: CCARReportRequest):
+    """Generates Federal Reserve CCAR Form FR Y-14A Schedule A submission packet."""
+    schedule = institutional_adapters_service.generate_fed_ccar_y14a(
+        portfolio_notional=req.portfolio_notional,
+        pnl_loss=req.pnl_loss,
+        cvar_99=req.cvar_99,
+        var_95=req.var_95,
+        scenario_name=req.scenario_name or "Federal Reserve Supervisory Severely Adverse Scenario",
+        institution_name=req.institution_name or "Citadel Global Equities & Quantitative Strategies",
+    )
+    return schedule
+
+
+class CopilotChatRequest(BaseModel):
+    query: str
+    portfolio_notional: float = 100_000_000.0
+    unhedged_pnl: float = -23_450_000.0
+    node_shocks: Optional[Dict[str, float]] = None
+
+
+@app.post("/api/v1/copilot/chat")
+def chat_with_stress_copilot(req: CopilotChatRequest):
+    """Processes natural language risk queries with the AI Conversational Risk Officer."""
+    answer = stress_copilot.answer_query(
+        query=req.query,
+        portfolio_notional=req.portfolio_notional,
+        unhedged_pnl=req.unhedged_pnl,
+        node_shocks=req.node_shocks,
+    )
+    return asdict(answer)
+
+
+@app.get("/api/v1/alerts")
+def list_risk_alerts():
+    """Lists recent risk limit breach alerts across institutional channels."""
+    alerts = alerting_service.list_alerts()
+    return {"alerts": [asdict(a) for a in alerts]}
+
+
+class TestAlertRequest(BaseModel):
+    scenario_name: str = "Taiwan Strait Blockade & Semiconductor Shock"
+    portfolio_notional: float = 100_000_000.0
+    pnl_loss: float = -23_450_000.0
+    cvar_99: float = 29_312_500.0
+    limit_drawdown_pct: float = -15.0
+
+
+@app.post("/api/v1/alerts/test")
+def trigger_test_alert(req: TestAlertRequest):
+    """Simulates a limit breach alert dispatch to Slack/Teams/PagerDuty."""
+    alert = alerting_service.evaluate_and_dispatch(
+        scenario_name=req.scenario_name,
+        portfolio_notional=req.portfolio_notional,
+        pnl_loss=req.pnl_loss,
+        cvar_99=req.cvar_99,
+        limit_drawdown_pct=req.limit_drawdown_pct,
+    )
+    if alert:
+        slack_payload = alerting_service.format_slack_payload(alert)
+        return {"alert": asdict(alert), "slack_payload": slack_payload}
+    return {"status": "no_breach"}
+
+
+@app.get("/api/v1/graph/geospatial")
+def get_geospatial_network():
+    """Returns geographic coordinates, maritime choke points, and critical fab clusters."""
+    facilities = [
+        {"id": "TSMC_FAB18", "ticker": "TSM", "name": "TSMC Fab 18 (3nm/5nm GigaFab)", "lat": 23.116, "lng": 120.278, "city": "Tainan", "country": "Taiwan", "type": "FAB", "criticality": 1.0},
+        {"id": "TSMC_FAB21", "ticker": "TSM", "name": "TSMC Fab 21 (Phase 1)", "lat": 33.743, "lng": -112.164, "city": "Phoenix", "country": "USA", "type": "FAB", "criticality": 0.4},
+        {"id": "FOXCONN_ZHENGZHOU", "ticker": "2317_TW", "name": "Foxconn 'iPhone City' MegaComplex", "lat": 34.528, "lng": 113.829, "city": "Zhengzhou", "country": "China", "type": "ASSEMBLY", "criticality": 0.9},
+        {"id": "FORD_ROUGE", "ticker": "F", "name": "Ford Dearborn Truck Plant (F-150)", "lat": 42.308, "lng": -83.155, "city": "Dearborn", "country": "USA", "type": "OEM", "criticality": 0.7},
+        {"id": "CHOKE_TAIWAN_STRAIT", "ticker": "GEO_TAIWAN", "name": "Taiwan Strait Maritime Corridor", "lat": 24.5, "lng": 119.8, "city": "Taiwan Strait", "country": "Maritime", "type": "CHOKE_POINT", "criticality": 1.0},
+        {"id": "CHOKE_MALACCA", "ticker": "GEO_MALACCA", "name": "Strait of Malacca", "lat": 2.5, "lng": 101.5, "city": "Malacca", "country": "Maritime", "type": "CHOKE_POINT", "criticality": 0.9},
+        {"id": "CHOKE_SUEZ", "ticker": "GEO_SUEZ", "name": "Suez Canal / Bab-el-Mandeb", "lat": 29.9, "lng": 32.5, "city": "Suez", "country": "Egypt", "type": "CHOKE_POINT", "criticality": 0.85},
+        {"id": "PORT_ROTTERDAM", "ticker": "PORT_RTM", "name": "Port of Rotterdam Gateway", "lat": 51.95, "lng": 4.13, "city": "Rotterdam", "country": "Netherlands", "type": "PORT", "criticality": 0.75},
+        {"id": "PORT_LONG_BEACH", "ticker": "PORT_LA", "name": "Port of Los Angeles / Long Beach", "lat": 33.74, "lng": -118.26, "city": "Los Angeles", "country": "USA", "type": "PORT", "criticality": 0.8},
+    ]
+    corridors = [
+        {"from": "TSMC_FAB18", "to": "FOXCONN_ZHENGZHOU", "mode": "AIR_FREIGHT", "dependency": 0.85},
+        {"from": "FOXCONN_ZHENGZHOU", "to": "PORT_LONG_BEACH", "mode": "CONTAINER_SHIP", "dependency": 0.75},
+        {"from": "CHOKE_TAIWAN_STRAIT", "to": "PORT_LONG_BEACH", "mode": "MARITIME_CORRIDOR", "dependency": 0.90},
+        {"from": "CHOKE_MALACCA", "to": "PORT_ROTTERDAM", "mode": "CRUDE_AND_CONTAINER", "dependency": 0.80},
+    ]
+    return {"facilities": facilities, "corridors": corridors}
+
 

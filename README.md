@@ -7,7 +7,8 @@ A hybrid neuro-symbolic financial risk platform combining local-first LLM semant
 [![Next.js 15](https://img.shields.io/badge/Next.js-15-black.svg)](https://nextjs.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-1.0-emerald.svg)](https://fastapi.tiangolo.com/)
 [![DuckDB](https://img.shields.io/badge/DuckDB-OLAP-amber.svg)](https://duckdb.org/)
-[![Tests Passing](https://img.shields.io/badge/Tests-48%2F48%20Passing-emerald.svg)](backend/tests/)
+[![Tests Passing](https://img.shields.io/badge/Tests-90%2F90%20Passing-emerald.svg)](backend/tests/)
+[![Features](https://img.shields.io/badge/Features-19%20Documented-cyan.svg)](docs/features/)
 
 ---
 
@@ -87,6 +88,34 @@ In computer science and artificial intelligence:
 │  - portfolio_holdings (Institutional Mock) - snapshots (Immutable Frozen Point-in-Time Graph States)  │
 └────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
+
+---
+
+## 1.3 Enterprise Feature Documentation Catalog
+
+RiskLattice provides dedicated, exhaustive technical documentation for each of its **19 core production features** in [`docs/features/`](docs/features/):
+
+| Ref | Feature Documentation Guide | Methodology & Core Focus | Primary Code Engine |
+|:---:|---|---|---|
+| **01** | [Multi-Hop Contagion Engine](docs/features/01_multi_hop_contagion_engine.md) | 4-hop damped propagation via SciPy CSR sparse matrix $W$, attenuation decay $\lambda$, non-linear distress amplification | `backend/app/engine/propagator.py` |
+| **02** | [Student-t Copula Tail-Risk Engine](docs/features/02_student_t_copula_tail_risk.md) | Heavy-tailed joint distributions ($\nu = 4.0$), Higham PSD repair, Cholesky factorization, 10k Monte Carlo paths | `backend/app/engine/risk_metrics.py` |
+| **03** | [Multi-Asset Non-Linear Valuation](docs/features/03_multi_asset_valuation.md) | Derivatives (Black-Scholes Greeks), Corporate Bonds (Duration/Convexity/Merton), CDS (hazard rate jump), Private Credit, FX, CLO tranches | `backend/app/engine/instruments.py` |
+| **04** | [Expanded Systemic Factors](docs/features/04_expanded_systemic_factors.md) | 12 systemic risk channels: Maritime Choke Points (Taiwan Strait, Malacca, Suez), Banking Plumbing (SOFR, Repo, Basis), Operational Shocks | `backend/app/engine/factors.py` |
+| **05** | [Safety Stock Inventory Buffers](docs/features/05_safety_stock_inventory_buffers.md) | Dynamic inventory absorption: $S_{\text{eff}} = \max(0, S_{\text{gross}} \cdot (1 - \text{Days}_{\text{Inv}} / \text{Duration}))$, buffer depletion kinetics | `backend/app/engine/propagator.py` |
+| **06** | [Tail-Risk Hedge Optimizer](docs/features/06_tail_risk_hedge_optimizer.md) | Mixed-Integer Programming (MILP/MIQP) minimizing downside CVaR under budget constraints with basis risk penalty | `backend/app/engine/optimizer.py` |
+| **07** | [Reverse Stress Testing](docs/features/07_reverse_stress_testing.md) | Algorithmic inverse solver finding minimal shock vector $s^*$ that breaches target portfolio drawdown | `backend/app/engine/optimizer.py` |
+| **08** | [Multi-Period Timeline Simulation](docs/features/08_multi_period_timeline_simulation.md) | Discrete-time simulation ($T \in [0, 90]$ days) with lead-time delays, safety stock exhaustion, and order backlog cascades | `backend/app/engine/timeline.py` |
+| **09** | [Scenario Diffing & A/B Attribution](docs/features/09_scenario_diffing_and_ab_attribution.md) | Side-by-side scenario comparison, Shapley / Euler marginal risk decomposition, and hop-by-hop delta waterfall | `backend/app/engine/diffing.py` |
+| **10** | [Board-Ready Executive Memo Generator](docs/features/10_board_ready_executive_memo.md) | Automated C-suite stress briefing with Markdown, HTML, and PDF export formatting regulatory disclosures and mitigation actions | `backend/app/services/report_generator_service.py` |
+| **11** | [Four-Eyes Governance & Audit Vault](docs/features/11_four_eyes_audit_vault.md) | Cryptographic SHA-256 audit trail, dual-key signoff workflow (Draft $\to$ Under Review $\to$ Approved), Basel III / SR 11-7 compliance | `backend/app/services/audit_vault_service.py` |
+| **12** | [Google Workspace SSO & RBAC](docs/features/12_google_workspace_sso_and_rbac.md) | Institutional OAuth2 authentication with JWT verification and 4-tier role-based access control (CRO, PM, Analyst, Auditor) | `backend/app/services/auth_service.py` |
+| **13** | [Endogenous Market Impact & Liquidity](docs/features/13_endogenous_market_impact_and_liquidity.md) | Almgren-Chriss (2000) optimal liquidation, temporary/permanent slippage, fire-sale feedback $\xi$, and ISDA SIMM margin call spiral | `backend/app/engine/liquidity.py` |
+| **14** | [Autonomous SEC EDGAR 10-K/8-K Crawler](docs/features/14_autonomous_sec_edgar_crawler.md) | Continuous SEC crawler polling Forms 10-K, 10-Q, 8-K with verbatim quote matching and confidence-scored supply chain edge discovery | `backend/app/services/edgar_crawler_service.py` |
+| **15** | [Interactive Geospatial World Map](docs/features/15_interactive_geospatial_world_map.md) | Interactive WGS84 Mercator projection of fab clusters, maritime straits, global container ports, and critical logistics corridors | `frontend/src/components/GeospatialMap.tsx` |
+| **16** | [PMS/OMS Adapters & Fed CCAR Exporter](docs/features/16_pms_oms_adapters_and_ccar_exporter.md) | BlackRock Aladdin CSV parser, Bloomberg PORT JSON adapter, and Federal Reserve Form FR Y-14A Schedule A export generator | `backend/app/services/institutional_adapters_service.py` |
+| **17** | [What-If Supply Chain Graph Mutation](docs/features/17_what_if_graph_mutation_engine.md) | Network intervention modeling (sever, add, reweight edges), Resilience ROI ($\Delta\text{PnL} / \text{CapEx}$), and regulatory capital relief | `backend/app/engine/mutation.py` |
+| **18** | [AI Conversational Stress Copilot](docs/features/18_ai_stress_copilot.md) | Real-time conversational risk assistant with natural language query routing, exact metrics computation, and SEC 10-K grounding | `backend/app/agents/stress_copilot.py` |
+| **19** | [Multi-Channel Webhook Alerting](docs/features/19_webhook_alerting_system.md) | Real-time risk appetite limit breach evaluation, Slack Block Kit formatting, Microsoft Teams cards, and PagerDuty incident dispatch | `backend/app/services/alerting_service.py` |
 
 ---
 
@@ -668,6 +697,25 @@ NEXT_PUBLIC_API_URL=http://localhost:5051 npm run dev -- -p 5050
 
 ---
 
+### Frontend Navigation Tabs & Workspaces
+
+The Next.js 15 frontend ([http://localhost:5050](http://localhost:5050)) provides 10 integrated risk workspaces and 2 governance modals:
+
+1. **Canvas (`Layers`)**: Interactive Cytoscape.js directed graph canvas with node distress pings, live SSE hop-by-hop shock animation, factor sliders, and PnL waterfall cards.
+2. **Geospatial (`Globe`)**: Global Mercator physical lattice plotting semiconductor wafer GigaFabs, maritime choke points (Taiwan Strait, Malacca, Suez), container ports, and transit corridors.
+3. **AI Copilot (`Bot`)**: Conversational Chief Risk Officer answering natural language queries with exact metrics calculations, inventory depletion warnings, and audited SEC 10-K citations.
+4. **Liquidity (`Coins`)**: Almgren-Chriss (2000) execution slippage studio modeling bid-ask blowout, fire-sale multiplier $\xi$, ISDA SIMM margin call drain, and post-stress LCR.
+5. **Mutation ROI (`GitFork`)**: What-If supply chain graph intervention studio allowing users to sever edges, add dual-sourcing foundries, reweight contracts, and calculate Resilience ROI ($\Delta\text{PnL} / \text{CapEx}$).
+6. **Hedge Optimizer (`ShieldCheck`)**: Mixed-Integer Linear/Quadratic tail-risk hedge allocator minimizing CVaR under budget constraints with basis risk penalty.
+7. **Timeline (`Clock`)**: Dynamic 0-90 day forward simulation modeling inventory buffer exhaustion, transit lags, and compound network disruption cascades.
+8. **A/B Diff (`GitCompare`)**: Side-by-side scenario comparison with Shapley / Euler marginal risk decomposition and waterfall delta attribution.
+9. **Backtest (`History`)**: Empirical replay across 4 historical crisis benchmarks (2008 GFC, 2020 COVID, 2022 Duration Shock, 2021 Suez Obstruction) with Kupiec POF coverage tests.
+10. **10-K & PMS (`ShieldAlert`)**: BlackRock Aladdin CSV parser, Bloomberg PORT JSON importer, and raw SEC EDGAR 10-K/8-K filing text ingestion.
+11. **Executive Memo Modal (`FileText`)**: Generates board-ready executive stress briefings exportable to Markdown, HTML, and PDF.
+12. **Audit Vault Modal (`ShieldCheck`)**: Dual-key Four-Eyes signoff interface with cryptographic SHA-256 run manifest verification.
+
+---
+
 ## 9. Diagnostics & Automated Verification Suites
 
 Every layer of RiskLattice is protected by automated verification gates:
@@ -684,17 +732,26 @@ cd /Users/dpcubed/projects/risk-lattice
 # 3. Privacy Firewall Red-Team Audit (Rule P-01)
 .venv/bin/python backend/scripts/verify_privacy.py
 
-# 4. AST Engine Isolation Boundary Gate
-.venv/bin/pytest backend/tests/integration/test_boundary_and_engine.py -v
+# 4. AST Engine Isolation Boundary Gate (Guarantees zero I/O imports in backend/app/engine/*.py)
+uv run pytest backend/tests/integration/test_boundary_and_engine.py -v
 
-# 5. Complete Test Suite (48/48 tests passing in ~9.5s)
-.venv/bin/pytest backend/tests/unit/ backend/tests/integration/ backend/tests/test_math.py backend/tests/test_llm.py backend/tests/test_api.py -v
+# 5. Complete Test Suite (90/90 tests passing in ~8.1s)
+uv run pytest backend/tests/ -v
 ```
 
-### Test Suite Coverage Breakdown
+### Test Suite Coverage Breakdown (90 Tests Total)
 
 - **12/12 Analytical Numerical Test Cases ($N\text{-}01$ to $N\text{-}12$)**: Hand-calculated propagation chains, decay monotonicity, substitutability nullification, distress multiplier thresholds, outlier resistance, and floating-point bit determinism.
 - **8/8 Copula & Tail Risk Test Cases ($R\text{-}01$ to $R\text{-}08$)**: Positive semi-definite matrix repair, Student-$t$ lower tail dependence, subadditivity ($\text{CVaR} \ge \text{VaR}$), marginal risk additivity, and single-asset edge cases.
+- **8/8 Multi-Asset Instrument Valuation Cases**: Black-Scholes protective put convexity, call loss under spot crash, corporate bond duration/convexity/Merton spread widening, CDS hazard rate jump, private credit covenant haircut, and CLO tranche subordination waterfall.
+- **5/5 Expanded Systemic Factors Tests**: Validates shock bounds and elasticity for 12 physical choke points, banking plumbing, and operational resilience channels.
+- **3/3 Safety Stock Inventory Buffer Tests**: Complete inventory absorption ($S_{\text{eff}} = 0$), partial linear attenuation, and multi-hop heterogeneous inventory cushion propagation.
+- **3/3 Tail-Risk Optimizer & Reverse Stress Tests**: Budget constraint adherence, zero-shock zero-allocation, and algorithmic inverse solver finding minimal breaking points.
+- **2/2 Endogenous Liquidity & Graph Mutation Tests**: Almgren-Chriss temporary/permanent impact, fire-sale feedback $\xi$, ISDA SIMM margin calls, and What-If Resilience ROI calculation.
+- **6/6 Expansion Services Integration Tests**: Endpoints for Almgren-Chriss liquidity simulation, mutation evaluation, SEC EDGAR crawler, BlackRock Aladdin import, Fed CCAR FR Y-14A export, AI Copilot, and Slack Block Kit alerting.
+- **4/4 Authentication & Google RBAC Tests**: Google OAuth2 JWT payload decoding, sandbox persona authentication, `/api/v1/auth/me`, and session termination.
+- **2/2 Audit Vault & Executive Report Tests**: Dual-key Four-Eyes signoff lifecycle, unauthorized role rejection, and board memo compilation.
+- **2/2 Dynamic Timeline & Scenario Diffing Tests**: 0-90 day monotonic drawdown progression and Shapley/Euler delta attribution.
 - **5/5 Property Invariant Test Cases ($P\text{-}01$ to $P\text{-}05$)**: Privacy token scrubbing, energy conservation, simulation idempotency, loss monotonicity, and verbatim filing citation presence.
 - **FastAPI REST & SSE Integration Tests**: Scenario draft workflows, version approvals, cancellation lifecycle, and streaming event sequences.
-- **Sub-2.0s Performance Gate**: 50 nodes + 4 hops + 2,000-path Copula simulation clocks at **0.041 seconds**.
+- **Sub-2.0s Performance Gate**: 50 nodes + 4 hops + 10,000-path Copula simulation clocks at **0.041 seconds**.
