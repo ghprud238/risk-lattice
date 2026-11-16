@@ -29,6 +29,7 @@ RiskLattice pairs a deterministic, non-linear Python quantitative math engine wi
 | **17** | [What-If Supply Chain Graph Mutation](./17_what_if_graph_mutation_engine.md) | Network intervention modeling (sever, add, reweight edges), Resilience ROI ($\Delta\text{PnL} / \text{CapEx}$), and regulatory capital relief | `backend/app/engine/mutation.py` | Production |
 | **18** | [AI Conversational Stress Copilot](./18_ai_stress_copilot.md) | Real-time conversational risk assistant with natural language query routing, exact metrics computation, and SEC 10-K grounding | `backend/app/agents/stress_copilot.py` | Production |
 | **19** | [Multi-Channel Webhook Alerting](./19_webhook_alerting_system.md) | Real-time risk appetite limit breach evaluation, Slack Block Kit formatting, Microsoft Teams cards, and PagerDuty incident dispatch | `backend/app/services/alerting_service.py` | Production |
+| **20** | [Live Threat Intel & AIS Maritime Simulator](./20_live_threat_intel_and_ais_simulator.md) | Real-time satellite AIS vessel congestion across 5 choke points, Systemic Vulnerability Index (SVI), threat wire feed & 1-click shock injection | `backend/app/engine/ais_threat.py` | Production |
 
 ---
 

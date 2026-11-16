@@ -47,6 +47,7 @@ from app.services.edgar_crawler_service import edgar_crawler_service
 from app.services.institutional_adapters_service import institutional_adapters_service
 from app.services.alerting_service import alerting_service
 from app.agents.stress_copilot import stress_copilot
+from app.services.threat_intelligence_service import threat_intelligence_service
 
 app = FastAPI(
     title="RiskLattice API",
@@ -1130,5 +1131,77 @@ def get_geospatial_network():
         {"from": "CHOKE_MALACCA", "to": "PORT_ROTTERDAM", "mode": "CRUDE_AND_CONTAINER", "dependency": 0.80},
     ]
     return {"facilities": facilities, "corridors": corridors}
+
+
+# --- Threat Intelligence & AIS Maritime Endpoints ---
+
+@app.get("/api/v1/threats/ais/status")
+def get_ais_threat_status():
+    """Returns current real-time satellite AIS vessel congestion and geopolitical threat snapshot."""
+    return threat_intelligence_service.get_snapshot()
+
+
+@app.post("/api/v1/threats/ais/tick")
+def advance_ais_telemetry_tick():
+    """Simulates one discrete forward drift step in AIS vessel traffic and recalculates SVI."""
+    snapshot = threat_intelligence_service.advance_telemetry_tick()
+    return asdict(snapshot)
+
+
+class IngestThreatRequest(BaseModel):
+    headline: str
+    source: str
+    severity: str = "HIGH"
+    choke_point_id: str = "GEO_TAIWAN_STRAIT"
+    affected_nodes: List[str]
+    raw_supply_impact_pct: float = -0.30
+    details: str = ""
+
+
+@app.post("/api/v1/threats/ingest")
+def ingest_breaking_threat(req: IngestThreatRequest):
+    """Ingests a breaking geopolitical or maritime threat wire event."""
+    threat = threat_intelligence_service.ingest_threat_event(
+        headline=req.headline,
+        source=req.source,
+        severity=req.severity,
+        choke_point_id=req.choke_point_id,
+        affected_nodes=req.affected_nodes,
+        raw_supply_impact_pct=req.raw_supply_impact_pct,
+        details=req.details,
+    )
+    return asdict(threat)
+
+
+class InjectThreatRequest(BaseModel):
+    event_id: str
+
+
+@app.post("/api/v1/threats/inject")
+def inject_threat_into_simulation(req: InjectThreatRequest):
+    """Translates a threat intelligence event into an exact s^(0) impulse vector for stress simulation."""
+    try:
+        injection_payload = threat_intelligence_service.inject_threat_to_scenario(req.event_id)
+        return injection_payload
+    except KeyError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+
+@app.get("/api/v1/threats/stream")
+async def stream_threat_telemetry(request: Request):
+    """Server-Sent Events (SSE) stream pushing real-time AIS vessel telemetry and SVI updates."""
+    async def event_generator():
+        while True:
+            if await request.is_disconnected():
+                break
+            snapshot = threat_intelligence_service.advance_telemetry_tick()
+            yield {
+                "event": "telemetry_update",
+                "data": json.dumps(asdict(snapshot)),
+            }
+            await asyncio.sleep(3)
+
+    return EventSourceResponse(event_generator())
+
 
 

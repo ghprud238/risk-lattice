@@ -16,6 +16,7 @@ import {
   Bot,
   Coins,
   GitFork,
+  Radio,
 } from "lucide-react";
 import CytoscapeGraph from "@/components/CytoscapeGraph";
 import ShockStudio from "@/components/ShockStudio";
@@ -29,6 +30,7 @@ import ScenarioDiffViewer from "@/components/ScenarioDiffViewer";
 import ExecutiveMemoModal from "@/components/ExecutiveMemoModal";
 import RegulatorySignoffModal from "@/components/RegulatorySignoffModal";
 import GeospatialMap from "@/components/GeospatialMap";
+import ThreatIntelligenceRadar from "@/components/ThreatIntelligenceRadar";
 import StressCopilot from "@/components/StressCopilot";
 import LiquidityStudio from "@/components/LiquidityStudio";
 import SupplyChainMutationStudio from "@/components/SupplyChainMutationStudio";
@@ -41,6 +43,7 @@ function RiskLatticeDashboard() {
   const { user, isAuthenticated, isLoading, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<
     | "canvas"
+    | "radar"
     | "geospatial"
     | "copilot"
     | "liquidity"
@@ -288,6 +291,18 @@ function RiskLatticeDashboard() {
               <span>Canvas</span>
             </button>
             <button
+              onClick={() => setActiveTab("radar")}
+              className={`flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg transition font-medium ${
+                activeTab === "radar"
+                  ? "bg-rose-500 text-white font-bold shadow shadow-rose-500/20"
+                  : "text-slate-400 hover:text-white"
+              }`}
+            >
+              <Radio className="w-3.5 h-3.5 text-rose-400" />
+              <span>Threat Radar</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-rose-400 animate-pulse ml-0.5" />
+            </button>
+            <button
               onClick={() => setActiveTab("geospatial")}
               className={`flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg transition font-medium ${
                 activeTab === "geospatial"
@@ -474,6 +489,15 @@ function RiskLatticeDashboard() {
             {/* Post-Mortem Narrative Report */}
             <NarrativePostMortem narrative={narrative} />
           </>
+        )}
+
+        {activeTab === "radar" && (
+          <ThreatIntelligenceRadar
+            onInjectShock={(scenarioName, directImpulses) => {
+              setActiveTab("canvas");
+              handleSimulate(scenarioName, directImpulses);
+            }}
+          />
         )}
 
         {activeTab === "geospatial" && <GeospatialMap />}
