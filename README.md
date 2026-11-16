@@ -89,11 +89,17 @@ In computer science and artificial intelligence:
 └────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
+> [!TIP]
+> **Complete Architecture Documentation & Data Flow Walkthroughs**:
+> - Detailed architectural rationale, design trade-offs, and boundary contracts are recorded in our formal **[Architecture Decision Records (ADRs)](docs/adrs/)** ([ADR-001 Storage](docs/adrs/ADR-001-storage.md) through [ADR-010 PDF Reporting](docs/adrs/ADR-010-pdf.md)).
+> - For a line-by-line tracing of live data flow across all 5 tiers (from raw natural language prompt through sparse matrix multiplication, Copula sampling, and SEC citation extraction), read the **[End-to-End Operational Walkthrough: The Taiwan Foundry Cascade](docs/daily_notes/2026-11-11.md#3-end-to-end-operational-walkthrough-the-taiwan-foundry-cascade)**.
+> - Consult the **[Master Documentation Hub](docs/README.md)** for the complete system directory map.
+
 ---
 
 ## 1.3 Enterprise Feature Documentation Catalog
 
-RiskLattice provides dedicated, exhaustive technical documentation for each of its **19 core production features** in [`docs/features/`](docs/features/):
+RiskLattice provides dedicated, exhaustive technical documentation for each of its **20 core production features** in [`docs/features/`](docs/features/):
 
 | Ref | Feature Documentation Guide | Methodology & Core Focus | Primary Code Engine |
 |:---:|---|---|---|
@@ -120,58 +126,153 @@ RiskLattice provides dedicated, exhaustive technical documentation for each of i
 
 ---
 
-## 2. What Are We Really Stress-Testing?
+## 2. What All Is Being Stress-Tested in RiskLattice?
 
-Traditional enterprise risk management systems (such as standard Parametric Value at Risk, 60-day historical simulation, or linear factor models like Barra) suffer from a critical flaw: **they assume the financial world is linear, normally distributed, and static**. They answer: *"If the benchmark drops 2%, what is our portfolio drawdown based on trailing linear correlations?"*
+Traditional enterprise risk management systems (such as standard Parametric Value at Risk, 60-day historical simulation, or linear multi-factor models like Barra and Axioma) suffer from a critical foundational flaw: **they assume the financial world is linear, normally distributed, continuous, and static**. They ask: *"If the benchmark drops 2%, what is our portfolio drawdown based on trailing linear covariances?"*
 
-In real-world financial crises (the 2008 Lehman interbank freeze, the 2020 COVID supply shutdown, the 2022 duration shock, or a sudden Taiwan Strait blockade), **linear correlation models fail catastrophically**. Correlations jump to 1.0, multi-tier supply chains snap, and leveraged balance sheets experience sudden, non-linear insolvency cascades.
+In real-world financial crises (the 2008 Lehman interbank freeze, the 2020 COVID mobility halt, the 2021 Suez Canal blockage, the 2022 duration shock, or a sudden Taiwan Strait naval quarantine), **linear correlation models fail catastrophically**. Correlations jump toward 1.0, multi-tier supply chains fracture, market liquidity evaporates in fire sales, and leveraged balance sheets hit sudden, non-linear solvency cliffs.
 
-RiskLattice stress-tests **5 distinct layers of systemic financial fragility**:
+RiskLattice stress-tests **10 interconnected fragility layers of systemic financial, operational, and macroeconomic risk**:
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-│                              THE 5 LAYERS OF FINANCIAL FRAGILITY IN RISKLATTICE                        │
+│                        THE 10 INTERCONNECTED FRAGILITY LAYERS IN RISKLATTICE                          │
 ├─────────────────────────────────────────────────┬──────────────────────────────────────────────────────┤
-│ 1. Multi-Hop Network Contagion                  │ Cascades propagating across 2nd, 3rd, & 4th tiers    │
-│ 2. Balance-Sheet Leverage Non-Linearity         │ Solvency cliffs when NetDebt/EBITDA > 3.0 (lambda)   │
-│ 3. Irreplaceable Vendor Bottlenecks             │ Single-points-of-failure with zero substitution (1-s)│
-│ 4. Heavy-Tailed Joint Crash Clustering          │ Multivariate Student-t Copula lower tail dependence  │
-│ 5. Portfolio PnL Waterfall Attribution          │ 1st- vs 2nd- vs 3rd-order losses & Marginal Risk     │
+│ 1. Multi-Hop Network Contagion (Hops 1 to 4)    │ Cascades propagating across 2nd, 3rd, & 4th tiers    │
+│ 2. Multi-Asset Non-Linear Portfolio Valuation   │ Derivatives Greeks, Merton spreads, CLO tranches     │
+│ 3. 12 Systemic Macro Factors & Geopolitics      │ Choke points (Taiwan, Suez, Hormuz), SOFR, Repo, Cyber│
+│ 4. Live Satellite AIS Telemetry & Threat Feeds  │ Real-time vessel congestion, demurrage, SVI (0-100)  │
+│ 5. Balance-Sheet Debt Covenants & Solvency Cliff│ NetDebt/EBITDA > 3.0 trigger multipliers (lambda, mu)│
+│ 6. Safety Stock Days-of-Inventory (DOI) Kinetics│ Dynamic absorption S_eff = max(0, S_gross*(1-DOI/T)) │
+│ 7. Endogenous Liquidity & Fire-Sale Spirals     │ Almgren-Chriss slippage, fire-sales, SIMM margin call│
+│ 8. Extreme Tail Dependence (Student-t Copula)   │ Joint crash clustering (nu=4.0), 99% CVaR vs VaR     │
+│ 9. Algorithmic Reverse Stress Testing           │ Minimal breaking point inverse solver (s*)           │
+│ 10. What-If Graph Interventions & Resilience ROI│ Network mutations, dual-sourcing, Delta PnL / CapEx  │
 └─────────────────────────────────────────────────┴──────────────────────────────────────────────────────┘
 ```
 
-### 2.1 Multi-Hop Network Contagion (Beyond 1st-Order Exposures)
-- **The Blind Spot in Traditional Models**: Standard models only evaluate direct, 1st-order counterparty links or aggregate sector betas. If a portfolio does not directly hold TSMC, its historical beta to Taiwanese semiconductors might appear near zero ($\beta \approx 0.12$).
-- **What RiskLattice Tests**: Recursive multi-tier contagion through directed dependency graphs:
+Along with dynamic multi-period timeline modeling ($T \in [0, 90]$ days), capital-constrained tail-risk hedge optimization, and historical crisis benchmarking with Kupiec POF coverage tests.
+
+---
+
+### 2.1 Layer 1: Multi-Hop Network Contagion (Hops 1 to 4)
+- **The Blind Spot in Traditional Models**: Standard models (Barra, RiskMetrics) only evaluate direct, 1st-order counterparty links or aggregate sector betas. If an asset manager does not directly hold TSMC shares, their portfolio's historical beta to Taiwanese semiconductors appears benign ($\beta \approx 0.12$).
+- **What RiskLattice Tests**: Recursive multi-tier contagion through directed dependency graphs using vectorized SciPy CSR sparse matrix message-passing:
+  $$\mathbf{in}^{(k)} = \Delta \mathbf{s}^{(k-1)} \cdot W^T, \quad \Delta s_v^{(k)} = \alpha^{k-1} \cdot \text{in}_v^{(k)} \cdot (1 - \sigma_v) \cdot \lambda_v$$
+  Transmission progresses systematically across 4 hops:
   $$\text{Hop 0 (Direct Shock)} \longrightarrow \text{Hop 1 (Tier-1 Suppliers)} \longrightarrow \text{Hop 2 (Downstream OEMs)} \longrightarrow \text{Hop 3/4 (Network Contagion)}$$
-- **Real-World Case**: Automotive manufacturers (Ford, GM) do not purchase silicon wafers directly from TSMC; they purchase microcontroller modules from Tier-1 suppliers (NXP, Infineon, Bosch). When TSMC halts, the shock ripples through Tier-1 suppliers to Tier-2 assembly plants, halting vehicle production lines worldwide. RiskLattice uncovers these hidden multi-hop transmission channels.
+- **Real-World Case**: Automotive manufacturers (Ford, General Motors) do not purchase silicon wafers directly from TSMC; they purchase microcontroller modules from Tier-1 suppliers (NXP Semiconductors, Infineon, Bosch). When TSMC halts, the shock ripples through Tier-1 suppliers to Tier-2 assembly plants, halting automotive assembly lines worldwide. RiskLattice uncovers these hidden multi-hop transmission channels.
+- **Documentation Guide**: Detailed in [**Multi-Hop Contagion Engine**](docs/features/01_multi_hop_contagion_engine.md) and architectural record [**ADR-003: Graph Propagation**](docs/adrs/ADR-003-graph.md).
 
-### 2.2 Balance-Sheet Leverage & Solvency Non-Linearities ($\lambda_v$)
-- **The Blind Spot in Traditional Models**: Assumes corporate equity returns respond linearly and symmetrically to revenue shocks ($r_i = \beta_i \cdot r_m$).
-- **What RiskLattice Tests**: **Credit covenant breach thresholds and debt-burden amplification**:
-  $$\lambda_v = \begin{cases} 1 + 0.35 \cdot \max(0, \text{NetDebt/EBITDA} - 3.0), & \text{if } \text{NetDebt/EBITDA} > 3.0 \text{ and } \Delta s < 0 \\ 1.0, & \text{otherwise} \end{cases}$$
-- **Real-World Case**: A cash-rich firm (e.g. Apple with deep cash reserves) absorbs macroeconomic supply disruptions with linear resilience ($\lambda=1.0$). In contrast, a capital-intensive, leveraged firm (e.g. an auto OEM with $\text{NetDebt/EBITDA} = 4.8$) faces credit rating downgrades, widening bond spreads, and commercial paper market lockout, compounding incoming shocks by **$1.63\times$ to $2.05\times$**.
+---
 
-### 2.3 Irreplaceable Supply-Chain Bottlenecks (Substitutability $\sigma_v$)
-- **The Blind Spot in Traditional Models**: Treats all supplier relationships as fungible, commoditized cost inputs.
-- **What RiskLattice Tests**: **Structural vendor lock-in and single points of operational failure**:
-  $$\text{Transmitted Shock} \propto (1 - \sigma_v)$$
-- **Real-World Case**: If a standard commodity steel supplier fails, an industrial manufacturer can substitute an alternate vendor within days ($\sigma_v = 0.8$, absorbing only 20% of the shock). However, if a proprietary extreme ultraviolet (EUV) lithography monopoly (ASML) or advanced 3nm foundry (TSMC) goes offline, substitutability is zero ($\sigma_v = 0.0$), forcing downstream customers to absorb 100% of the disruption.
+### 2.2 Layer 2: Multi-Asset Non-Linear Portfolio Valuation & Greeks
+- **The Blind Spot in Traditional Models**: Traditional linear models revalue portfolios using simple first-order delta approximations ($\Delta P_i \approx \text{Notional}_i \cdot \Delta S_i$). This severely misprices instruments with embedded convexity, asymmetric payoffs, or credit spreads.
+- **What RiskLattice Tests**: Full non-linear asset-class revaluation across **7 distinct institutional instrument types**:
+  1. **Equities (Long/Short)**: Convex beta-gamma response $\Delta P_i = N_i \cdot (\beta_i S_i + \frac{1}{2} \gamma_i S_i^2)$.
+  2. **Stock Options (Long/Short Calls & Puts)**: Black-Scholes Greeks revaluation including Delta ($\Delta$), Gamma ($\Gamma$), Vega ($\nu$), and Theta ($\Theta$):
+     $$\Delta P_{\text{opt}} \approx \Delta \cdot \Delta S + \frac{1}{2} \Gamma \cdot (\Delta S)^2 + \nu \cdot \Delta \sigma_{\text{implied}}$$
+  3. **Corporate Bonds**: Duration-convexity pricing coupled with Merton structural credit spread widening:
+     $$\Delta P_{\text{bond}} \approx -D_{\text{mod}} \cdot \Delta y + \frac{1}{2} C \cdot (\Delta y)^2, \quad \Delta y = \Delta y_{\text{macro}} + \alpha_{\text{credit}} \cdot |S_v|$$
+  4. **Credit Default Swaps (CDS)**: Mark-to-market hazard rate revaluation:
+     $$\Delta P_{\text{CDS}} \approx N \cdot \text{RPV01} \cdot (\Delta s_{\text{CDS}}), \quad \Delta s_{\text{CDS}} = (1 - R) \cdot \Delta \lambda_{\text{hazard}}$$
+  5. **Private Credit**: Illiquidity haircuts and covenant violation penalties ($15\%$ performing haircut, $35\%$ distressed haircut when leverage breaches covenant thresholds).
+  6. **FX Forwards**: Cross-currency basis and covered interest rate parity shifts.
+  7. **Collateralized Loan Obligations (CLO Tranches)**: Subordination waterfall cash-flow impairment (Equity tranche absorbed first, then Mezzanine, then Senior AAA).
+- **Real-World Case**: A portfolio holding long equity in Nvidia, short put options on AMD, and long corporate bonds in Ford faces simultaneous equity losses, accelerating gamma losses on short puts as volatility spikes, and bond mark-to-market losses as Ford's credit spreads widen. Linear models miss over 40% of this drawdown.
+- **Documentation Guide**: Detailed in [**Multi-Asset Non-Linear Valuation**](docs/features/03_multi_asset_valuation.md).
 
-### 2.4 Extreme Tail Dependence & Correlation Breakdown (Student-$t$ Copula)
-- **The Blind Spot in Traditional Models**: Gaussian (Normal) Value at Risk assumes extreme joint crashes are virtually impossible (a $6\sigma$ event occurring once every 10,000 years, yet observed multiple times every decade).
-- **What RiskLattice Tests**: **Asymmetric lower-tail joint crash clustering** using a 10,000-path multivariate Student-$t$ Copula ($\nu = 5$ degrees of freedom):
-  - In normal market regimes, assets appear uncorrelated and diversified.
-  - In systemic crisis regimes, diversification breaks down—all asset prices drop simultaneously.
-  - RiskLattice tests whether an institutional portfolio can withstand joint tail crashes where simultaneous downside risk is **$12\times$ higher** than Gaussian models assume.
+---
 
-### 2.5 Portfolio PnL Waterfall & Marginal Risk Attribution (MCR)
-- **The Blind Spot in Traditional Models**: Produces a single aggregate loss figure without explaining the causal transmission mechanism or which asset is driving the ruin.
-- **What RiskLattice Tests**: Non-linear convex revaluation decomposed into an additive **PnL Waterfall**:
-  - **1st-Order Loss**: Direct macro hits to owned assets.
-  - **2nd-Order Loss**: Disruptions propagated through immediate tier-1 customers and suppliers.
-  - **3rd/4th-Order Loss**: Compound drawdowns triggered by network contagion and counterparty leverage distress.
-  - **Marginal Contribution to Risk (MCR)**: Decomposes 99% Expected Shortfall (CVaR) position-by-position, identifying the exact portfolio holding that serves as the primary transmission amplifier.
+### 2.3 Layer 3: 12 Systemic Macro Factors & Geopolitical Plumbing
+- **The Blind Spot in Traditional Models**: Conventional stress-testers use high-level, aggregate equity indexes (e.g. S&P 500 -10%) or standard interest rate shifts (+100 bps), ignoring the microeconomic transmission channels where physical logistics and interbank funding break down.
+- **What RiskLattice Tests**: Stress-testing across **12 granular macroeconomic, physical, and interbank plumbing factor channels**:
+  - **Physical Maritime Choke Points**: Taiwan Strait (`FOUNDRY_TW`), Malacca Strait (`CHOKEPOINT_MALACCA`), Suez Canal (`CHOKEPOINT_SUEZ`), Strait of Hormuz (`CHOKEPOINT_HORMUZ`), Panama Canal (`CHOKEPOINT_PANAMA`), Dry Bulk Shipping Freight (`BALTIC_DRY`).
+  - **Monetary & Interbank Plumbing**: Interbank Liquidity Spread (`SOFR_SPREAD`), Tri-Party Repo Haircuts (`REPO_HAIRCUT`), EUR/USD Cross-Currency Basis (`CROSS_CURRENCY_BASIS`), High-Yield OAS (`HY_OAS`).
+  - **Operational & Geopolitical Shocks**: Critical Cloud Infrastructure Outage (`CLOUD_OUTAGE`), Cyber Attack on Clearing Infrastructure (`CYBER_ATTACK`), Rare Earth Export Sanctions (`RARE_EARTH_BAN`).
+- **Real-World Case**: A naval quarantine of the Taiwan Strait spikes Baltic Dry freight by $+180\%$, halts $70\%$ of advanced semiconductor exports, and widens SOFR repo spreads as collateral velocity slows in Asian clearinghouses.
+- **Documentation Guide**: Detailed in [**Expanded Systemic Factors**](docs/features/04_expanded_systemic_factors.md).
+
+---
+
+### 2.4 Layer 4: Live Satellite AIS Maritime Choke-Point Fleet Telemetry
+- **The Blind Spot in Traditional Models**: Risk models update monthly or quarterly from lagged financial reports, missing fast-moving physical supply chain collapses until quarterly earnings are reported weeks later.
+- **What RiskLattice Tests**: Ingests real-time Automated Identification System (AIS) satellite vessel transponder streams across 5 global maritime choke points:
+  - **Vessel Queue Congestion Index**: $C = 1.0 + \max\left(0, \frac{V_{\text{active}} - V_{\text{baseline}}}{V_{\text{baseline}}}\right)$
+  - **Demurrage Rate Surge**: $D = \max(0, (C - 1.0) \cdot 1.45)$
+  - **Disruption Probability**: $P_{\text{disrupt}} = \min\left(1.0, \frac{C - 1.0}{2.0} + \frac{\max(0, 1.0 - \text{Speed}/\text{Speed}_{\text{base}})}{2.0}\right)$
+  - **Systemic Vulnerability Index (SVI $0-100$)**: Composite global vulnerability index tracking bottleneck clustering.
+  - **Decaying Threat Impulse**: Maps military escalation alerts and live vessel speed drops directly into graph shock impulses with exponential time decay ($e^{-\lambda t}$).
+- **Real-World Case**: An AIS speed collapse in the Strait of Malacca from 14.2 knots to 3.8 knots with 148 queued tankers immediately alerts risk managers to an impending petrochemical feedstock supply squeeze before equity markets open.
+- **Documentation Guide**: Detailed in [**Live Threat Intel & AIS Maritime Simulator**](docs/features/20_live_threat_intel_and_ais_simulator.md).
+
+---
+
+### 2.5 Layer 5: Balance-Sheet Debt Covenants & Solvency Cliff Multipliers
+- **The Blind Spot in Traditional Models**: Assumes corporate balance sheets respond linearly to revenue declines, ignoring debt covenant defaults, credit rating downgrades, and debt-burden cliffs.
+- **What RiskLattice Tests**: Asymmetric non-linear corporate distress amplification:
+  $$\lambda_v = \begin{cases} 1 + 0.35 \cdot \max(0, \text{NetDebt/EBITDA}_v - 3.0), & \text{if } \text{NetDebt/EBITDA} > 3.0 \text{ and } \Delta s < 0 \\ 1.0, & \text{otherwise} \end{cases}$$
+  Coupled with instrument solvency cliff multipliers $\mu \in \{1.0, 1.25, 1.50\}$ that trigger discontinuous value write-downs when interest coverage ratio ($\text{ICR}$) falls below $1.5\times$.
+- **Real-World Case**: Apple maintains substantial net cash and absorbs supplier disruptions with linear resilience ($\lambda=1.0$). In contrast, an automotive OEM carrying $\text{NetDebt/EBITDA} = 4.8$ suffers credit rating downgrades, commercial paper market lockout, and covenant renegotiation penalties, multiplying incoming supply shocks by **$1.63\times$ to $2.05\times$**.
+- **Documentation Guide**: Detailed in [**Multi-Hop Contagion Engine**](docs/features/01_multi_hop_contagion_engine.md) and [**Multi-Asset Valuation**](docs/features/03_multi_asset_valuation.md).
+
+---
+
+### 2.6 Layer 6: Safety Stock Days-of-Inventory (DOI) Absorption & Depletion Kinetics
+- **The Blind Spot in Traditional Models**: Assumes every supply disruption immediately impacts production on Day 1, ignoring on-hand physical inventory cushions.
+- **What RiskLattice Tests**: Dynamic physical buffer absorption:
+  $$S_{\text{eff}} = \max\left(0, S_{\text{gross}} \cdot \left(1 - \frac{\text{Days}_{\text{Inv}}}{\text{Duration}}\right)\right)$$
+  - If a company holds 90 days of safety stock and a supplier outage lasts 30 days, $S_{\text{eff}} = 0$ (the buffer absorbs 100% of the shock).
+  - If the disruption lasts 120 days, the buffer cushions the first 90 days and transmits the remaining 25% of the shock.
+- **Real-World Case**: In 2021, Toyota navigated the initial global automotive semiconductor shortage for 4 months because its post-Fukushima "Business Continuity Plan" mandated 120 days of chip buffer, while competitors with just-in-time (JIT) 14-day inventories halted plants within two weeks.
+- **Documentation Guide**: Detailed in [**Safety Stock Inventory Buffers**](docs/features/05_safety_stock_inventory_buffers.md).
+
+---
+
+### 2.7 Layer 7: Endogenous Market Impact & Fire-Sale Liquidity Spirals
+- **The Blind Spot in Traditional Models**: Assumes infinite, costless market liquidity—that an institution can liquidate $\$500\text{M}$ of positions at current screen prices without moving the market.
+- **What RiskLattice Tests**: The Almgren-Chriss (2000) optimal execution framework coupled with endogenous fire-sale feedback and collateral margin spirals:
+  - **Temporary Slippage**: $I_{\text{temp}} = \eta \cdot \left(\frac{Q}{V \tau}\right)^\alpha$
+  - **Permanent Market Impact**: $I_{\text{perm}} = \gamma \cdot \left(\frac{Q}{V}\right)$
+  - **Fire-Sale Feedback Multiplier ($\xi$)**: When multiple funds liquidate overlapping assets simultaneously, price drops trigger secondary liquidation waves ($\xi \in [1.0, 3.5]$).
+  - **ISDA SIMM Margin Call Cash Drain**: 99% 10-day margin call requirements drain cash reserves.
+  - **Post-Stress Liquidity Coverage Ratio (LCR)**: Tests whether high-quality liquid assets ($\text{HQLA}$) remain sufficient to withstand a 30-day run.
+- **Real-World Case**: During the March 2020 dash-for-cash, hedge fund basis trades were liquidated into illiquid off-the-run Treasury markets, driving bid-ask spreads up 10-fold and triggering emergency Federal Reserve repo injections.
+- **Documentation Guide**: Detailed in [**Endogenous Market Impact & Liquidity**](docs/features/13_endogenous_market_impact_and_liquidity.md).
+
+---
+
+### 2.8 Layer 8: Extreme Tail Dependence & Correlation Breakdown (Student-$t$ Copula)
+- **The Blind Spot in Traditional Models**: Gaussian (Normal) Value at Risk assumes joint tail crashes are virtually impossible ($6\sigma$ events occurring once in a universe's lifetime). In crises, Gaussian models vastly understate risk.
+- **What RiskLattice Tests**: Multivariate Student-$t$ Copula with $\nu = 4.0$ degrees of freedom and Higham spectral positive semi-definite (PSD) eigenvalue regularization:
+  - Models non-zero asymptotic lower tail dependence: $\lambda_L = 2 t_{\nu+1}\left(-\sqrt{\frac{(\nu+1)(1-\rho)}{1+\rho}}\right) > 0$.
+  - 10,000 Monte Carlo paths simulate realistic joint crash clustering.
+  - Computes subadditive 99% Expected Shortfall (CVaR) and position-by-position Marginal Contribution to Risk (MCR).
+  - Quantifies the **Tail Ratio** ($\text{CVaR}_{\text{Copula}} / \text{VaR}_{\text{Gaussian}} \approx 12.2\times$), proving tail under-insurance.
+- **Real-World Case**: In October 2008 and March 2020, diversified portfolios of tech, banks, energy, and municipal bonds crashed together as correlations jumped from 0.25 to 0.85. RiskLattice captures this joint lower-tail clustering.
+- **Documentation Guide**: Detailed in [**Student-t Copula Tail-Risk Engine**](docs/features/02_student_t_copula_tail_risk.md) and [**ADR-005: Copula Simulation**](docs/adrs/ADR-005-risk.md).
+
+---
+
+### 2.9 Layer 9: Algorithmic Reverse Stress Testing & Minimal Breaking Points
+- **The Blind Spot in Traditional Models**: Traditional risk models ask: *"Given this scenario, what is our loss?"* They cannot answer the existential executive question: *"What is the smallest plausible combination of shocks that would render our firm insolvent?"*
+- **What RiskLattice Tests**: Formulates an algorithmic inverse optimization problem:
+  $$\min_{\mathbf{s}} \|\mathbf{s}\|_2^2 \quad \text{subject to} \quad \text{Drawdown}(\mathbf{s}) \ge D_{\text{target}}, \quad \mathbf{s}_{\text{min}} \le \mathbf{s} \le \mathbf{s}_{\text{max}}$$
+  Finds the minimal-norm systemic shock vector $\mathbf{s}^*$ that forces the portfolio past a catastrophic drawdown threshold (e.g. $-30\%$), exposing hidden structural vulnerabilities that forward scenarios miss.
+- **Real-World Case**: Uncovers that an asset manager's portfolio can survive a 50% drop in crude oil alone, but a concurrent $-18\%$ wafer disruption combined with a $+40\text{ bps}$ SOFR spike triggers simultaneous cross-asset margin calls and covenant haircuts, breaching capital limits.
+- **Documentation Guide**: Detailed in [**Reverse Stress Testing**](docs/features/07_reverse_stress_testing.md).
+
+---
+
+### 2.10 Layer 10: What-If Supply Chain Graph Interventions & Resilience ROI
+- **The Blind Spot in Traditional Models**: Conventional risk tools are passive observers—they calculate drawdowns but offer no mechanism to model counter-measures or evaluate supply chain re-engineering.
+- **What RiskLattice Tests**: Dynamic graph surgery and capital allocation:
+  - **Graph Mutations**: Sever fragile vendor linkages, add dual-sourcing secondary foundries (e.g., TSMC + Intel Foundry dual-sourcing), and reweight procurement dependencies.
+  - **Resilience ROI**:
+    $$\text{Resilience ROI} = \frac{\Delta \text{PnL}_{\text{mitigated}}}{\text{CapEx}_{\text{intervention}}}$$
+  - **Regulatory Capital Relief**: Quantifies the reduction in Pillar 2 supervisory capital charges achieved by de-risking single points of failure.
+- **Real-World Case**: Demonstrates that spending $\$12\text{M}$ to qualify an alternate packaging supplier reduces portfolio worst-case drawdown from $-\$100.8\text{M}$ to $-\$62.4\text{M}$, generating a $3.2\times$ Resilience ROI and unlocking $\$18\text{M}$ in regulatory capital relief.
+- **Documentation Guide**: Detailed in [**What-If Supply Chain Graph Mutation**](docs/features/17_what_if_graph_mutation_engine.md).
 
 ---
 
@@ -185,43 +286,68 @@ A clear reference of what data enters RiskLattice and what intelligence and risk
 ├─────────────────────────────────────────────────┬──────────────────────────────────────────────────────┤
 │                     INPUTS                      │                       OUTPUTS                        │
 ├─────────────────────────────────────────────────┼──────────────────────────────────────────────────────┤
-│ 1. Macro Scenario (NLP Text or Factor Sliders)  │ 1. Multi-Hop Graph State & Node Shocks (0 to 4 hops) │
-│ 2. Institutional Portfolio Holdings (CSV/JSON)  │ 2. PnL Waterfall Breakdown (1st, 2nd, 3rd+ orders)   │
-│ 3. SEC 10-K Regulatory Filings (Background)     │ 3. Student-t Copula 99% VaR & Expected Shortfall     │
-│ 4. 504-Day Return Series & Balance Sheet Ratios │ 4. Marginal Contribution to Risk (MCR per holding)   │
-│                                                 │ 5. Verbatim-Cited Narrative Report ([10-K Chunk #])  │
-│                                                 │ 6. Real-Time Server-Sent Events (SSE) Stream         │
+│ 1. 12 Systemic Macro Factors & Geopolitics      │ 1. Multi-Hop Graph State & Node Shocks (0 to 4 hops) │
+│ 2. 7 Asset Classes (Equities, Options, Bonds,   │ 2. PnL Waterfall Breakdown (1st, 2nd, 3rd+ orders)   │
+│    CDS, Private Credit, FX, CLO Tranches)       │ 3. Student-t Copula 99% VaR & Expected Shortfall     │
+│ 3. Live Satellite AIS Vessel Telemetry Feed     │ 4. Marginal Contribution to Risk (MCR per holding)   │
+│ 4. SEC EDGAR 10-K, 10-Q, 8-K Regulatory Filings │ 5. Almgren-Chriss Liquidity & SIMM Margin Calls      │
+│ 5. 504-Day Return Series & Balance Sheet Ratios │ 6. Live AIS Choke-Point Radar & SVI Index (0-100)    │
+│ 6. PMS/OMS Imports (BlackRock Aladdin, PORT)    │ 7. Verbatim-Cited Narrative Report ([10-K Chunk #])  │
+│                                                 │ 8. Board Memo (PDF/HTML) & Four-Eyes Cryptographic   │
+│                                                 │    Audit Seal (Fed SR 11-7 / Basel III compliance)   │
+│                                                 │ 9. Real-Time Server-Sent Events (SSE) Stream         │
 └─────────────────────────────────────────────────┴──────────────────────────────────────────────────────┘
 ```
 
 ### 3.1 System Inputs
 
-RiskLattice accepts inputs across three operational dimensions:
+RiskLattice accepts inputs across five operational dimensions:
 
-#### 1. The Macroeconomic Scenario (Shock Trigger)
-The user can trigger stress tests via three alternative modalities:
+#### 1. The Macroeconomic & Geopolitical Scenario (Shock Trigger)
+The user can trigger stress tests via four alternative modalities:
 - **Free-Form Natural Language Prompt**: Plain English description of a geopolitical, macroeconomic, or industrial shock (e.g., *"Taiwan Strait blockade halts chip exports by 70% and spikes shipping freight by 180%"*).
-- **Historical Crisis Benchmark**: Pre-configured historical vectors (e.g., *2008 Lehman Liquidity Freeze*, *2020 COVID Mobility Halt*, *2022 Duration Shock*).
-- **Manual Factor Sliders**: Direct numerical adjustments across 8 canonical macro factors:
+- **Historical Crisis Benchmark**: Pre-configured historical vectors (e.g., *2008 Lehman Liquidity Freeze*, *2020 COVID Mobility Halt*, *2021 Suez Obstruction*, *2022 Duration Shock*).
+- **Manual Factor Sliders**: Direct numerical adjustments across **12 canonical systemic factors**:
   - `FOUNDRY_TW` (Taiwan Wafer Export Shock: $[-0.95, +1.00]$)
+  - `CHOKEPOINT_MALACCA` (Strait of Malacca Transit Outage: $[0.00, 1.00]$)
+  - `CHOKEPOINT_SUEZ` (Suez Canal Transit Interruption: $[0.00, 1.00]$)
+  - `CHOKEPOINT_HORMUZ` (Strait of Hormuz Tanker Halt: $[0.00, 1.00]$)
+  - `CHOKEPOINT_PANAMA` (Panama Canal Drought Capacity Restriction: $[0.00, 1.00]$)
   - `BALTIC_DRY` (Dry Bulk Shipping Freight Surge: $[-0.80, +2.00]$)
   - `BRENT_CRUDE` (Crude Oil Price Shock: $[-0.80, +1.50]$)
   - `SOFR_SPREAD` (Interbank Liquidity Spread: $[0.00, +0.05]$)
+  - `REPO_HAIRCUT` (Tri-Party Repo Haircut Widening: $[0.00, +0.15]$)
+  - `CROSS_CURRENCY_BASIS` (EUR/USD Basis Dislocation: $[-0.02, +0.02]$)
   - `HY_OAS` (High-Yield Option-Adjusted Spread: $[0.00, +0.12]$)
   - `US10Y_REAL` (10-Year Real Yield Shift: $[-0.03, +0.05]$)
   - `DXY` (US Dollar Index Surge: $[-0.20, +0.30]$)
   - `VIX` (Equity Volatility Index Shock: $[-0.50, +2.00]$)
+  - `CLOUD_OUTAGE` (Major Hyperscaler Cloud Outage: $[0.00, 1.00]$)
+  - `CYBER_ATTACK` (Financial Clearing System Cyber Attack: $[0.00, 1.00]$)
+  - `RARE_EARTH_BAN` (Critical Minerals Export Restrictions: $[0.00, 1.00]$)
+- **Live Satellite AIS Telemetry**: Automated shock injection driven by transponder speed drops, queue build-ups, and threat wire escalation alerts.
 
-#### 2. Institutional Portfolio Holdings (Position Ledger)
-Imported via CSV, JSON, or loaded from DuckDB (`portfolio_holdings`):
+#### 2. Institutional Portfolio Holdings (7 Asset Classes)
+Imported via CSV, JSON, or loaded from DuckDB (`portfolio_holdings`), BlackRock Aladdin, or Bloomberg PORT:
 - **Ticker Identifiers**: Canonical ticker symbols (e.g., `NVDA`, `TSM`, `AAPL`, `MSFT`, `F`, `JPM`).
-- **Asset Classes**: Multi-asset support for **Equity (Long/Short)**, **Credit Default Swaps (CDS)**, and **FX Currency Hedges**.
+- **7 Supported Asset Classes**:
+  - `EQUITY`: Common long/short equities with calibrated beta and gamma.
+  - `OPTION`: Standardized vanilla Calls and Puts with strike, expiry, volatility, and full Black-Scholes Greeks ($\Delta, \Gamma, \nu, \Theta$).
+  - `BOND`: Fixed-rate corporate bonds with coupon, modified duration, convexity, and Merton credit spread widening.
+  - `CDS`: Single-name Credit Default Swaps with spread, recovery rate $R$, and RPV01.
+  - `PRIVATE_CREDIT`: Direct lending loans with covenant leverage triggers and 15%/35% illiquidity haircuts.
+  - `FX`: FX Forwards and cross-currency currency pairs.
+  - `CLO`: Securitized collateralized loan obligation debt tranches with loss absorption waterfalls.
 - **Dollar Notionals**: Position sizes (e.g., $+\$100\text{M}$ NVDA, $+\$50\text{M}$ TSM, $-\$30\text{M}$ Ford short).
-  > **Privacy Note**: Dollar amounts and share counts remain inside Tier 1 (DuckDB). Only normalized weight vectors $\mathbf{w}$ are used in risk calculations; the LLM tier never sees positions or balances.
+  > **Privacy Note**: Dollar amounts and share counts remain strictly inside Tier 1 (DuckDB). Only normalized weight vectors $\mathbf{w}$ are used in risk calculations; the LLM tier never sees positions or balances ([Rule P-01](backend/app/agents/llm_router.py)).
 
-#### 3. Financial & Regulatory Corpus (Background Ground Truth)
+#### 3. Real-Time Satellite AIS Telemetry & Geopolitical Threat Feed
+- **Live Telemetry Stream**: Continuous transponder data across 5 choke points tracking active vessels, median transit speed, and queue congestion ratio.
+- **Geopolitical Threat Wire**: Ingests real-time security alerts (e.g., *Naval Exercise live fire drills*, *Drone strikes*, *Canal grounding*), computing instant SVI impact and decaying shock impulses.
+
+#### 4. Financial & Regulatory Corpus (Background Ground Truth)
 Stored in embedded DuckDB 2.0:
-- **SEC Form 10-K Corpus**: 40 full chunks from Item 1A (Risk Factors) and Footnotes for major S&P 500 corporations.
+- **SEC Form 10-K/10-Q/8-K Corpus**: Real Item 1A Risk Factors chunks with exact character offsets.
 - **504 Trading Days Historical Returns**: 2-regime Markov-switching daily return matrix calibrated with heavy-tailed Student-$t$ margins.
 - **Corporate Balance Sheet Fundamentals**: Net Debt/EBITDA, Interest Coverage Ratio, Cash Buffer, and Supplier Substitutability ($\sigma_v$).
 
@@ -229,38 +355,45 @@ Stored in embedded DuckDB 2.0:
 
 ### 3.2 System Outputs
 
-RiskLattice produces five deterministic and qualitative output artifacts:
+RiskLattice produces 9 deterministic, analytical, and governance output artifacts:
 
-#### 1. Interactive Multi-Hop Contagion Graph
+#### 1. Interactive Multi-Hop Contagion Graph & Geospatial World Map
 - **Hop-by-Hop Node Shock Vectors**: Exact shock values at each transmission stage:
   $$\Delta s_v^{(0)} \text{ (Macro)}, \quad \Delta s_v^{(1)} \text{ (Direct Tier-1)}, \quad \Delta s_v^{(2)} \text{ (Downstream)}, \quad \Delta s_v^{(3/4)} \text{ (Contagion)}$$
-- **Cumulative Clamped Shock ($S_v$)**: Bounded in $[-0.95, +1.50]$ with node status indicators:
-  - Healthy (Green: $|S_v| < 5\%$)
-  - Alert (Amber: $5\% \le |S_v| < 15\%$)
-  - Severe Distress (Crimson: $|S_v| \ge 15\%$)
-- **Critical Transmission Bottlenecks**: Highlights the specific high-leverage nodes where $\lambda_v > 1.0$ compounded the cascade.
+- **Cumulative Clamped Shock ($S_v$)**: Bounded in $[-0.95, +1.50]$ with node status indicators (Healthy Green $<5\%$, Amber Alert $5-15\%$, Crimson Severe $\ge 15\%$).
+- **Interactive Geospatial World Map**: Displays semiconductor mega-fabs, maritime choke points, and global shipping lanes with real-time transit risk overlays ([Feature 15](docs/features/15_interactive_geospatial_world_map.md)).
 
 #### 2. Portfolio PnL & Additive Waterfall Breakdown
 - **Total Portfolio Loss**: Stressed dollar PnL (e.g., $-\$100.8\text{M}$) and percentage drawdown (e.g., $-22.4\%$).
-- **Additive Order-of-Impact Waterfall**:
-  - **1st-Order Loss**: Dollar damage from direct macro hits to owned assets.
-  - **2nd-Order Loss**: Losses triggered by immediate supplier and customer bottlenecks.
-  - **3rd/4th-Order Loss**: Cascading network insolvency driven by counterparty balance-sheet distress.
+- **Additive Order-of-Impact Waterfall**: Decomposes loss into 1st-Order (Direct), 2nd-Order (Supplier), and 3rd/4th-Order (Network Contagion) buckets.
 
 #### 3. Student-$t$ Copula Tail-Risk Distribution & Metrics
-- **Value at Risk (99% VaR)**: Parametric (Gaussian) vs. Historical vs. Student-$t$ Copula VaR.
+- **Value at Risk (99% VaR)**: Parametric Gaussian vs. Historical vs. Student-$t$ Copula VaR.
 - **Expected Shortfall (99% CVaR)**: Conditional average loss in the worst 1% of joint crash outcomes.
-- **Tail Ratio**: Ratio of Copula CVaR to Gaussian VaR (e.g., $12.2\times$), proving tail risk underestimation.
-- **Marginal Contribution to Risk (MCR)**: Ranked percentage breakdown identifying which holding drives the majority of portfolio tail loss (e.g., `NVDA`: 48.2%, `TSM`: 31.4%).
+- **Tail Ratio**: Ratio of Copula CVaR to Gaussian VaR ($12.2\times$), proving severe tail risk underestimation.
+- **Marginal Contribution to Risk (MCR)**: Ranked asset-level breakdown identifying primary tail loss drivers ([Feature 02](docs/features/02_student_t_copula_tail_risk.md)).
 
-#### 4. Grounded Narrative Post-Mortem Report
-- A 3-bullet executive briefing synthesized in natural language:
-  - **Macro Trigger**: What initial event catalyzed the stress.
-  - **Transmission Bottleneck**: Which non-obvious multi-hop supplier link amplified the disruption.
-  - **Tail-Risk Hedges**: Specific hedge recommendations (e.g., put options on semiconductor ETFs, long freight-rate futures).
-- **Verbatim SEC 10-K Citations**: Every factual relationship is accompanied by a clickable citation (e.g., `[10-K Chunk #14]`) verified by exact substring match against official SEC disclosures.
+#### 4. Endogenous Liquidity & Fire-Sale Slippage Studio
+- **Almgren-Chriss Market Impact**: Total liquidation execution cost split into temporary slippage $I_{\text{temp}}$ and permanent impact $I_{\text{perm}}$.
+- **Fire-Sale Feedback Multiplier ($\xi$)**: Amplification resulting from crowded institutional liquidation.
+- **ISDA SIMM Margin Calls & Post-Stress LCR**: Required collateral posting and 30-day liquidity buffer survival ratio ([Feature 13](docs/features/13_endogenous_market_impact_and_liquidity.md)).
 
-#### 5. Real-Time Server-Sent Events (SSE) Stream
+#### 5. Live AIS Radar & Threat Intelligence Feed
+- **Systemic Vulnerability Index (SVI $0-100$)**: Real-time composite maritime risk gauge.
+- **Choke-Point Status Cards**: Live speed, active vessel queue, demurrage surge %, and disruption probability across Taiwan Strait, Malacca, Suez, Hormuz, and Panama ([Feature 20](docs/features/20_live_threat_intel_and_ais_simulator.md)).
+
+#### 6. What-If Supply Chain Graph Intervention & Resilience ROI
+- **Network Interventions**: Interactive UI to sever edges, dual-source suppliers, or reweight procurement dependencies.
+- **Resilience ROI**: Stressed $\Delta\text{PnL}$ savings divided by CapEx expenditure ([Feature 17](docs/features/17_what_if_graph_mutation_engine.md)).
+
+#### 7. Board-Ready Executive Memo (MD/HTML/PDF) & CCAR FR Y-14A Exporter
+- **Automated C-Suite Briefing**: Plain-English executive memo synthesizing trigger events, bottleneck causality, and actionable tail hedges ([Feature 10](docs/features/10_board_ready_executive_memo.md)).
+- **Regulatory Reporting**: Federal Reserve Comprehensive Capital Analysis and Review (CCAR) Form FR Y-14A Schedule A export ([Feature 16](docs/features/16_pms_oms_adapters_and_ccar_exporter.md)).
+
+#### 8. Four-Eyes Cryptographic Audit Manifest
+- **Dual-Key Governance**: Cryptographic SHA-256 seal recording scenario parameters, code commit hash, and two-signature sign-off workflow (Draft $\to$ Under Review $\to$ Approved) complying with Federal Reserve SR 11-7 and Basel III model governance ([Feature 11](docs/features/11_four_eyes_audit_vault.md)).
+
+#### 9. Real-Time Server-Sent Events (SSE) Stream
 A live JSON event stream over `/simulate/stream` emitting progressive execution stages:
 - `event: started` $\to$ Job initialization and frozen snapshot generation.
 - `event: propagating` $\to$ Hop-by-hop node activation counts and transmission vectors.
@@ -426,6 +559,10 @@ RiskLattice covers 5 primary operational use cases. Each use case touches distin
 - `AI Tier`: `PrivacySanitizer` $\to$ `ShockTranslator` $\to$ `NarrativeExplainer`
 - `Engine`: `ContagionPropagator` $\to$ `compute_portfolio_valuation` $\to$ `TailRiskEngine`
 - `Storage`: `DuckDB` (loads nodes, edges, returns, and snapshot)
+
+> [!NOTE]
+> **Detailed Data Flow Walkthrough**:
+> For a comprehensive, step-by-step engineering walkthrough with intermediate JSON payloads and AST boundary contracts during this scenario, see the **[Taiwan Foundry Cascade Walkthrough (Daily Notes 2026-11-11)](docs/daily_notes/2026-11-11.md#3-end-to-end-operational-walkthrough-the-taiwan-foundry-cascade)** and formal architecture specifications in [ADR-002: Pure Compute Isolation](docs/adrs/ADR-002-compute.md), [ADR-003: Graph Propagation](docs/adrs/ADR-003-graph.md), and [ADR-006: AI Privacy Firewall](docs/adrs/ADR-006-ai.md).
 
 ---
 
