@@ -11,6 +11,7 @@ RiskLattice pairs a deterministic, non-linear Python quantitative math engine wi
 ```
 docs/
 ├── README.md                                  <-- Master Documentation Hub (This File)
+├── use_cases_data_specification.md            <-- Exhaustive Inputs & Outputs Data Specification (19 Use Cases)
 ├── adrs/                                      <-- Architecture Decision Records (ADR-001 to ADR-010)
 │   ├── ADR-001-storage.md                     <-- Embedded DuckDB OLAP Storage
 │   ├── ADR-002-compute.md                     <-- Pure Compute Engine Isolation Boundary
@@ -52,7 +53,8 @@ docs/
     ├── 2026-11-13.md                          <-- Multi-Asset Pricing, 12 Factors, Inventory Buffers
     ├── 2026-11-14.md                          <-- Google SSO, Hedge Optimizer, Reverse Stress, Timeline
     ├── 2026-11-15.md                          <-- Almgren-Chriss Liquidity, What-If Mutation, 19 Features
-    └── 2026-11-16.md                          <-- Live Threat Intel, Satellite AIS Simulator, SVI Index
+    ├── 2026-11-16.md                          <-- Live Threat Intel, Satellite AIS Simulator, SVI Index
+    └── 2026-11-17.md                          <-- Use Cases Data Specification & Schema Dictionary
 ```
 
 ---
@@ -67,6 +69,8 @@ docs/
    Every graph edge extracted from unstructured filings includes character-offset citations and exact verbatim quotes from SEC 10-K disclosures, preventing LLM hallucinations.
 4. **Dual-Key Governance & Cryptographic Vault ([ADR-010](./adrs/ADR-010-pdf.md) & [Feature 11](./features/11_four_eyes_audit_vault.md))**:
    Institutional stress test runs produce immutable SHA-256 digital seals requiring independent secondary sign-off before submission to bank regulators (Federal Reserve SR 11-7 compliance).
+5. **Exhaustive Input & Output Data Specification ([Use Cases Data Spec](./use_cases_data_specification.md))**:
+   Complete data dictionary and schema specification for all 19 operational use cases, providing exact JSON/CSV payloads, field definitions, mathematical transforms, and invariant boundary checks.
 
 ---
 

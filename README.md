@@ -280,6 +280,10 @@ Along with dynamic multi-period timeline modeling ($T \in [0, 90]$ days), capita
 
 A clear reference of what data enters RiskLattice and what intelligence and risk artifacts exit the system.
 
+> [!NOTE]
+> **Exhaustive Data Dictionary & Schema Specification**:
+> For complete field-by-field schemas, Pydantic/TypeScript interfaces, units, constraints, and verified copy-pasteable JSON/CSV payloads across all 19 operational use cases, see the **[Use Cases Input & Output Data Specification](docs/use_cases_data_specification.md)**.
+
 ```
 ┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
 │                                       INPUT & OUTPUT SUMMARY                                           │
