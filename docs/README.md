@@ -12,6 +12,7 @@ RiskLattice pairs a deterministic, non-linear Python quantitative math engine wi
 docs/
 ├── README.md                                  <-- Master Documentation Hub (This File)
 ├── use_cases_data_specification.md            <-- Exhaustive Inputs & Outputs Data Specification (19 Use Cases)
+├── mobile_architecture_guide.md               <-- React Native / Expo Mobile Architecture & Client-Server Split
 ├── adrs/                                      <-- Architecture Decision Records (ADR-001 to ADR-010)
 │   ├── ADR-001-storage.md                     <-- Embedded DuckDB OLAP Storage
 │   ├── ADR-002-compute.md                     <-- Pure Compute Engine Isolation Boundary
@@ -54,7 +55,8 @@ docs/
     ├── 2026-11-14.md                          <-- Google SSO, Hedge Optimizer, Reverse Stress, Timeline
     ├── 2026-11-15.md                          <-- Almgren-Chriss Liquidity, What-If Mutation, 19 Features
     ├── 2026-11-16.md                          <-- Live Threat Intel, Satellite AIS Simulator, SVI Index
-    └── 2026-11-17.md                          <-- Use Cases Data Specification & Schema Dictionary
+    ├── 2026-11-17.md                          <-- Use Cases Data Specification & Schema Dictionary
+    └── 2026-11-19.md                          <-- React Native Mobile App, Client-Server Split, & Beta Strategy
 ```
 
 ---

@@ -56,12 +56,20 @@ In computer science and artificial intelligence:
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-│                                       CLIENT TIER (Next.js 15)                                         │
-│  - Cytoscape.js Network Canvas       - Shock Studio & Factor Sliders    - 1st/2nd/3rd PnL Waterfall    │
-│  - 4 Crisis Replay Backtester        - Verbatim 10-K Citation Drawer    - Portfolio CSV/JSON Importer  │
-└───────────────────────────────────────────────────┬────────────────────────────────────────────────────┘
-                                                    │ HTTP / Server-Sent Events (SSE)
-                                                    ▼
+│                                       CLIENT TIER (Web & Mobile)                                       │
+├─────────────────────────────────────────────────┬──────────────────────────────────────────────────────┤
+│               WEB (Next.js 15 · Port 5050)      │         MOBILE (React Native / Expo · iOS & Android) │
+├─────────────────────────────────────────────────┼──────────────────────────────────────────────────────┤
+│ • Cytoscape.js Interactive Network Canvas       │ • Live Satellite AIS Maritime Radar & SVI Gauge      │
+│ • Deep Multi-Period Timeline Scrubber (0-90d)   │ • 1-Tap Factor Shock Injection (Taiwan, Suez, Brent) │
+│ • 1st/2nd/3rd PnL Waterfall & Greek Hedging     │ • 3-Stage PnL Waterfall Triage & 99% CVaR Bar        │
+│ • Fed CCAR FR Y-14A Schedule A Regulatory Export│ • Conversational AI Chief Risk Officer Copilot Chat  │
+│ • Aladdin CSV / Bloomberg PORT JSON Ingestion   │ • 1-Tap Biometric Dual-Key Sign & Seal (SHA-256)     │
+│ • Side-by-Side Scenario Diffing & Shapley Attrib│ • Dynamic Host Switcher (Localhost, Emulator, LAN IP)│
+└─────────────────────────────────────────────────┴───────────────────┬──────────────────────────────────┘
+                                                                      │ HTTP / Server-Sent Events (SSE)
+                                                                      │ Shared TypeScript Types (shared/types)
+                                                                      ▼
 ┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
 │                                       GATEWAY TIER (FastAPI)                                           │
 │  - REST Endpoints (/simulate, /backtest, /filings)       - SSE Streaming (/simulate/stream)            │
@@ -825,17 +833,25 @@ cd /Users/dpcubed/projects/risk-lattice
 - **Frontend Terminal**: [http://localhost:5050](http://localhost:5050)
 - **FastAPI OpenAPI Swagger**: [http://localhost:5051/docs](http://localhost:5051/docs)
 
-### Running Backend and Frontend Independently
+### Running Backend, Frontend, and Mobile Independently
 
 ```bash
-# Backend (Terminal 1)
+# 1. Backend (Terminal 1)
 cd /Users/dpcubed/projects/risk-lattice/backend
 ../.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 5051 --reload
 
-# Frontend (Terminal 2)
+# 2. Web Frontend (Terminal 2)
 cd /Users/dpcubed/projects/risk-lattice/frontend
 NEXT_PUBLIC_API_URL=http://localhost:5051 npm run dev -- -p 5050
+
+# 3. Mobile App (Terminal 3 - React Native / Expo)
+cd /Users/dpcubed/projects/risk-lattice/mobile
+npm run start
+# Press 'i' for iOS Simulator, 'a' for Android Emulator, or scan QR code with Expo Go
 ```
+
+> [!TIP]
+> For in-depth architectural details on client-server separation, mobile screens, offline mocks, and LAN IP physical device testing, read the **[Mobile & Client-Server Architecture Guide](docs/mobile_architecture_guide.md)**.
 
 ---
 
