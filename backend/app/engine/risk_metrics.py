@@ -66,7 +66,10 @@ class TailRiskEngine:
             else:
                 returns_df = pd.DataFrame()
 
-        pivoted = returns_df.pivot(index="trade_date", columns="node_id", values="daily_return").dropna()
+        if not returns_df.empty and "trade_date" in returns_df.columns and "node_id" in returns_df.columns:
+            pivoted = returns_df.pivot_table(index="trade_date", columns="node_id", values="daily_return", aggfunc="last").dropna()
+        else:
+            pivoted = pd.DataFrame()
         # Ensure ordering aligns with holdings
         available_holdings = [h for h in holdings if h in pivoted.columns]
         if not available_holdings:
@@ -108,7 +111,20 @@ class TailRiskEngine:
         reg_corr = vecs @ np.diag(vals) @ vecs.T
         inv_d = 1.0 / np.sqrt(np.diag(reg_corr))
         reg_corr = np.outer(inv_d, inv_d) * reg_corr
-        L = np.linalg.cholesky(reg_corr)
+        reg_corr = (reg_corr + reg_corr.T) / 2.0
+
+        # Adaptive Cholesky with ridge jitter for collinear chaos resilience
+        L = None
+        for jitter in [0.0, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2]:
+            try:
+                candidate = reg_corr + np.eye(K) * jitter
+                L = np.linalg.cholesky(candidate)
+                break
+            except np.linalg.LinAlgError:
+                continue
+
+        if L is None:
+            L = np.eye(K)
 
         # 1. Generate uncorrelated standard normal variates
         Z = rng.standard_normal(size=(self.num_simulations, K))

@@ -101,12 +101,11 @@ class LLMRouter:
         )
 
         # If mock response is explicitly provided and mock mode enabled, return it
-        if self.use_mock_fallback and (mock_response is not None or os.getenv("MOCK_LLM", "true").lower() == "true"):
+        if self.use_mock_fallback and os.getenv("MOCK_LLM", "true").lower() == "true":
             if mock_response is not None:
                 return mock_response
 
-        try:
-            # Attempt LiteLLM invocation with 2s timeout for local responsiveness
+        def _invoke_llm() -> T:
             response = litellm.completion(
                 model=self.model,
                 messages=[
@@ -127,10 +126,15 @@ class LLMRouter:
 
             parsed = json.loads(raw_text)
             return response_model.model_validate(parsed)
-        except Exception:
+
+        def _fallback() -> T:
             if mock_response is not None:
                 return mock_response
-            raise
+            raise RuntimeError(f"Circuit breaker tripped: no mock fallback available for {response_model.__name__}")
+
+        # Execute guarded by circuit breaker
+        from app.services.circuit_breaker_service import llm_circuit_breaker
+        return llm_circuit_breaker.call(_invoke_llm, fallback=_fallback)
 
 
 # Global router instance

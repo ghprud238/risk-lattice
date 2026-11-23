@@ -6,6 +6,12 @@ from app.services.job_service import job_service, JobService, JobEvent
 from app.services.scenario_service import scenario_service, ScenarioService
 from app.services.portfolio_service import portfolio_service, PortfolioService
 from app.services.auth_service import auth_service, AuthService, UserProfile, AuthResponse
+from app.services.circuit_breaker_service import (
+    CircuitBreakerService,
+    CircuitState,
+    llm_circuit_breaker,
+    ais_circuit_breaker,
+)
 
 __all__ = [
     "snapshot_service",
@@ -21,4 +27,8 @@ __all__ = [
     "AuthService",
     "UserProfile",
     "AuthResponse",
+    "CircuitBreakerService",
+    "CircuitState",
+    "llm_circuit_breaker",
+    "ais_circuit_breaker",
 ]

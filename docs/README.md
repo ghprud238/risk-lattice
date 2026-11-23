@@ -45,7 +45,8 @@ docs/
 │   ├── 17_what_if_graph_mutation_engine.md    <-- Network Interventions & Resilience ROI
 │   ├── 18_ai_stress_copilot.md                <-- Conversational CRO Assistant
 │   ├── 19_webhook_alerting_system.md          <-- Slack Block Kit Multi-Channel Webhooks
-│   └── 20_live_threat_intel_and_ais_simulator.md <-- Live Satellite AIS Radar & Threat Feed
+│   ├── 20_live_threat_intel_and_ais_simulator.md <-- Live Satellite AIS Radar & Threat Feed
+│   └── 21_chaos_engineering_and_circuit_breakers.md <-- Adversarial Chaos Fuzzing & Gateway Circuit Breakers
 └── daily_notes/                               <-- Chronological Engineering & Quantitative Logs
     ├── README.md                              <-- Master Index of Daily Notes
     ├── 2026-11-10.md                          <-- Milestones 1–4, DuckDB, Huber, AST Isolation
@@ -56,7 +57,8 @@ docs/
     ├── 2026-11-15.md                          <-- Almgren-Chriss Liquidity, What-If Mutation, 19 Features
     ├── 2026-11-16.md                          <-- Live Threat Intel, Satellite AIS Simulator, SVI Index
     ├── 2026-11-17.md                          <-- Use Cases Data Specification & Schema Dictionary
-    └── 2026-11-19.md                          <-- React Native Mobile App, Client-Server Split, & Beta Strategy
+    ├── 2026-11-19.md                          <-- React Native Mobile App, Client-Server Split, & Beta Strategy
+    └── 2026-11-23.md                          <-- Adversarial Chaos Engineering Suite & Gateway Circuit Breakers
 ```
 
 ---

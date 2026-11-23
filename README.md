@@ -7,8 +7,8 @@ A hybrid neuro-symbolic financial risk platform combining local-first LLM semant
 [![Next.js 15](https://img.shields.io/badge/Next.js-15-black.svg)](https://nextjs.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-1.0-emerald.svg)](https://fastapi.tiangolo.com/)
 [![DuckDB](https://img.shields.io/badge/DuckDB-OLAP-amber.svg)](https://duckdb.org/)
-[![Tests Passing](https://img.shields.io/badge/Tests-95%2F95%20Passing-emerald.svg)](backend/tests/)
-[![Features](https://img.shields.io/badge/Features-20%20Documented-cyan.svg)](docs/features/)
+[![Tests Passing](https://img.shields.io/badge/Tests-106%2F106%20Passing-emerald.svg)](backend/tests/)
+[![Features](https://img.shields.io/badge/Features-21%20Documented-cyan.svg)](docs/features/)
 
 ---
 
@@ -131,6 +131,7 @@ RiskLattice provides dedicated, exhaustive technical documentation for each of i
 | **18** | [AI Conversational Stress Copilot](docs/features/18_ai_stress_copilot.md) | Real-time conversational risk assistant with natural language query routing, exact metrics computation, and SEC 10-K grounding | `backend/app/agents/stress_copilot.py` |
 | **19** | [Multi-Channel Webhook Alerting](docs/features/19_webhook_alerting_system.md) | Real-time risk appetite limit breach evaluation, Slack Block Kit formatting, Microsoft Teams cards, and PagerDuty incident dispatch | `backend/app/services/alerting_service.py` |
 | **20** | [Live Threat Intel & AIS Maritime Simulator](docs/features/20_live_threat_intel_and_ais_simulator.md) | Real-time satellite AIS vessel congestion across 5 choke points, Systemic Vulnerability Index (SVI), threat wire feed & 1-click shock injection | `backend/app/engine/ais_threat.py` |
+| **21** | [Adversarial Chaos Engineering & Circuit Breakers](docs/features/21_chaos_engineering_and_circuit_breakers.md) | 3-state Gateway Circuit Breakers (Closed/Open/Half-Open), pure AST chaos generators (cyclic graphs, singular covariance, leverage cliffs), & automated CLI chaos drill | `backend/app/engine/chaos.py`<br>`backend/app/services/circuit_breaker_service.py` |
 
 ---
 
@@ -891,15 +892,19 @@ cd /Users/dpcubed/projects/risk-lattice
 # 3. Privacy Firewall Red-Team Audit (Rule P-01)
 .venv/bin/python backend/scripts/verify_privacy.py
 
-# 4. AST Engine Isolation Boundary Gate (Guarantees zero I/O imports in backend/app/engine/*.py)
+# 4. Adversarial Chaos Engineering & Circuit Breaker Drill (0.14s)
+.venv/bin/python backend/scripts/chaos_drill.py
+
+# 5. AST Engine Isolation Boundary Gate (Guarantees zero I/O imports in backend/app/engine/*.py)
 uv run pytest backend/tests/integration/test_boundary_and_engine.py -v
 
-# 5. Complete Test Suite (95/95 tests passing in ~8.2s)
+# 6. Complete Test Suite (106/106 tests passing in ~32s)
 uv run pytest backend/tests/ -v
 ```
 
-### Test Suite Coverage Breakdown (95 Tests Total)
+### Test Suite Coverage Breakdown (106 Tests Total)
 
+- **11/11 Adversarial Chaos & Circuit Breaker Fuzzing Tests**: Cyclic graph feedback damping, singular/collinear covariance PSD repair, extreme leverage cliffs ($D/E \to 10^6$), degenerate inventory buffer bounds, disconnected/island graphs, fuzzed shock vector sanitization (NaN/Inf), circuit breaker 3-state transitions (Closed/Open/Half-Open), and REST chaos endpoints.
 - **12/12 Analytical Numerical Test Cases ($N\text{-}01$ to $N\text{-}12$)**: Hand-calculated propagation chains, decay monotonicity, substitutability nullification, distress multiplier thresholds, outlier resistance, and floating-point bit determinism.
 - **8/8 Copula & Tail Risk Test Cases ($R\text{-}01$ to $R\text{-}08$)**: Positive semi-definite matrix repair, Student-$t$ lower tail dependence, subadditivity ($\text{CVaR} \ge \text{VaR}$), marginal risk additivity, and single-asset edge cases.
 - **8/8 Multi-Asset Instrument Valuation Cases**: Black-Scholes protective put convexity, call loss under spot crash, corporate bond duration/convexity/Merton spread widening, CDS hazard rate jump, private credit covenant haircut, and CLO tranche subordination waterfall.

@@ -30,6 +30,7 @@ RiskLattice pairs a deterministic, non-linear Python quantitative math engine wi
 | **18** | [AI Conversational Stress Copilot](./18_ai_stress_copilot.md) | Real-time conversational risk assistant with natural language query routing, exact metrics computation, and SEC 10-K grounding | `backend/app/agents/stress_copilot.py` | Production |
 | **19** | [Multi-Channel Webhook Alerting](./19_webhook_alerting_system.md) | Real-time risk appetite limit breach evaluation, Slack Block Kit formatting, Microsoft Teams cards, and PagerDuty incident dispatch | `backend/app/services/alerting_service.py` | Production |
 | **20** | [Live Threat Intel & AIS Maritime Simulator](./20_live_threat_intel_and_ais_simulator.md) | Real-time satellite AIS vessel congestion across 5 choke points, Systemic Vulnerability Index (SVI), threat wire feed & 1-click shock injection | `backend/app/engine/ais_threat.py` | Production |
+| **21** | [Adversarial Chaos Engineering & Circuit Breakers](./21_chaos_engineering_and_circuit_breakers.md) | 3-state Gateway Circuit Breakers (Closed/Open/Half-Open), pure AST chaos generators (cyclic graphs, singular covariance, leverage cliffs), & automated CLI chaos drill | `backend/app/engine/chaos.py`<br>`backend/app/services/circuit_breaker_service.py` | Production |
 
 ---
 

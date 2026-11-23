@@ -51,7 +51,7 @@ class EdgeCalibrator:
         if df.empty:
             return {f: 0.0 for f in factor_nodes}
 
-        pivoted = df.pivot(index="trade_date", columns="node_id", values="daily_return").dropna()
+        pivoted = df.pivot_table(index="trade_date", columns="node_id", values="daily_return", aggfunc="last").dropna()
         if len(pivoted) < 20 or target_node not in pivoted.columns:
             return {f: 0.0 for f in factor_nodes}
 

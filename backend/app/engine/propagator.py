@@ -64,14 +64,28 @@ class ContagionPropagator:
 
         for i, (_, row) in enumerate(nodes_df.iterrows()):
             node_type = row.get("node_type", "")
-            net_debt_ebitda = float(row.get("net_debt_ebitda", 0.0) or 0.0)
-            int_coverage = float(row.get("int_coverage", 5.0) or 5.0)
+            raw_debt = row.get("net_debt_ebitda", 0.0)
+            raw_cov = row.get("int_coverage", 5.0)
+
+            try:
+                net_debt_ebitda = float(raw_debt) if raw_debt is not None else 0.0
+                if np.isnan(net_debt_ebitda) or np.isinf(net_debt_ebitda):
+                    net_debt_ebitda = 0.0
+            except (ValueError, TypeError):
+                net_debt_ebitda = 0.0
+
+            try:
+                int_coverage = float(raw_cov) if raw_cov is not None else 5.0
+                if np.isnan(int_coverage) or np.isinf(int_coverage):
+                    int_coverage = 5.0
+            except (ValueError, TypeError):
+                int_coverage = 5.0
 
             # Applies to corporate assets and suppliers with debt metrics
             if node_type in ("ASSET", "SUPPLIER"):
                 if net_debt_ebitda > 3.0 or int_coverage < 1.5:
-                    excess_leverage = max(0.0, net_debt_ebitda - 3.0)
-                    lambdas[i] = 1.0 + 0.35 * excess_leverage
+                    excess_leverage = float(np.clip(max(0.0, net_debt_ebitda - 3.0), 0.0, 50.0))
+                    lambdas[i] = float(np.clip(1.0 + 0.35 * excess_leverage, 1.0, 50.0))
                 else:
                     lambdas[i] = 1.0
             else:
@@ -105,14 +119,26 @@ class ContagionPropagator:
         s0 = np.zeros(N, dtype=np.float64)
         for nid, val in initial_shock.items():
             if nid in node_to_idx:
-                # Clamp initial shocks to [-0.95, 2.00]
-                s0[node_to_idx[nid]] = float(np.clip(val, -0.95, 2.00))
+                try:
+                    num_val = float(val) if val is not None else 0.0
+                    if np.isnan(num_val) or np.isinf(num_val):
+                        num_val = 0.0
+                    s0[node_to_idx[nid]] = float(np.clip(num_val, -0.95, 2.00))
+                except (ValueError, TypeError):
+                    s0[node_to_idx[nid]] = 0.0
 
         # Substitutability vector sigma_v clamped to [0.0, 0.8]
         substitutabilities = np.zeros(N, dtype=np.float64)
         for _, row in nodes_df.iterrows():
             idx = node_to_idx[row["node_id"]]
-            substitutabilities[idx] = float(np.clip(row.get("substitutability", 0.3), 0.0, 0.8))
+            raw_sub = row.get("substitutability", 0.3)
+            try:
+                num_sub = float(raw_sub) if raw_sub is not None else 0.3
+                if np.isnan(num_sub) or np.isinf(num_sub):
+                    num_sub = 0.3
+            except (ValueError, TypeError):
+                num_sub = 0.3
+            substitutabilities[idx] = float(np.clip(num_sub, 0.0, 0.8))
 
         # Inventory buffer absorption factors
         inventory_factors = np.ones(N, dtype=np.float64)
@@ -120,10 +146,21 @@ class ContagionPropagator:
             idx = node_to_idx[row["node_id"]]
             inv_days = 0.0
             if node_inventory_days and row["node_id"] in node_inventory_days:
-                inv_days = float(node_inventory_days[row["node_id"]])
+                raw_inv = node_inventory_days[row["node_id"]]
             elif "inventory_days" in row and pd.notna(row["inventory_days"]):
-                inv_days = float(row["inventory_days"])
-            
+                raw_inv = row["inventory_days"]
+            else:
+                raw_inv = 0.0
+
+            try:
+                inv_days = float(raw_inv) if raw_inv is not None else 0.0
+                if np.isnan(inv_days) or np.isinf(inv_days):
+                    inv_days = 0.0
+            except (ValueError, TypeError):
+                inv_days = 0.0
+
+            inv_days = max(0.0, inv_days)
+
             if inv_days > 0 and horizon_days > 0:
                 absorption_ratio = max(0.0, (horizon_days - inv_days) / horizon_days)
                 inventory_factors[idx] = float(np.clip(absorption_ratio, 0.0, 1.0))

@@ -48,6 +48,8 @@ from app.services.institutional_adapters_service import institutional_adapters_s
 from app.services.alerting_service import alerting_service
 from app.agents.stress_copilot import stress_copilot
 from app.services.threat_intelligence_service import threat_intelligence_service
+from app.services.circuit_breaker_service import llm_circuit_breaker, ais_circuit_breaker, CircuitState
+from app.engine.chaos import run_comprehensive_chaos_suite
 
 app = FastAPI(
     title="RiskLattice API",
@@ -131,7 +133,7 @@ class BacktestRunRequest(BaseModel):
 
 @app.get("/api/v1/health")
 def health_check():
-    """System health check and database statistics."""
+    """System health check, database statistics, and circuit breaker telemetry."""
     try:
         node_count = db_manager.execute("SELECT count(*) FROM graph_nodes;")[0][0]
         edge_count = db_manager.execute("SELECT count(*) FROM graph_edges;")[0][0]
@@ -141,10 +143,67 @@ def health_check():
             "database": "DuckDB Connected",
             "total_nodes": node_count,
             "total_edges": edge_count,
-            "llm_mode": "Deterministic Hybrid Router"
+            "llm_mode": "Deterministic Hybrid Router",
+            "circuit_breakers": {
+                "llm_router": llm_circuit_breaker.state.value,
+                "ais_feed": ais_circuit_breaker.state.value,
+                "fallback_active": (
+                    llm_circuit_breaker.state != CircuitState.CLOSED
+                    or ais_circuit_breaker.state != CircuitState.CLOSED
+                ),
+            },
         }
     except Exception as e:
         return {"status": "degraded", "error": str(e)}
+
+
+@app.get("/api/v1/chaos/circuit-breaker")
+def get_circuit_breaker_telemetry():
+    """Returns real-time telemetry for all gateway circuit breakers."""
+    return {
+        "llm_router": llm_circuit_breaker.get_telemetry(),
+        "ais_feed": ais_circuit_breaker.get_telemetry(),
+    }
+
+
+class CircuitBreakerActionRequest(BaseModel):
+    name: str = "llm_router"
+    reason: Optional[str] = "Manual chaos action"
+
+
+@app.post("/api/v1/chaos/circuit-breaker/trip")
+def trip_circuit_breaker(req: CircuitBreakerActionRequest):
+    """Trips target circuit breaker for chaos engineering drills."""
+    target = llm_circuit_breaker if "llm" in req.name.lower() else ais_circuit_breaker
+    target.trip(reason=req.reason or "Manual trip via API")
+    return {
+        "message": f"Circuit breaker '{target.name}' tripped to OPEN",
+        "telemetry": target.get_telemetry(),
+    }
+
+
+@app.post("/api/v1/chaos/circuit-breaker/reset")
+def reset_circuit_breaker(req: CircuitBreakerActionRequest):
+    """Resets target circuit breaker to normal CLOSED operation."""
+    target = llm_circuit_breaker if "llm" in req.name.lower() else ais_circuit_breaker
+    target.reset(reason=req.reason or "Manual reset via API")
+    return {
+        "message": f"Circuit breaker '{target.name}' reset to CLOSED",
+        "telemetry": target.get_telemetry(),
+    }
+
+
+@app.post("/api/v1/chaos/drill")
+def execute_chaos_drill():
+    """Executes a full mathematical and gateway chaos drill battery."""
+    reports = run_comprehensive_chaos_suite()
+    all_passed = all(r.passed for r in reports)
+    return {
+        "status": "PASSED" if all_passed else "FAILED",
+        "total_drills": len(reports),
+        "passed_count": sum(1 for r in reports if r.passed),
+        "results": [r.model_dump() for r in reports],
+    }
 
 
 @app.get("/api/v1/graph")
