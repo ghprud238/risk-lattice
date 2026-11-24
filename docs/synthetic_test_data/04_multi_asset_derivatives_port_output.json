@@ -1,0 +1,96 @@
+{
+  "portfolio_name": "Multi-Asset Cross-Asset Convexity Book",
+  "total_notional_usd": 13150000.0,
+  "total_stressed_pnl_usd": -2279277.78,
+  "net_effective_return_pct": -17.33,
+  "evaluated_positions": [
+    {
+      "ticker": "NVDA",
+      "type": "EQUITY",
+      "notional_usd": 2000000.0,
+      "stressed_pnl_usd": -560000.0,
+      "effective_return_pct": -28.0,
+      "metrics_or_greeks": {
+        "delta": 1.0,
+        "beta": 1.0
+      },
+      "status_notes": "Equity LONG return -0.2800"
+    },
+    {
+      "ticker": "NVDA",
+      "type": "EQUITY_OPTION",
+      "notional_usd": 150000.0,
+      "stressed_pnl_usd": 517884.55,
+      "effective_return_pct": 345.26,
+      "metrics_or_greeks": {
+        "price_before": 6.0291,
+        "price_after": 26.8448,
+        "delta": -0.2989,
+        "gamma": 0.0123,
+        "vega": 0.217,
+        "vol_before": 0.45,
+        "vol_after": 0.548
+      },
+      "status_notes": "LONG PUT [K=115.0]: Spot 125.0->90.0, Vol 45.0%->54.8%"
+    },
+    {
+      "ticker": "TSM",
+      "type": "BOND",
+      "notional_usd": 3000000.0,
+      "stressed_pnl_usd": -748339.2,
+      "effective_return_pct": -24.94,
+      "metrics_or_greeks": {
+        "duration": 6.8,
+        "convexity": 55.0,
+        "spread_widening_bps": 448.0,
+        "yield_delta": 0.0448,
+        "price_pct_change": -0.2494
+      },
+      "status_notes": "Bond D=6.8y: Spread +448.0 bps, dP/P=-24.94%"
+    },
+    {
+      "ticker": "INTC",
+      "type": "CDS",
+      "notional_usd": 5000000.0,
+      "stressed_pnl_usd": 211176.87,
+      "effective_return_pct": 4.22,
+      "metrics_or_greeks": {
+        "spread_duration": 4.8,
+        "spread_before_bps": 120.0,
+        "spread_after_bps": 207.9904,
+        "hazard_rate_before": 0.02,
+        "hazard_rate_after": 0.0347,
+        "delta_spread_bps": 87.9904
+      },
+      "status_notes": "CDS BUY Protection: Spread 120 -> 208 bps (+88 bps)"
+    },
+    {
+      "ticker": "SUPPLIER_01",
+      "type": "PRIVATE_CREDIT",
+      "notional_usd": 2000000.0,
+      "stressed_pnl_usd": -700000.0,
+      "effective_return_pct": -35.0,
+      "metrics_or_greeks": {
+        "initial_leverage": 4.8,
+        "stressed_leverage": 8.0,
+        "covenant_limit": 4.5,
+        "covenant_breached": 1.0
+      },
+      "status_notes": "COVENANT BREACH! Leverage 4.8x -> 8.0x (Limit: 4.5x). Impairment: 35.0%"
+    },
+    {
+      "ticker": "CLO_MEZZ",
+      "type": "CLO_TRANCHE",
+      "notional_usd": 1000000.0,
+      "stressed_pnl_usd": -1000000.0,
+      "effective_return_pct": -100.0,
+      "metrics_or_greeks": {
+        "pool_loss": 0.25,
+        "attachment": 0.09,
+        "detachment": 0.18,
+        "tranche_loss_rate": 1.0
+      },
+      "status_notes": "CLO BBB Mezzanine [9.0%-18.0%]: Pool Loss 25.0% -> Tranche Impairment 100.0%"
+    }
+  ]
+}

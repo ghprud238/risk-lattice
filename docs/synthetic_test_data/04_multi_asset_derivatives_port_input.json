@@ -1,0 +1,68 @@
+{
+  "portfolio_name": "Multi-Asset Cross-Asset Convexity Book",
+  "positions": [
+    {
+      "type": "EQUITY",
+      "ticker": "NVDA",
+      "notional": 2000000.0,
+      "side": "LONG"
+    },
+    {
+      "type": "EQUITY_OPTION",
+      "ticker": "NVDA",
+      "notional": 150000.0,
+      "option_type": "PUT",
+      "spot": 125.0,
+      "strike": 115.0,
+      "maturity_years": 0.25,
+      "implied_vol": 0.45,
+      "side": "LONG"
+    },
+    {
+      "type": "BOND",
+      "ticker": "TSM",
+      "notional": 3000000.0,
+      "duration": 6.8,
+      "convexity": 55.0,
+      "spread_bps": 85.0,
+      "credit_beta": 1.4,
+      "side": "LONG"
+    },
+    {
+      "type": "CDS",
+      "ticker": "INTC",
+      "notional": 5000000.0,
+      "spread_duration": 4.8,
+      "current_spread_bps": 120.0,
+      "recovery_rate": 0.4,
+      "hazard_sensitivity": 2.5,
+      "side": "BUY"
+    },
+    {
+      "type": "PRIVATE_CREDIT",
+      "ticker": "SUPPLIER_01",
+      "notional": 2000000.0,
+      "initial_leverage": 4.8,
+      "covenant_max_leverage": 4.5,
+      "recovery_rate": 0.65,
+      "spread_bps": 650.0,
+      "side": "LONG"
+    },
+    {
+      "type": "CLO_TRANCHE",
+      "ticker": "CLO_MEZZ",
+      "notional": 1000000.0,
+      "attachment_point": 0.09,
+      "detachment_point": 0.18,
+      "tranche_name": "BBB Mezzanine",
+      "side": "LONG"
+    }
+  ],
+  "node_shocks": {
+    "NVDA": -0.28,
+    "TSM": -0.32,
+    "INTC": -0.22,
+    "SUPPLIER_01": -0.4,
+    "CLO_MEZZ": -0.25
+  }
+}

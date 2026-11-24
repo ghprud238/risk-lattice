@@ -290,8 +290,9 @@ Along with dynamic multi-period timeline modeling ($T \in [0, 90]$ days), capita
 A clear reference of what data enters RiskLattice and what intelligence and risk artifacts exit the system.
 
 > [!NOTE]
-> **Exhaustive Data Dictionary & Schema Specification**:
-> For complete field-by-field schemas, Pydantic/TypeScript interfaces, units, constraints, and verified copy-pasteable JSON/CSV payloads across all 19 operational use cases, see the **[Use Cases Input & Output Data Specification](docs/use_cases_data_specification.md)**.
+> **Exhaustive Data Specification & Synthetic Benchmark Fixtures**:
+> - For complete field-by-field schemas, Pydantic/TypeScript interfaces, units, constraints, and verified copy-pasteable payloads across all 19 operational use cases, see the **[Use Cases Input & Output Data Specification](docs/use_cases_data_specification.md)**.
+> - For machine-readable, ready-to-load testing inputs (`*.json`, `*.csv`) and mathematically verified outputs (`*.json`) across 9 core scenarios, see the **[Synthetic Test Data Catalog](docs/synthetic_test_data/README.md)**.
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
@@ -896,14 +897,18 @@ cd /Users/dpcubed/projects/risk-lattice
 .venv/bin/python backend/scripts/chaos_drill.py
 
 # 5. AST Engine Isolation Boundary Gate (Guarantees zero I/O imports in backend/app/engine/*.py)
-uv run pytest backend/tests/integration/test_boundary_and_engine.py -v
+.venv/bin/pytest backend/tests/integration/test_boundary_and_engine.py -v
 
-# 6. Complete Test Suite (106/106 tests passing in ~32s)
-uv run pytest backend/tests/ -v
+# 6. Synthetic Benchmark Fixtures Integration Gate (Validates all 9 institutional test fixtures)
+.venv/bin/pytest backend/tests/integration/test_synthetic_data_fixtures.py -v
+
+# 7. Complete Test Suite (116/116 tests passing in ~26s)
+.venv/bin/pytest backend/tests/ -v
 ```
 
-### Test Suite Coverage Breakdown (106 Tests Total)
+### Test Suite Coverage Breakdown (116 Tests Total)
 
+- **10/10 Synthetic Benchmark Fixtures Tests**: Bit-exact mathematical validation against machine-readable JSON/CSV test data across Taiwan foundry cascade, Suez AIS telemetry, Aladdin portfolio ingestion, multi-asset options/bonds/CDS/private credit/CLO pricing, tail-risk hedge optimizer, reverse stress testing, Almgren-Chriss fire sale, supply chain mutation ROI, and Four-Eyes cryptographic sealing.
 - **11/11 Adversarial Chaos & Circuit Breaker Fuzzing Tests**: Cyclic graph feedback damping, singular/collinear covariance PSD repair, extreme leverage cliffs ($D/E \to 10^6$), degenerate inventory buffer bounds, disconnected/island graphs, fuzzed shock vector sanitization (NaN/Inf), circuit breaker 3-state transitions (Closed/Open/Half-Open), and REST chaos endpoints.
 - **12/12 Analytical Numerical Test Cases ($N\text{-}01$ to $N\text{-}12$)**: Hand-calculated propagation chains, decay monotonicity, substitutability nullification, distress multiplier thresholds, outlier resistance, and floating-point bit determinism.
 - **8/8 Copula & Tail Risk Test Cases ($R\text{-}01$ to $R\text{-}08$)**: Positive semi-definite matrix repair, Student-$t$ lower tail dependence, subadditivity ($\text{CVaR} \ge \text{VaR}$), marginal risk additivity, and single-asset edge cases.

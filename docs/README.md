@@ -14,6 +14,18 @@ docs/
 ├── use_cases_data_specification.md            <-- Exhaustive Inputs & Outputs Data Specification (19 Use Cases)
 ├── mobile_architecture_guide.md               <-- React Native / Expo Mobile Architecture & Client-Server Split
 ├── competitive_analysis_and_monetization.md   <-- Institutional Competitive Landscape & B2B Monetization Model
+├── synthetic_test_data/                       <-- Machine-Readable Synthetic Input & Output Testing Fixtures
+│   ├── README.md                              <-- Catalog of 9 Institutional Scenarios, Schemas, & Math Ground Truth
+│   ├── generate_synthetic_test_data.py        <-- Automated Verification Fixture Generator
+│   ├── 01_taiwan_foundry_shock_input.json & output.json
+│   ├── 02_suez_maritime_blockade_input.json & output.json
+│   ├── 03_institutional_portfolio_aladdin_input.csv & output.json
+│   ├── 04_multi_asset_derivatives_port_input.json & output.json
+│   ├── 05_tail_risk_hedge_optimizer_input.json & output.json
+│   ├── 06_reverse_stress_testing_input.json & output.json
+│   ├── 07_almgren_chriss_liquidity_input.json & output.json
+│   ├── 08_supply_chain_mutation_input.json & output.json
+│   └── 09_four_eyes_audit_vault_input.json & output.json
 ├── adrs/                                      <-- Architecture Decision Records (ADR-001 to ADR-010)
 │   ├── ADR-001-storage.md                     <-- Embedded DuckDB OLAP Storage
 │   ├── ADR-002-compute.md                     <-- Pure Compute Engine Isolation Boundary
@@ -59,7 +71,8 @@ docs/
     ├── 2026-11-16.md                          <-- Live Threat Intel, Satellite AIS Simulator, SVI Index
     ├── 2026-11-17.md                          <-- Use Cases Data Specification & Schema Dictionary
     ├── 2026-11-19.md                          <-- React Native Mobile App, Client-Server Split, & Beta Strategy
-    └── 2026-11-23.md                          <-- Adversarial Chaos Engineering Suite & Gateway Circuit Breakers
+    ├── 2026-11-23.md                          <-- Adversarial Chaos Engineering Suite & Gateway Circuit Breakers
+    └── 2026-11-24.md                          <-- Competitive Landscape, Monetization, Compound AI Synergy, & Synthetic Fixtures
 ```
 
 ---
@@ -78,6 +91,8 @@ docs/
    Complete data dictionary and schema specification for all 19 operational use cases, providing exact JSON/CSV payloads, field definitions, mathematical transforms, and invariant boundary checks.
 6. **Institutional Positioning & Monetization Model ([Competitive Analysis & Monetization](./competitive_analysis_and_monetization.md))**:
    Comprehensive competitive teardown vs BlackRock Aladdin, MSCI Barra, Bloomberg PORT, Interos, and Palantir Foundry, detailing the 4-tier commercial pricing model ($45k to $1.25M), DaaS API, private BOM ingestion, and the 4-week pilot playbook.
+7. **Machine-Readable Synthetic Benchmark Fixtures ([Synthetic Test Data](./synthetic_test_data/README.md))**:
+   Complete repository of deterministic synthetic inputs (`*.json`, `*.csv`) and mathematically verified outputs (`*.json`) across 9 institutional scenarios, with automated regression coverage in CI (`test_synthetic_data_fixtures.py`).
 
 ---
 
@@ -96,8 +111,11 @@ cd /Users/dpcubed/projects/risk-lattice
 .venv/bin/python backend/scripts/verify_privacy.py
 
 # 4. AST Isolation Boundary Check
-uv run pytest backend/tests/integration/test_boundary_and_engine.py -v
+.venv/bin/pytest backend/tests/integration/test_boundary_and_engine.py -v
 
-# 5. Complete 95-Test Suite
-uv run pytest backend/tests/ -v
+# 5. Synthetic Fixtures Integration Suite
+.venv/bin/pytest backend/tests/integration/test_synthetic_data_fixtures.py -v
+
+# 6. Complete 116-Test Suite
+.venv/bin/pytest backend/tests/ -v
 ```

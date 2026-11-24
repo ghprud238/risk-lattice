@@ -1,0 +1,36 @@
+{
+  "scenario_name": "Taiwan Strait Semiconductor Disruption & Foundry Quarantine",
+  "scenario_description": "PLA exercises enforce a naval exclusion zone around Hsinchu Science Park, halting TSMC advanced wafer exports.",
+  "horizon_days": 20,
+  "initial_shocks": {
+    "FOUNDRY_TW": -0.7,
+    "BALTIC_DRY": 1.2
+  },
+  "inventory_buffer_overrides": {
+    "NVDA": 45.0,
+    "AAPL": 30.0,
+    "MSFT": 60.0
+  },
+  "portfolio_weights": {
+    "AMD": 0.05,
+    "BA": 0.05,
+    "CVX": 0.05,
+    "DAL": 0.05,
+    "DUK": 0.05,
+    "F": 0.05,
+    "GM": 0.05,
+    "INTC": 0.05,
+    "KRE": 0.05,
+    "NEE": 0.05,
+    "NVDA": 0.05,
+    "OXY": 0.05,
+    "PACW": 0.05,
+    "PLD": 0.05,
+    "SPG": 0.05,
+    "TSLA": 0.05,
+    "TSM": 0.05,
+    "UAL": 0.05,
+    "WAL": 0.05,
+    "XOM": 0.05
+  }
+}

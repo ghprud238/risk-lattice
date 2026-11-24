@@ -1,0 +1,11 @@
+{
+  "incident_id": "INC-SUEZ-2026-X1",
+  "target_choke_point": "GEO_SUEZ",
+  "headline": "Houthi Anti-Ship Missile Strike Forces Container Fleet Divergence Around Cape of Good Hope",
+  "severity": "CRITICAL",
+  "observed_transit_speed_knots": 2.8,
+  "baseline_transit_speed_knots": 12.0,
+  "active_vessel_queue": 118,
+  "baseline_vessel_queue": 85,
+  "duration_days": 35
+}

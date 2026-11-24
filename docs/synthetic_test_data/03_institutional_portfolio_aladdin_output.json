@@ -1,0 +1,22 @@
+{
+  "portfolio_name": "Aladdin Institutional Tech Long/Short Pod",
+  "total_notional_usd": 20000000.0,
+  "holdings_count": 10,
+  "normalized_weights": {
+    "AAPL": 0.125,
+    "NVDA": 0.15,
+    "TSM": 0.1,
+    "MSFT": 0.11,
+    "AMZN": 0.09,
+    "GOOGL": 0.075,
+    "INTC": 0.05,
+    "ASML": 0.1,
+    "AVGO": 0.1,
+    "QCOM": 0.1
+  },
+  "rule_p01_privacy_status": {
+    "dollar_values_scrubbed_from_llm": true,
+    "share_counts_scrubbed_from_llm": true,
+    "weights_sum": 1.0
+  }
+}

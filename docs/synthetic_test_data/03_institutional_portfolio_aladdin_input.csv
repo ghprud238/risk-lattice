@@ -1,0 +1,11 @@
+Ticker,NotionalUSD,Shares,AssetClass,Sector,Country
+AAPL,2500000.0,11500,EQUITY,Information Technology,US
+NVDA,3000000.0,24000,EQUITY,Semiconductors,US
+TSM,2000000.0,11800,EQUITY,Semiconductors,TW
+MSFT,2200000.0,5100,EQUITY,Software,US
+AMZN,1800000.0,9500,EQUITY,Consumer Discretionary,US
+GOOGL,1500000.0,8800,EQUITY,Communication Services,US
+INTC,1000000.0,32000,EQUITY,Semiconductors,US
+ASML,2000000.0,2300,EQUITY,Semiconductor Equipment,NL
+AVGO,2000000.0,1400,EQUITY,Semiconductors,US
+QCOM,2000000.0,12500,EQUITY,Semiconductors,US

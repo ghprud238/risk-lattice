@@ -1,0 +1,41 @@
+{
+  "liquidation_pct": 0.25,
+  "market_participation_rate": 0.1,
+  "fund_unencumbered_cash_usd": 15000000.0,
+  "portfolio_unhedged_pnl_usd": -23450000.0,
+  "gross_derivative_notional_usd": 50000000.0,
+  "positions": [
+    {
+      "asset_id": "NVDA",
+      "target_notional": 8000000.0,
+      "adv_30d": 2500000000.0,
+      "volatility_ann": 0.45,
+      "bid_ask_spread_bps": 2.5,
+      "liquidation_urgency": "HIGH"
+    },
+    {
+      "asset_id": "AAPL",
+      "target_notional": 6000000.0,
+      "adv_30d": 3200000000.0,
+      "volatility_ann": 0.28,
+      "bid_ask_spread_bps": 1.8,
+      "liquidation_urgency": "MEDIUM"
+    },
+    {
+      "asset_id": "TSM",
+      "target_notional": 5000000.0,
+      "adv_30d": 850000000.0,
+      "volatility_ann": 0.38,
+      "bid_ask_spread_bps": 4.2,
+      "liquidation_urgency": "FIRE_SALE"
+    },
+    {
+      "asset_id": "ASML",
+      "target_notional": 4000000.0,
+      "adv_30d": 450000000.0,
+      "volatility_ann": 0.4,
+      "bid_ask_spread_bps": 5.0,
+      "liquidation_urgency": "FIRE_SALE"
+    }
+  ]
+}

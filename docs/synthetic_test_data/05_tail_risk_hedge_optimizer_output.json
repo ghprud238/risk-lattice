@@ -1,0 +1,60 @@
+{
+  "status": "OPTIMAL_CONVERGED",
+  "initial_unhedged_pnl_usd": -3850000.0,
+  "hedged_pnl_usd": 2483437.16,
+  "pnl_improvement_usd": 6333437.16,
+  "total_hedge_cost_usd": 399999.81,
+  "budget_remaining_usd": 0.19,
+  "initial_cvar_99_usd": 4812500.0,
+  "hedged_cvar_99_usd": 0.0,
+  "cvar_reduction_pct": 100.0,
+  "optimal_allocations": [
+    {
+      "candidate_id": "SOXX_PUT",
+      "instrument_name": "SOXX Semiconductor ETF Out-of-the-Money Put Options (Delta: -0.25)",
+      "target_node": "TSM",
+      "action": "BUY",
+      "allocated_notional_usd": 9813323.66,
+      "estimated_cost_usd": 372906.3,
+      "pnl_protection_usd": 6354127.07,
+      "description": "Hedges TSM contagion via EQUITY_OPTION"
+    },
+    {
+      "candidate_id": "NVDA_PUT",
+      "instrument_name": "NVIDIA 3-Month Out-of-the-Money Put Protection (Delta: -0.22)",
+      "target_node": "NVDA",
+      "action": "BUY",
+      "allocated_notional_usd": 645057.59,
+      "estimated_cost_usd": 27092.42,
+      "pnl_protection_usd": 379293.86,
+      "description": "Hedges NVDA contagion via EQUITY_OPTION"
+    }
+  ],
+  "efficient_frontier": [
+    {
+      "budget": 80000.0,
+      "protection_pnl": 1346688.03,
+      "cvar_reduction_pct": 28.0
+    },
+    {
+      "budget": 200000.0,
+      "protection_pnl": 3366720.07,
+      "cvar_reduction_pct": 70.0
+    },
+    {
+      "budget": 320000.0,
+      "protection_pnl": 5386752.12,
+      "cvar_reduction_pct": 90.0
+    },
+    {
+      "budget": 400000.0,
+      "protection_pnl": 6733440.15,
+      "cvar_reduction_pct": 90.0
+    },
+    {
+      "budget": 420640.29,
+      "protection_pnl": 7043965.11,
+      "cvar_reduction_pct": 90.0
+    }
+  ]
+}

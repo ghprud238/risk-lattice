@@ -1,0 +1,13 @@
+{
+  "portfolio_notional_usd": 20000000.0,
+  "target_loss_pct": 0.15,
+  "factor_sensitivities": {
+    "FOUNDRY_TW": 0.45,
+    "BALTIC_DRY": 0.3,
+    "BRENT_CRUDE": 0.25,
+    "SOFR_SPREAD": 0.35,
+    "HY_OAS": 0.4,
+    "CANAL_TRANSIT": 0.28,
+    "CLOUD_OUTAGE_SEV": 0.2
+  }
+}

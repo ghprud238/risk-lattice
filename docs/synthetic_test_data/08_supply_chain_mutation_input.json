@@ -1,0 +1,28 @@
+{
+  "intervention_name": "TSMC & AMD Advanced Packaging Dual-Sourcing Mitigation",
+  "capex_budget_usd": 150000.0,
+  "mutations": [
+    {
+      "mutation_type": "REWEIGHT_EDGE",
+      "source_id": "FOUNDRY_TW",
+      "target_id": "TSM",
+      "new_weight": 0.3,
+      "capex_cost": 100000.0,
+      "lead_time_months": 12,
+      "rationale": "Diversify wafer fabrication away from sole-source Hsinchu fab"
+    },
+    {
+      "mutation_type": "SEVER_EDGE",
+      "source_id": "FOUNDRY_TW",
+      "target_id": "AMD",
+      "new_weight": 0.0,
+      "capex_cost": 50000.0,
+      "lead_time_months": 6,
+      "rationale": "Qualify secondary packaging and foundry partner"
+    }
+  ],
+  "test_shock": {
+    "FOUNDRY_TW": -0.7,
+    "BALTIC_DRY": 1.2
+  }
+}

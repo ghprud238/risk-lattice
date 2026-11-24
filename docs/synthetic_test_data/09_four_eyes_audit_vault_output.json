@@ -1,0 +1,17 @@
+{
+  "run_id": "RUN-2026-11-24-CCAR-STRESS-4A",
+  "audit_status": "APPROVED_AND_LOCKED",
+  "cryptographic_sha256_seal": "d6f7e83391e3e6907ae518bda270cc06fd7b18ad39529be0ae1d0ec40dde01de",
+  "dual_key_signoff": {
+    "preparer": "Alex Mercer",
+    "preparer_role": "SENIOR_RISK_ANALYST",
+    "approver": "Sarah Connor",
+    "approver_role": "CHIEF_RISK_OFFICER",
+    "sealed_at": "2026-11-24T10:25:00Z"
+  },
+  "regulatory_compliance_stamp": {
+    "sr_11_7_model_governance": "VERIFIED_PASS",
+    "four_eyes_principle": "ENFORCED",
+    "tamper_evident_lock": true
+  }
+}

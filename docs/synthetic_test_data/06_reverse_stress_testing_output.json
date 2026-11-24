@@ -1,0 +1,53 @@
+{
+  "target_loss_pct": 15.0,
+  "achieved_loss_pct": 15.0,
+  "minimal_l2_norm": 0.1725,
+  "critical_factor": "FOUNDRY_TW",
+  "solver_iterations": 2,
+  "minimal_shock_vector": {
+    "FOUNDRY_TW": -0.0893,
+    "BALTIC_DRY": -0.0595,
+    "BRENT_CRUDE": -0.0496,
+    "SOFR_SPREAD": -0.0695,
+    "HY_OAS": -0.0794,
+    "CANAL_TRANSIT": -0.0556,
+    "CLOUD_OUTAGE_SEV": -0.0397
+  },
+  "top_vulnerable_factors": [
+    {
+      "factor": "FOUNDRY_TW",
+      "shock": -0.0893,
+      "loss_contribution_pct": 26.8
+    },
+    {
+      "factor": "HY_OAS",
+      "shock": -0.0794,
+      "loss_contribution_pct": 21.2
+    },
+    {
+      "factor": "SOFR_SPREAD",
+      "shock": -0.0695,
+      "loss_contribution_pct": 16.2
+    },
+    {
+      "factor": "BALTIC_DRY",
+      "shock": -0.0595,
+      "loss_contribution_pct": 11.9
+    },
+    {
+      "factor": "CANAL_TRANSIT",
+      "shock": -0.0556,
+      "loss_contribution_pct": 10.4
+    },
+    {
+      "factor": "BRENT_CRUDE",
+      "shock": -0.0496,
+      "loss_contribution_pct": 8.3
+    },
+    {
+      "factor": "CLOUD_OUTAGE_SEV",
+      "shock": -0.0397,
+      "loss_contribution_pct": 5.3
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "intervention_name": "TSMC & AMD Advanced Packaging Dual-Sourcing Mitigation",
+  "initial_unmitigated_pnl_usd": -424030.0,
+  "mutated_hardened_pnl_usd": -156444.88,
+  "capital_savings_usd": 267585.12,
+  "total_capex_invested_usd": 150000.0,
+  "resilience_roi_multiple": 1.78,
+  "initial_cvar_99_usd": 530037.5,
+  "mutated_cvar_99_usd": 195556.1,
+  "cvar_relief_pct": 63.11,
+  "is_financially_viable": true,
+  "top_mitigated_nodes": [
+    {
+      "node_id": "AMD",
+      "initial_shock": -0.2119,
+      "mutated_shock": -0.0742,
+      "pnl_savings": 137728.5
+    },
+    {
+      "node_id": "TSM",
+      "initial_shock": -0.3088,
+      "mutated_shock": -0.1789,
+      "pnl_savings": 129856.62
+    }
+  ]
+}

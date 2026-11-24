@@ -1,0 +1,43 @@
+{
+  "unhedged_portfolio_notional": 20000000.0,
+  "unhedged_pnl_usd": -3850000.0,
+  "max_hedge_budget_usd": 400000.0,
+  "node_shocks": {
+    "TSM": -0.35,
+    "NVDA": -0.28,
+    "F": -0.22,
+    "BALTIC_DRY": 0.4
+  },
+  "candidate_instruments": [
+    {
+      "candidate_id": "SOXX_PUT",
+      "target_node": "TSM",
+      "instrument_type": "EQUITY_OPTION",
+      "side": "BUY",
+      "unit_cost_bps": 380.0,
+      "protection_elasticity": 1.85,
+      "max_notional": 10000000.0,
+      "description": "SOXX Semiconductor ETF Out-of-the-Money Put Options (Delta: -0.25)"
+    },
+    {
+      "candidate_id": "F_CDS_5Y",
+      "target_node": "F",
+      "instrument_type": "CDS",
+      "side": "BUY",
+      "unit_cost_bps": 210.0,
+      "protection_elasticity": 1.4,
+      "max_notional": 8000000.0,
+      "description": "Ford Motor Credit 5-Year Senior CDS Protection"
+    },
+    {
+      "candidate_id": "NVDA_PUT",
+      "target_node": "NVDA",
+      "instrument_type": "EQUITY_OPTION",
+      "side": "BUY",
+      "unit_cost_bps": 420.0,
+      "protection_elasticity": 2.1,
+      "max_notional": 10000000.0,
+      "description": "NVIDIA 3-Month Out-of-the-Money Put Protection (Delta: -0.22)"
+    }
+  ]
+}

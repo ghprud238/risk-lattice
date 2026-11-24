@@ -1,0 +1,56 @@
+{
+  "total_notional_liquidated_usd": 5750000.0,
+  "total_market_impact_loss_usd": 132059.54,
+  "blended_price_discount_pct": 2.3,
+  "fire_sale_contagion_multiplier": 1.0,
+  "margin_summary": {
+    "initial_margin_requirement_usd": 4000000.0,
+    "stressed_margin_requirement_usd": 9000000.0,
+    "margin_call_cash_drain_usd": 14380000.0,
+    "variation_margin_deficit_usd": 9380000.0,
+    "post_stress_lcr_pct": 104.3,
+    "days_to_cash_exhaustion": 15.3
+  },
+  "asset_slippage_breakdown": [
+    {
+      "asset_id": "NVDA",
+      "notional_sold_usd": 2000000.0,
+      "adv_ratio": 0.0008,
+      "temporary_impact_bps": 208.1,
+      "permanent_impact_bps": 2.2,
+      "spread_blowout_bps": 4.6,
+      "total_liquidation_cost_usd": 42310.8,
+      "realized_price_discount_pct": 2.12
+    },
+    {
+      "asset_id": "AAPL",
+      "notional_sold_usd": 1500000.0,
+      "adv_ratio": 0.0005,
+      "temporary_impact_bps": 94.5,
+      "permanent_impact_bps": 0.9,
+      "spread_blowout_bps": 2.4,
+      "total_liquidation_cost_usd": 14428.74,
+      "realized_price_discount_pct": 0.96
+    },
+    {
+      "asset_id": "TSM",
+      "notional_sold_usd": 1250000.0,
+      "adv_ratio": 0.0015,
+      "temporary_impact_bps": 288.0,
+      "permanent_impact_bps": 5.5,
+      "spread_blowout_bps": 10.6,
+      "total_liquidation_cost_usd": 37005.68,
+      "realized_price_discount_pct": 2.96
+    },
+    {
+      "asset_id": "ASML",
+      "notional_sold_usd": 1000000.0,
+      "adv_ratio": 0.0022,
+      "temporary_impact_bps": 372.7,
+      "permanent_impact_bps": 8.3,
+      "spread_blowout_bps": 12.6,
+      "total_liquidation_cost_usd": 38314.33,
+      "realized_price_discount_pct": 3.83
+    }
+  ]
+}

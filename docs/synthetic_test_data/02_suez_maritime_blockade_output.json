@@ -1,0 +1,19 @@
+{
+  "incident_id": "INC-SUEZ-2026-X1",
+  "systemic_vulnerability_index": 18.8,
+  "target_choke_point_telemetry": {
+    "choke_point_id": "GEO_SUEZ",
+    "name": "Suez Canal / Bab-el-Mandeb",
+    "status": "BLOCKADE",
+    "congestion_index": 4.45,
+    "active_vessel_queue": 118,
+    "demurrage_surge_pct": 155.2,
+    "disruption_probability": 1.0
+  },
+  "translated_macro_impulses": {
+    "PORT_RTM": -0.8775,
+    "ASML": -0.7459,
+    "BMW": -0.634,
+    "F": -0.5389
+  }
+}

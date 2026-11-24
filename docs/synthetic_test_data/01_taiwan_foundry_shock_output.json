@@ -1,0 +1,70 @@
+{
+  "scenario_name": "Taiwan Strait Semiconductor Disruption & Foundry Quarantine",
+  "total_active_nodes": 16,
+  "critical_propagation_paths": [
+    [
+      "BALTIC_DRY",
+      "LOGISTICS_PORT_LA",
+      "AVIONICS_DSP_SUP",
+      "BA"
+    ],
+    [
+      "FOUNDRY_TW",
+      "TSM"
+    ]
+  ],
+  "risk_metrics": {
+    "var_95_pct": 4.02,
+    "var_99_pct": 5.44,
+    "cvar_95_pct": 4.96,
+    "cvar_99_pct": 6.67,
+    "tail_ratio": 10.66,
+    "simulations_count": 5000
+  },
+  "portfolio_valuation": {
+    "base_notional_usd": 20000000.0,
+    "stressed_pnl_usd": -424020.0,
+    "effective_return_pct": -2.12,
+    "order1_direct_pnl_usd": -903000.0,
+    "order2_tier1_pnl_usd": 351370.0,
+    "order3_4_network_pnl_usd": 127610.0
+  },
+  "top_impacted_nodes": [
+    {
+      "node_id": "TSM",
+      "name": "Taiwan Semiconductor Mfg Co",
+      "cumulative_shock": -0.3088,
+      "distress_multiplier": 1.0
+    },
+    {
+      "node_id": "FOUNDRY_TW",
+      "name": "Taiwan Advanced Wafer Foundry",
+      "cumulative_shock": -0.244,
+      "distress_multiplier": 1.0
+    },
+    {
+      "node_id": "AMD",
+      "name": "Advanced Micro Devices",
+      "cumulative_shock": -0.2119,
+      "distress_multiplier": 1.0
+    },
+    {
+      "node_id": "MEM_PACKAGING_FAB",
+      "name": "Advanced Memory Packaging Fab",
+      "cumulative_shock": -0.1665,
+      "distress_multiplier": 1.0
+    },
+    {
+      "node_id": "AUTO_WIRING_HARNESS",
+      "name": "Automotive Wiring Harness Cluster",
+      "cumulative_shock": -0.1059,
+      "distress_multiplier": 1.0
+    },
+    {
+      "node_id": "F",
+      "name": "Ford Motor Company",
+      "cumulative_shock": -0.0411,
+      "distress_multiplier": 1.525
+    }
+  ]
+}
