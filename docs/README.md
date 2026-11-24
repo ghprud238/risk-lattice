@@ -13,6 +13,7 @@ docs/
 ├── README.md                                  <-- Master Documentation Hub (This File)
 ├── use_cases_data_specification.md            <-- Exhaustive Inputs & Outputs Data Specification (19 Use Cases)
 ├── mobile_architecture_guide.md               <-- React Native / Expo Mobile Architecture & Client-Server Split
+├── competitive_analysis_and_monetization.md   <-- Institutional Competitive Landscape & B2B Monetization Model
 ├── adrs/                                      <-- Architecture Decision Records (ADR-001 to ADR-010)
 │   ├── ADR-001-storage.md                     <-- Embedded DuckDB OLAP Storage
 │   ├── ADR-002-compute.md                     <-- Pure Compute Engine Isolation Boundary
@@ -75,6 +76,8 @@ docs/
    Institutional stress test runs produce immutable SHA-256 digital seals requiring independent secondary sign-off before submission to bank regulators (Federal Reserve SR 11-7 compliance).
 5. **Exhaustive Input & Output Data Specification ([Use Cases Data Spec](./use_cases_data_specification.md))**:
    Complete data dictionary and schema specification for all 19 operational use cases, providing exact JSON/CSV payloads, field definitions, mathematical transforms, and invariant boundary checks.
+6. **Institutional Positioning & Monetization Model ([Competitive Analysis & Monetization](./competitive_analysis_and_monetization.md))**:
+   Comprehensive competitive teardown vs BlackRock Aladdin, MSCI Barra, Bloomberg PORT, Interos, and Palantir Foundry, detailing the 4-tier commercial pricing model ($45k to $1.25M), DaaS API, private BOM ingestion, and the 4-week pilot playbook.
 
 ---
 

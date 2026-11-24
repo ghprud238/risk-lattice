@@ -920,3 +920,87 @@ uv run pytest backend/tests/ -v
 - **5/5 Property Invariant Test Cases ($P\text{-}01$ to $P\text{-}05$)**: Privacy token scrubbing, energy conservation, simulation idempotency, loss monotonicity, and verbatim filing citation presence.
 - **FastAPI REST & SSE Integration Tests**: Scenario draft workflows, version approvals, cancellation lifecycle, and streaming event sequences.
 - **Sub-2.0s Performance Gate**: 50 nodes + 4 hops + 10,000-path Copula simulation clocks at **0.041 seconds**.
+
+---
+
+## 10. Institutional Competitive Analysis & Strategic Positioning
+
+RiskLattice occupies a unique position in enterprise financial risk management by synthesizing **causal multi-tier network propagation** with **rigorous quantitative finance (Student-$t$ Copulas, Almgren-Chriss liquidity, non-linear balance-sheet cliffs)**.
+
+```
+             HIGH
+              ▲
+              │                                      ★ RISKLATTICE
+              │                            (4-Hop Causal Graph + Student-t Copula +
+              │                             Verbatim 10-K + AIS Radar + Sub-50ms)
+              │
+              │         INTEROS / RESILINC
+SUPPLY        │         • Supplier mapping
+CHAIN &       │         • Qualitative risk scores
+NETWORK       │         • Zero financial PnL
+TOPOLOGY      │         • Procurement focus
+DEPTH         │
+              │
+              │                                      BLACKROCK ALADDIN / MSCI BARRA
+              │                                      • Gold standard portfolio risk
+              │                                      • Linear factor covariance
+              │                                      • Blind to Tier 2-4 bottlenecks
+              │                                      • Overnight batch processing
+              │
+              └─────────────────────────────────────────────────────────────────────►
+              LOW                       FINANCIAL RISK ENGINE DEPTH              HIGH
+                                     (Multi-Asset Valuation, Copula CVaR, FRTB)
+```
+
+### Head-to-Head Comparison Matrix
+
+| Capability / Dimension | **RiskLattice** | **BlackRock Aladdin** | **MSCI Barra** | **Bloomberg PORT** | **Interos / Resilinc** | **Palantir Foundry** |
+|:---|:---:|:---:|:---:|:---:|:---:|:---:|
+| **Multi-Hop Contagion (Tier 2-4)** | **Yes (4-Hop Damped $\alpha=0.65$)** | No (Linear factor beta) | No (Pure covariance) | No (Parent/sub only) | Yes (Supply graph) | Yes (Custom ontology) |
+| **Balance Sheet Solvency Cliff ($\lambda_v$)** | **Yes (Non-linear leverage jump)** | No | No | No | Qualitative score only | Custom build required |
+| **Heavy-Tailed Copula Tail-Risk** | **Yes (Student-$t$, $\nu=4$, PCG64)** | Historical / Parametric | Gaussian / Cornish-Fisher | Historical VaR only | No | Custom code required |
+| **Multi-Asset Valuation & Greeks** | **Yes (7 asset classes, BS skew, CDS)** | Yes | Yes (Equity focus) | Yes | No | Custom code required |
+| **Verbatim Regulatory Text Grounding** | **Yes (Exact SEC 10-K citations)** | No | No | Linked filing viewer | No (Proprietary survey) | Document indexing |
+| **Real-Time AIS Maritime Telemetry** | **Yes (5 choke points, SVI Index)** | No | No | Vessel mapping | Transit alerts | Custom integration |
+| **Endogenous Fire-Sale Liquidity** | **Yes (Almgren-Chriss + Margin)** | Simplified bid-ask | Simplified liquidity | Bid-ask spread | No | Custom build required |
+| **Simulation Latency** | **Sub-50ms (Real-time sliders)** | Minutes to hours (Batch) | Batch calculation | 2–10 seconds | Static dashboard | Queries take seconds/min |
+| **Data Privacy & Egress** | **Rule P-01 (Air-Gapped Local)** | Hosted Cloud | Hosted Cloud | Bloomberg Terminal | Hosted SaaS | Private Cloud / VPC |
+| **Governance & Audit Trail** | **Four-Eyes (SHA-256 Dual Sign)** | Audit logging | Standard logs | User logs | No | Immutable logs |
+| **Typical Annual Contract (ARR)** | **$45k – $375k** | **$1M – $10M+** | **$200k – $1M+** | **$30k / seat** | **$50k – $150k** | **$1.5M – $5M+** |
+
+> [!TIP]
+> For detailed competitive teardowns and incumbent vulnerabilities, read the **[Institutional Competitive Analysis & Commercial Monetization Guide](docs/competitive_analysis_and_monetization.md)**.
+
+---
+
+## 11. Monetization Opportunities & B2B Commercial Model
+
+RiskLattice is commercialized through a modular enterprise licensing model structured across four tiers and three high-margin expansion vectors:
+
+### 11.1 Enterprise Subscription Tiers
+
+1. **Tier 1: Boutique Quant & Single-Pod Hedge Fund ($45,000 – $95,000 / year)**:
+   - Target: Single-strategy pods and boutique asset managers ($250M – $2B AUM).
+   - Value: Real-time 4-hop cascade simulation, live AIS threat radar, Student-$t$ Copula 99% CVaR, and 5 Web/Mobile seats.
+2. **Tier 2: Multi-Strategy Hedge Fund & Asset Manager ($150,000 – $375,000 / year)**:
+   - Target: Tier-1 multi-strategy funds (Citadel, Millennium, Point72, Balyasny) ($5B – $50B+ AUM).
+   - Value: What-If Supply Chain Graph Mutation Studio, Almgren-Chriss liquidity stress, Four-Eyes cryptographic audit vault, Aladdin/PORT adapters, and 25 seats.
+3. **Tier 3: Tier-1 Bank (G-SIB) & Treasury Compliance ($500,000 – $1,250,000 / year)**:
+   - Target: Global investment banks (JPMorgan, Goldman Sachs, Morgan Stanley) and national bank treasuries.
+   - Value: Enterprise-wide site license, air-gapped VPC deployment, Fed CCAR Form FR Y-14A Schedule A regulatory export, and Federal Reserve SR 11-7 model validation pack.
+4. **Tier 4: Threat Intelligence & Choke-Point Data-as-a-Service (DaaS) ($60,000 – $180,000 / year)**:
+   - Target: Commodity trading desks (Trafigura, Glencore), marine reinsurance underwriters (Swiss Re, Lloyd's), and macro funds.
+   - Value: Machine-readable API feed of 5 maritime choke points, Systemic Vulnerability Index (SVI 0-100), demurrage surge rates, and multi-channel webhook dispatch.
+
+### 11.2 High-Margin Expansion Revenue Streams
+
+- **Private Bill-of-Materials (BOM) Ingestion ($75k – $150k setup)**: Air-gapped onboarding of confidential corporate supply chain contracts (e.g. automotive OEMs and aerospace defense contractors).
+- **Federal Reserve SR 11-7 Model Validation Dossier ($50k – $120k per audit cycle)**: Pre-packaged model risk management validation dossiers displacing costly Big-4 consulting engagements.
+- **Custom Reverse Stress-Testing Advisory ($100k – $250k per engagement)**: Custom inverse optimization for sovereign wealth funds and pensions identifying minimal breaking points.
+
+### 11.3 Economic ROI for Buyers
+
+- **Hedge Fund ROI**: Avoiding a single 250 bps tail drawdown on a $1B book saves **$25,000,000** (a **166x return on investment** on a $150k license).
+- **Bank FRTB Capital Relief ROI**: Demonstrating non-linear inventory absorption kinetics reduces stressed Expected Shortfall capital charges by 45 bps, freeing **$45,000,000 in regulatory capital** across a $10B book ($4.5M annual carry savings).
+- **Corporate Treasury ROI**: Pre-hedging maritime choke-point diversions 24 days before inventory depletion avoids automotive assembly line halts costing **$15M – $40M**.
+
