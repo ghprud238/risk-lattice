@@ -12,19 +12,40 @@ import {
   Cpu,
   ChevronRight,
   Sparkles,
+  KeyRound,
+  Eye,
+  EyeOff,
+  UserPlus,
+  LogIn,
 } from "lucide-react";
 import { useAuth, UserRole } from "@/context/AuthContext";
 
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
 
 export default function LoginScreen() {
-  const { loginWithGoogleCredential, loginWithPersona, isLoading } = useAuth();
-  const [activeTab, setActiveTab] = useState<"google" | "personas">("google");
-  const [customEmail, setCustomEmail] = useState("");
-  const [customName, setCustomName] = useState("");
-  const [customOrg, setCustomOrg] = useState("");
-  const [customRole, setCustomRole] = useState<UserRole>("CHIEF_RISK_OFFICER");
+  const {
+    loginWithCredentials,
+    registerUser,
+    loginWithGoogleCredential,
+    loginWithPersona,
+    isLoading,
+  } = useAuth();
+
+  // Top level options: "proprietary" (Option 2) or "google" (Option 1)
+  const [authMethod, setAuthMethod] = useState<"proprietary" | "google">("proprietary");
+
+  // Proprietary sub-mode: "login" or "register"
+  const [proprietaryMode, setProprietaryMode] = useState<"login" | "register">("login");
+
+  // Form states
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const [organization, setOrganization] = useState("");
+  const [role, setRole] = useState<UserRole>("CHIEF_RISK_OFFICER");
+  const [showPassword, setShowPassword] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   const googleBtnRef = useRef<HTMLDivElement>(null);
 
@@ -40,11 +61,12 @@ export default function LoginScreen() {
       if ((window as any).google?.accounts?.id) {
         (window as any).google.accounts.id.initialize({
           client_id: GOOGLE_CLIENT_ID,
-          callback: (response: any) => {
+          callback: async (response: any) => {
             if (response.credential) {
-              loginWithGoogleCredential(response.credential).catch(() => {
-                setErrorMsg("Google authentication failed. Please try again.");
-              });
+              const res = await loginWithGoogleCredential(response.credential);
+              if (!res.success) {
+                setErrorMsg(res.error || "Google authentication failed. Please try again.");
+              }
             }
           },
         });
@@ -63,52 +85,80 @@ export default function LoginScreen() {
     document.body.appendChild(script);
 
     return () => {
-      document.body.removeChild(script);
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
     };
   }, [loginWithGoogleCredential]);
 
+  // Proprietary Login Handler
+  const handleProprietarySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMsg(null);
+    setSuccessMsg(null);
+
+    if (!email || !password) {
+      setErrorMsg("Please provide both email and password.");
+      return;
+    }
+
+    if (proprietaryMode === "login") {
+      const res = await loginWithCredentials(email, password);
+      if (!res.success) {
+        setErrorMsg(res.error || "Invalid institutional credentials.");
+      }
+    } else {
+      if (!name) {
+        setErrorMsg("Please provide your full name for regulatory attribution.");
+        return;
+      }
+      if (password.length < 6) {
+        setErrorMsg("Password must be at least 6 characters.");
+        return;
+      }
+      const res = await registerUser(
+        email,
+        password,
+        name,
+        role,
+        organization || "Institutional Client"
+      );
+      if (!res.success) {
+        setErrorMsg(res.error || "Registration failed.");
+      } else {
+        setSuccessMsg("Account successfully registered! Logging you in...");
+      }
+    }
+  };
+
+  // Quick fill default institutional accounts
+  const handleQuickFill = (
+    accountEmail: string,
+    accountPass: string,
+    accountName: string,
+    accountRole: UserRole,
+    accountOrg: string
+  ) => {
+    setEmail(accountEmail);
+    setPassword(accountPass);
+    setName(accountName);
+    setRole(accountRole);
+    setOrganization(accountOrg);
+    setProprietaryMode("login");
+    setErrorMsg(null);
+  };
+
+  // Google Workspace Simulated Fallback Login
   const handleSimulatedGoogleLogin = async () => {
     setErrorMsg(null);
-    // Instant Google Workspace OAuth emulation
-    const success = await loginWithPersona(
+    const res = await loginWithPersona(
       "alex.turner@institutional-risk.google.com",
       "Alex Turner",
       "CHIEF_RISK_OFFICER",
       "Google Cloud Financial Services"
     );
-    if (!success) {
-      setErrorMsg("Failed to authenticate session.");
-    }
-  };
-
-  const handlePersonaSelect = async (
-    email: string,
-    name: string,
-    role: UserRole,
-    org: string
-  ) => {
-    setErrorMsg(null);
-    const success = await loginWithPersona(email, name, role, org);
-    if (!success) {
-      setErrorMsg("Failed to authenticate persona.");
-    }
-  };
-
-  const handleCustomSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!customEmail) {
-      setErrorMsg("Please provide an institutional email address.");
-      return;
-    }
-    setErrorMsg(null);
-    const success = await loginWithPersona(
-      customEmail,
-      customName || customEmail.split("@")[0],
-      customRole,
-      customOrg || "Institutional Asset Management"
-    );
-    if (!success) {
-      setErrorMsg("Failed to authenticate custom persona.");
+    if (!res.success) {
+      setErrorMsg(res.error || "Failed to authenticate Google session.");
     }
   };
 
@@ -130,7 +180,7 @@ export default function LoginScreen() {
               Risk<span className="text-cyan-400">Lattice</span>
             </h1>
             <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-950/80 text-cyan-400 border border-cyan-800/60">
-              ENTERPRISE SSO
+              ENTERPRISE AUTH
             </span>
           </div>
           <p className="text-xs text-slate-400 max-w-sm mx-auto">
@@ -139,45 +189,61 @@ export default function LoginScreen() {
         </div>
 
         {/* Card Body */}
-        <div className="bg-[#0b101b]/90 border border-slate-800/90 rounded-2xl p-6 shadow-2xl backdrop-blur-xl space-y-5">
+        <div className="bg-[#0b101b]/95 border border-slate-800/90 rounded-2xl p-6 shadow-2xl backdrop-blur-xl space-y-5">
           {errorMsg && (
             <div className="p-3 rounded-xl bg-rose-950/40 border border-rose-800/60 text-rose-300 text-xs flex items-center space-x-2">
               <ShieldAlert className="w-4 h-4 shrink-0 text-rose-400" />
               <span>{errorMsg}</span>
             </div>
           )}
+          {successMsg && (
+            <div className="p-3 rounded-xl bg-emerald-950/40 border border-emerald-800/60 text-emerald-300 text-xs flex items-center space-x-2">
+              <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
+              <span>{successMsg}</span>
+            </div>
+          )}
 
-          {/* Tab Selector */}
+          {/* Top-Level Authentication Method Selector */}
           <div className="flex rounded-xl bg-slate-900/90 p-1 border border-slate-800 text-xs font-medium">
             <button
-              onClick={() => setActiveTab("google")}
+              onClick={() => {
+                setAuthMethod("proprietary");
+                setErrorMsg(null);
+              }}
               className={`flex-1 py-2 rounded-lg transition flex items-center justify-center space-x-2 ${
-                activeTab === "google"
+                authMethod === "proprietary"
                   ? "bg-cyan-500 text-slate-950 font-bold shadow"
                   : "text-slate-400 hover:text-white"
               }`}
             >
-              <span>Google Login</span>
+              <KeyRound className="w-3.5 h-3.5" />
+              <span>Proprietary Login</span>
             </button>
             <button
-              onClick={() => setActiveTab("personas")}
+              onClick={() => {
+                setAuthMethod("google");
+                setErrorMsg(null);
+              }}
               className={`flex-1 py-2 rounded-lg transition flex items-center justify-center space-x-2 ${
-                activeTab === "personas"
+                authMethod === "google"
                   ? "bg-cyan-500 text-slate-950 font-bold shadow"
                   : "text-slate-400 hover:text-white"
               }`}
             >
-              <span>Sandbox Personas</span>
+              <span>Google SDK / SSO</span>
             </button>
           </div>
 
-          {activeTab === "google" && (
-            <div className="space-y-4">
+          {/* ========================================================================= */}
+          {/* OPTION 1: GOOGLE SDK / WORKSPACE SSO                                      */}
+          {/* ========================================================================= */}
+          {authMethod === "google" && (
+            <div className="space-y-4 pt-1">
               <p className="text-xs text-slate-400 text-center">
-                Sign in with your verified institutional Google Workspace account or enterprise OAuth identity.
+                Sign in with your verified institutional Google Workspace account or corporate Google OAuth identity.
               </p>
 
-              {/* Native Google One-Tap Container (if Client ID present) */}
+              {/* Native Google One-Tap Container (if Client ID configured) */}
               {GOOGLE_CLIENT_ID && (
                 <div className="flex justify-center my-3" ref={googleBtnRef}></div>
               )}
@@ -217,147 +283,257 @@ export default function LoginScreen() {
             </div>
           )}
 
-          {activeTab === "personas" && (
+          {/* ========================================================================= */}
+          {/* OPTION 2: PROPRIETARY LOGIN & REGISTRATION SYSTEM                         */}
+          {/* ========================================================================= */}
+          {authMethod === "proprietary" && (
             <div className="space-y-4">
-              <p className="text-[11px] text-slate-400">
-                Select an institutional persona for evaluation and stress testing:
-              </p>
-
-              {/* Persona Cards */}
-              <div className="space-y-2">
+              {/* Sub-mode Switch: Login vs Register */}
+              <div className="flex justify-between items-center border-b border-slate-800/80 pb-2">
+                <div className="text-xs font-semibold text-slate-300 flex items-center space-x-1.5">
+                  {proprietaryMode === "login" ? (
+                    <>
+                      <LogIn className="w-3.5 h-3.5 text-cyan-400" />
+                      <span>Account Sign In</span>
+                    </>
+                  ) : (
+                    <>
+                      <UserPlus className="w-3.5 h-3.5 text-cyan-400" />
+                      <span>Create Institutional Account</span>
+                    </>
+                  )}
+                </div>
                 <button
-                  onClick={() =>
-                    handlePersonaSelect(
-                      "sarah.chen@citadel-macro.com",
-                      "Sarah Chen",
-                      "CHIEF_RISK_OFFICER",
-                      "Citadel Macro Fund"
-                    )
-                  }
-                  className="w-full text-left p-3 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-slate-800/80 hover:border-cyan-500/50 transition duration-150 group"
+                  type="button"
+                  onClick={() => {
+                    setProprietaryMode(proprietaryMode === "login" ? "register" : "login");
+                    setErrorMsg(null);
+                  }}
+                  className="text-xs text-cyan-400 hover:text-cyan-300 font-medium transition"
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2.5">
-                      <div className="w-8 h-8 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold text-xs">
-                        SC
-                      </div>
-                      <div>
-                        <div className="text-xs font-bold text-white group-hover:text-cyan-400 transition">
-                          Sarah Chen
-                        </div>
-                        <div className="text-[10px] text-slate-400">
-                          Chief Risk Officer • Citadel Macro Fund
-                        </div>
-                      </div>
-                    </div>
-                    <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-cyan-950 text-cyan-400 border border-cyan-800">
-                      CRO
-                    </span>
-                  </div>
-                </button>
-
-                <button
-                  onClick={() =>
-                    handlePersonaSelect(
-                      "marcus.vance@point72-tmt.com",
-                      "Marcus Vance",
-                      "PORTFOLIO_MANAGER",
-                      "Point72 Asset Management"
-                    )
-                  }
-                  className="w-full text-left p-3 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-slate-800/80 hover:border-cyan-500/50 transition duration-150 group"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2.5">
-                      <div className="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-xs">
-                        MV
-                      </div>
-                      <div>
-                        <div className="text-xs font-bold text-white group-hover:text-cyan-400 transition">
-                          Marcus Vance
-                        </div>
-                        <div className="text-[10px] text-slate-400">
-                          Quant Portfolio Manager • Point72 TMT Pod
-                        </div>
-                      </div>
-                    </div>
-                    <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-blue-950 text-blue-400 border border-blue-800">
-                      PM
-                    </span>
-                  </div>
-                </button>
-
-                <button
-                  onClick={() =>
-                    handlePersonaSelect(
-                      "elena.rostova@jpmorgan-risk.com",
-                      "Elena Rostova",
-                      "ANALYST",
-                      "JPMorgan Chase & Co."
-                    )
-                  }
-                  className="w-full text-left p-3 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-slate-800/80 hover:border-cyan-500/50 transition duration-150 group"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2.5">
-                      <div className="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs">
-                        ER
-                      </div>
-                      <div>
-                        <div className="text-xs font-bold text-white group-hover:text-cyan-400 transition">
-                          Elena Rostova
-                        </div>
-                        <div className="text-[10px] text-slate-400">
-                          Senior Risk Analyst • JPMorgan CCAR Desk
-                        </div>
-                      </div>
-                    </div>
-                    <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-emerald-950 text-emerald-400 border border-emerald-800">
-                      ANALYST
-                    </span>
-                  </div>
+                  {proprietaryMode === "login" ? "Need an account? Register" : "Have an account? Sign In"}
                 </button>
               </div>
 
-              {/* Custom Write-In Form */}
-              <form onSubmit={handleCustomSubmit} className="pt-3 border-t border-slate-800/80 space-y-2.5">
-                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                  Or Custom Institutional Email
+              {/* Proprietary Form */}
+              <form onSubmit={handleProprietarySubmit} className="space-y-3.5">
+                {proprietaryMode === "register" && (
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-300 mb-1">
+                      Full Legal Name
+                    </label>
+                    <input
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="e.g. Sarah Connor"
+                      className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 text-xs text-white placeholder-slate-500 outline-none transition"
+                    />
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-[11px] font-semibold text-slate-300 mb-1">
+                    Institutional Email Address
+                  </label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="e.g. cro@risklattice.com"
+                    required
+                    className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 text-xs text-white placeholder-slate-500 outline-none transition font-mono"
+                  />
                 </div>
-                <input
-                  type="email"
-                  placeholder="name@fund-name.com"
-                  value={customEmail}
-                  onChange={(e) => setCustomEmail(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-cyan-500"
-                />
+
+                <div>
+                  <label className="block text-[11px] font-semibold text-slate-300 mb-1">
+                    Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="••••••••••••"
+                      required
+                      className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 text-xs text-white placeholder-slate-500 outline-none transition pr-9"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition"
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                {proprietaryMode === "register" && (
+                  <>
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-300 mb-1">
+                          Assigned Role
+                        </label>
+                        <select
+                          value={role}
+                          onChange={(e) => setRole(e.target.value as UserRole)}
+                          className="w-full px-2.5 py-2 rounded-xl bg-slate-900 border border-slate-800 focus:border-cyan-500 text-xs text-white outline-none"
+                        >
+                          <option value="CHIEF_RISK_OFFICER">Chief Risk Officer</option>
+                          <option value="PORTFOLIO_MANAGER">Portfolio Manager</option>
+                          <option value="ANALYST">Quantitative Analyst</option>
+                          <option value="AUDITOR">Model Auditor</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-300 mb-1">
+                          Organization
+                        </label>
+                        <input
+                          type="text"
+                          value={organization}
+                          onChange={(e) => setOrganization(e.target.value)}
+                          placeholder="e.g. Citadel / BlackRock"
+                          className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 focus:border-cyan-500 text-xs text-white placeholder-slate-500 outline-none"
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
+
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full py-2 px-3 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold text-xs transition flex items-center justify-center space-x-1.5 shadow"
+                  className="w-full py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold text-xs transition duration-200 shadow-lg shadow-cyan-500/20 flex items-center justify-center space-x-2 disabled:opacity-50 active:scale-[0.98] mt-2"
                 >
-                  <span>Enter Command Center</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  {isLoading ? (
+                    <div className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <>
+                      <span>{proprietaryMode === "login" ? "Sign In to RiskLattice" : "Create Account"}</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </>
+                  )}
                 </button>
               </form>
+
+              {/* Pre-seeded Institutional Demo Credentials Quick-Fill */}
+              <div className="pt-3 border-t border-slate-800/80">
+                <div className="text-[10px] font-mono font-semibold uppercase tracking-wider text-slate-400 mb-2 flex items-center space-x-1">
+                  <Sparkles className="w-3 h-3 text-cyan-400" />
+                  <span>Pre-Seeded Demo Accounts (Click to Fill)</span>
+                </div>
+                <div className="grid grid-cols-2 gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleQuickFill(
+                        "cro@risklattice.com",
+                        "cro123!",
+                        "Sarah Connor",
+                        "CHIEF_RISK_OFFICER",
+                        "Global Risk Governance"
+                      )
+                    }
+                    className="p-2 text-left rounded-lg bg-slate-900/60 hover:bg-slate-800 border border-slate-800 hover:border-cyan-500/40 transition group"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-semibold text-white group-hover:text-cyan-400">
+                        CRO
+                      </span>
+                      <span className="text-[9px] font-mono text-cyan-400 bg-cyan-950 px-1 py-0.5 rounded">
+                        cro123!
+                      </span>
+                    </div>
+                    <div className="text-[10px] text-slate-400 truncate">cro@risklattice.com</div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleQuickFill(
+                        "pm@risklattice.com",
+                        "pm123!",
+                        "Marcus Vance",
+                        "PORTFOLIO_MANAGER",
+                        "Alpha Tech Pod"
+                      )
+                    }
+                    className="p-2 text-left rounded-lg bg-slate-900/60 hover:bg-slate-800 border border-slate-800 hover:border-cyan-500/40 transition group"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-semibold text-white group-hover:text-cyan-400">
+                        PM
+                      </span>
+                      <span className="text-[9px] font-mono text-blue-400 bg-blue-950 px-1 py-0.5 rounded">
+                        pm123!
+                      </span>
+                    </div>
+                    <div className="text-[10px] text-slate-400 truncate">pm@risklattice.com</div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleQuickFill(
+                        "analyst@risklattice.com",
+                        "analyst123!",
+                        "Elena Rostova",
+                        "ANALYST",
+                        "Macro Quant Research"
+                      )
+                    }
+                    className="p-2 text-left rounded-lg bg-slate-900/60 hover:bg-slate-800 border border-slate-800 hover:border-cyan-500/40 transition group"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-semibold text-white group-hover:text-cyan-400">
+                        Analyst
+                      </span>
+                      <span className="text-[9px] font-mono text-purple-400 bg-purple-950 px-1 py-0.5 rounded">
+                        analyst123!
+                      </span>
+                    </div>
+                    <div className="text-[10px] text-slate-400 truncate">analyst@risklattice.com</div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleQuickFill(
+                        "auditor@risklattice.com",
+                        "auditor123!",
+                        "David Sterling",
+                        "AUDITOR",
+                        "Model Validation"
+                      )
+                    }
+                    className="p-2 text-left rounded-lg bg-slate-900/60 hover:bg-slate-800 border border-slate-800 hover:border-cyan-500/40 transition group"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-semibold text-white group-hover:text-cyan-400">
+                        Auditor
+                      </span>
+                      <span className="text-[9px] font-mono text-amber-400 bg-amber-950 px-1 py-0.5 rounded">
+                        auditor123!
+                      </span>
+                    </div>
+                    <div className="text-[10px] text-slate-400 truncate">auditor@risklattice.com</div>
+                  </button>
+                </div>
+              </div>
             </div>
           )}
         </div>
 
-        {/* Security & Regulatory Highlights */}
-        <div className="grid grid-cols-3 gap-2 text-center text-[10px] text-slate-500">
-          <div className="p-2 rounded-xl bg-slate-950/40 border border-slate-900">
-            <span className="block font-bold text-slate-400">Fed SR 11-7</span>
-            <span>Model Governed</span>
-          </div>
-          <div className="p-2 rounded-xl bg-slate-950/40 border border-slate-900">
-            <span className="block font-bold text-slate-400">Rule P-01</span>
-            <span>Zero Data Egress</span>
-          </div>
-          <div className="p-2 rounded-xl bg-slate-950/40 border border-slate-900">
-            <span className="block font-bold text-slate-400">AST Isolated</span>
-            <span>Pure C/Python Math</span>
-          </div>
+        {/* Footer info */}
+        <div className="text-center text-[11px] text-slate-500 flex items-center justify-center space-x-2">
+          <span>DuckDB Salted PBKDF2 / Bcrypt</span>
+          <span>•</span>
+          <span>PyJWT HMAC-SHA256</span>
+          <span>•</span>
+          <span>Google Identity Services SDK</span>
         </div>
       </div>
     </div>

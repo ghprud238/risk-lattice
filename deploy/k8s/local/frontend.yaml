@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: risk-lattice-frontend
+  namespace: risk-lattice
   labels:
     app: risk-lattice-frontend
 spec:
@@ -20,19 +21,40 @@ spec:
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5050
+              name: http
           env:
             - name: NEXT_PUBLIC_API_URL
-              value: "http://risk-lattice-backend:5051"
+              value: "http://localhost:5051"
+            - name: PORT
+              value: "5050"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 5050
+            initialDelaySeconds: 6
+            periodSeconds: 8
+            timeoutSeconds: 3
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: risk-lattice-frontend
+  namespace: risk-lattice
+  labels:
+    app: risk-lattice-frontend
 spec:
   type: NodePort
   selector:
     app: risk-lattice-frontend
   ports:
-    - port: 5050
+    - name: http
+      port: 5050
       targetPort: 5050
       nodePort: 30080

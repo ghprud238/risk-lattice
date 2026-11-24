@@ -16,13 +16,31 @@ export interface UserProfile {
   created_at: string;
 }
 
+interface AuthResult {
+  success: boolean;
+  error?: string;
+}
+
 interface AuthContextType {
   user: UserProfile | null;
   token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  loginWithGoogleCredential: (credential: string) => Promise<boolean>;
-  loginWithPersona: (email: string, name: string, role: UserRole, organization: string) => Promise<boolean>;
+  loginWithCredentials: (email: string, password: string) => Promise<AuthResult>;
+  registerUser: (
+    email: string,
+    password: string,
+    name: string,
+    role: UserRole,
+    organization: string
+  ) => Promise<AuthResult>;
+  loginWithGoogleCredential: (credential: string) => Promise<AuthResult>;
+  loginWithPersona: (
+    email: string,
+    name: string,
+    role: UserRole,
+    organization: string
+  ) => Promise<AuthResult>;
   logout: () => void;
 }
 
@@ -31,8 +49,10 @@ const AuthContext = createContext<AuthContextType>({
   token: null,
   isAuthenticated: false,
   isLoading: true,
-  loginWithGoogleCredential: async () => false,
-  loginWithPersona: async () => false,
+  loginWithCredentials: async () => ({ success: false, error: "Not initialized" }),
+  registerUser: async () => ({ success: false, error: "Not initialized" }),
+  loginWithGoogleCredential: async () => ({ success: false, error: "Not initialized" }),
+  loginWithPersona: async () => ({ success: false, error: "Not initialized" }),
   logout: () => {},
 });
 
@@ -60,7 +80,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             if (res.ok) {
               return res.json();
             } else {
-              // Token invalid
               logout();
             }
           })
@@ -83,7 +102,67 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const loginWithGoogleCredential = async (credential: string): Promise<boolean> => {
+  const loginWithCredentials = async (email: string, password: string): Promise<AuthResult> => {
+    setIsLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        setToken(data.token);
+        setUser(data.user);
+        localStorage.setItem("risklattice_token", data.token);
+        localStorage.setItem("risklattice_user", JSON.stringify(data.user));
+        return { success: true };
+      } else {
+        return { success: false, error: data.detail || "Authentication failed." };
+      }
+    } catch (e: any) {
+      console.error("Proprietary login failed", e);
+      return { success: false, error: e.message || "Network error during login." };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const registerUser = async (
+    email: string,
+    password: string,
+    name: string,
+    role: UserRole,
+    organization: string
+  ): Promise<AuthResult> => {
+    setIsLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/auth/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, name, role, organization }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        setToken(data.token);
+        setUser(data.user);
+        localStorage.setItem("risklattice_token", data.token);
+        localStorage.setItem("risklattice_user", JSON.stringify(data.user));
+        return { success: true };
+      } else {
+        return { success: false, error: data.detail || "Registration failed." };
+      }
+    } catch (e: any) {
+      console.error("Registration failed", e);
+      return { success: false, error: e.message || "Network error during registration." };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loginWithGoogleCredential = async (credential: string): Promise<AuthResult> => {
     setIsLoading(true);
     try {
       const res = await fetch(`${API_BASE}/api/v1/auth/google`, {
@@ -92,18 +171,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         body: JSON.stringify({ credential }),
       });
 
+      const data = await res.json();
       if (res.ok) {
-        const data = await res.json();
         setToken(data.token);
         setUser(data.user);
         localStorage.setItem("risklattice_token", data.token);
         localStorage.setItem("risklattice_user", JSON.stringify(data.user));
-        return true;
+        return { success: true };
       }
-      return false;
-    } catch (e) {
+      return { success: false, error: data.detail || "Google login failed" };
+    } catch (e: any) {
       console.error("Google login failed", e);
-      return false;
+      return { success: false, error: e.message || "Google OAuth network error." };
     } finally {
       setIsLoading(false);
     }
@@ -114,7 +193,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     name: string,
     role: UserRole,
     organization: string
-  ): Promise<boolean> => {
+  ): Promise<AuthResult> => {
     setIsLoading(true);
     try {
       const res = await fetch(`${API_BASE}/api/v1/auth/google`, {
@@ -123,18 +202,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         body: JSON.stringify({ email, name, role, organization }),
       });
 
+      const data = await res.json();
       if (res.ok) {
-        const data = await res.json();
         setToken(data.token);
         setUser(data.user);
         localStorage.setItem("risklattice_token", data.token);
         localStorage.setItem("risklattice_user", JSON.stringify(data.user));
-        return true;
+        return { success: true };
       }
-      return false;
-    } catch (e) {
+      return { success: false, error: data.detail || "Persona login failed" };
+    } catch (e: any) {
       console.error("Persona login failed", e);
-      return false;
+      return { success: false, error: e.message || "Persona network error." };
     } finally {
       setIsLoading(false);
     }
@@ -160,6 +239,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         token,
         isAuthenticated: !!user,
         isLoading,
+        loginWithCredentials,
+        registerUser,
         loginWithGoogleCredential,
         loginWithPersona,
         logout,

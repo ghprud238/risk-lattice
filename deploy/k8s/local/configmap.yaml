@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: risk-lattice-config
+  namespace: risk-lattice
+data:
+  PORT: "5051"
+  HOST: "0.0.0.0"
+  MOCK_LLM: "true"
+  MINSKY_ENABLED: "false"
+  LOG_LEVEL: "INFO"
+  NEXT_PUBLIC_API_URL: "http://localhost:5051"

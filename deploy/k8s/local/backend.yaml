@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: risk-lattice-backend
+  namespace: risk-lattice
   labels:
     app: risk-lattice-backend
 spec:
@@ -20,27 +21,47 @@ spec:
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5051
+              name: http
+          envFrom:
+            - configMapRef:
+                name: risk-lattice-config
+            - secretRef:
+                name: risk-lattice-secrets
           readinessProbe:
             httpGet:
               path: /api/v1/health
               port: 5051
-            initialDelaySeconds: 5
-            periodSeconds: 10
+            initialDelaySeconds: 4
+            periodSeconds: 6
+            timeoutSeconds: 3
           livenessProbe:
             httpGet:
               path: /api/v1/health
               port: 5051
-            initialDelaySeconds: 10
-            periodSeconds: 15
+            initialDelaySeconds: 8
+            periodSeconds: 10
+            timeoutSeconds: 3
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: risk-lattice-backend
+  namespace: risk-lattice
+  labels:
+    app: risk-lattice-backend
 spec:
-  type: ClusterIP
+  type: NodePort
   selector:
     app: risk-lattice-backend
   ports:
-    - port: 5051
+    - name: http
+      port: 5051
       targetPort: 5051
+      nodePort: 30081

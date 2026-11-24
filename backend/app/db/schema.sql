@@ -49,3 +49,43 @@ CREATE TABLE IF NOT EXISTS stress_runs (
     critical_path_json JSON,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Authentication & Authorization Tables
+-- Supports Proprietary Username/Password + Google Workspace SSO
+CREATE TABLE IF NOT EXISTS users (
+    user_id VARCHAR PRIMARY KEY,
+    email VARCHAR UNIQUE NOT NULL,
+    password_hash VARCHAR, -- Salted bcrypt / PBKDF2 hash, NULL for OAuth-only users
+    name VARCHAR NOT NULL,
+    picture TEXT,
+    role VARCHAR NOT NULL DEFAULT 'ANALYST', -- 'CHIEF_RISK_OFFICER', 'PORTFOLIO_MANAGER', 'ANALYST', 'AUDITOR'
+    organization VARCHAR NOT NULL DEFAULT 'Institutional Client',
+    auth_provider VARCHAR NOT NULL DEFAULT 'proprietary', -- 'proprietary', 'google'
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_login TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+
+CREATE TABLE IF NOT EXISTS user_sessions (
+    session_token VARCHAR PRIMARY KEY,
+    user_id VARCHAR NOT NULL,
+    expires_at BIGINT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ip_address VARCHAR,
+    user_agent TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_sessions_token ON user_sessions(session_token);
+CREATE INDEX IF NOT EXISTS idx_sessions_user ON user_sessions(user_id);
+
+CREATE TABLE IF NOT EXISTS user_audit_logs (
+    log_id VARCHAR PRIMARY KEY,
+    user_id VARCHAR NOT NULL,
+    action VARCHAR NOT NULL, -- 'REGISTER', 'LOGIN', 'LOGOUT', 'PASSWORD_RESET', 'SIGN_OFF', 'SIMULATE'
+    details TEXT,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_audit_user ON user_audit_logs(user_id);

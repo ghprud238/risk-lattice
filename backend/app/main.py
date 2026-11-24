@@ -583,6 +583,19 @@ def export_run_bundle(run_id: str):
 
 # --- Authentication & Google SSO Endpoints ---
 
+class ProprietaryLoginRequest(BaseModel):
+    email: str = Field(..., description="Institutional email address")
+    password: str = Field(..., description="Account password")
+
+
+class ProprietaryRegisterRequest(BaseModel):
+    email: str = Field(..., description="Institutional email address")
+    password: str = Field(..., description="Account password (min 6 characters)")
+    name: str = Field(..., description="Full display name")
+    role: UserRole = Field("ANALYST", description="Institutional RBAC role")
+    organization: str = Field("Institutional Client", description="Company or fund organization")
+
+
 class GoogleAuthRequest(BaseModel):
     credential: Optional[str] = Field(None, description="Google OAuth ID Token JWT")
     email: Optional[str] = Field(None, description="Email for institutional sandbox persona")
@@ -590,6 +603,35 @@ class GoogleAuthRequest(BaseModel):
     picture: Optional[str] = Field(None, description="User avatar image URL")
     role: Optional[UserRole] = Field(None, description="Institutional RBAC role")
     organization: Optional[str] = Field(None, description="Institutional employer / fund name")
+
+
+@app.post("/api/v1/auth/register")
+def register_user(req: ProprietaryRegisterRequest):
+    """Registers a new institutional user account using the proprietary auth system."""
+    try:
+        auth_resp = auth_service.register_user(
+            email=req.email,
+            password=req.password,
+            name=req.name,
+            role=req.role,
+            organization=req.organization,
+        )
+        return auth_resp
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/v1/auth/login")
+def login_proprietary_user(req: ProprietaryLoginRequest):
+    """Authenticates via proprietary email & password system with bcrypt verification."""
+    try:
+        auth_resp = auth_service.authenticate_credentials(
+            email=req.email,
+            password=req.password,
+        )
+        return auth_resp
+    except ValueError as e:
+        raise HTTPException(status_code=401, detail=str(e))
 
 
 @app.post("/api/v1/auth/google")
@@ -621,6 +663,16 @@ def get_current_user(request: Request, token: Optional[str] = Query(None)):
         raise HTTPException(status_code=401, detail="Invalid or expired session token")
     
     return {"user": user}
+
+
+@app.get("/api/v1/auth/users")
+def list_system_users(request: Request):
+    """Returns list of registered institutional users (requires authenticated session)."""
+    auth_header = request.headers.get("Authorization") or ""
+    user = auth_service.get_user_from_token(auth_header) if auth_header else None
+    if not user:
+        raise HTTPException(status_code=401, detail="Authentication required")
+    return {"users": auth_service.list_users()}
 
 
 @app.post("/api/v1/auth/logout")

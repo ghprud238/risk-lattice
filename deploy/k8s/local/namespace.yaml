@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: risk-lattice
+  labels:
+    app.kubernetes.io/name: risk-lattice
+    app.kubernetes.io/part-of: risk-lattice-platform

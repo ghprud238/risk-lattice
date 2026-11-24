@@ -11,6 +11,7 @@ RiskLattice pairs a deterministic, non-linear Python quantitative math engine wi
 ```
 docs/
 ├── README.md                                  <-- Master Documentation Hub (This File)
+├── debugging_guide.md                         <-- Full-Stack Debugging Guide (Backend, Frontend, K8s, DuckDB, SSE)
 ├── use_cases_data_specification.md            <-- Exhaustive Inputs & Outputs Data Specification (19 Use Cases)
 ├── mobile_architecture_guide.md               <-- React Native / Expo Mobile Architecture & Client-Server Split
 ├── competitive_analysis_and_monetization.md   <-- Institutional Competitive Landscape & B2B Monetization Model
@@ -94,28 +95,39 @@ docs/
 7. **Machine-Readable Synthetic Benchmark Fixtures ([Synthetic Test Data](./synthetic_test_data/README.md))**:
    Complete repository of deterministic synthetic inputs (`*.json`, `*.csv`) and mathematically verified outputs (`*.json`) across 9 institutional scenarios, with automated regression coverage in CI (`test_synthetic_data_fixtures.py`).
 
+8. **Enterprise Infrastructure & Debugging ([Debugging Guide](./debugging_guide.md))**:
+   Full-stack debugging procedures, VS Code launch configurations (`.vscode/launch.json`), DuckDB schema inspection, SSE stream tracing, and container/Kubernetes troubleshooting.
+
 ---
 
 ## Quick Command Verification
 
+RiskLattice provides a standardized master `Makefile` for all common operations:
+
 ```bash
 cd /Users/dpcubed/projects/risk-lattice
 
+# Master Help & Target Listing
+make help
+
 # 1. Environment & System Doctor
-.venv/bin/python backend/scripts/doctor.py
+make doctor
 
 # 2. Ultra-Fast Offline Math Smoke Test (0.126s)
-.venv/bin/python backend/scripts/smoke_test.py
+make smoke
 
 # 3. Privacy Firewall Red-Team Audit (Rule P-01)
-.venv/bin/python backend/scripts/verify_privacy.py
+make privacy
 
 # 4. AST Isolation Boundary Check
-.venv/bin/pytest backend/tests/integration/test_boundary_and_engine.py -v
+make test-ast
 
 # 5. Synthetic Fixtures Integration Suite
-.venv/bin/pytest backend/tests/integration/test_synthetic_data_fixtures.py -v
+make synthetic
 
-# 6. Complete 116-Test Suite
-.venv/bin/pytest backend/tests/ -v
+# 6. Complete 119-Test Suite
+make test
+
+# 7. Local Kubernetes E2E Verification Flow
+make k8s-test
 ```

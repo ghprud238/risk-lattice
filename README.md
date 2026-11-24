@@ -7,7 +7,7 @@ A hybrid neuro-symbolic financial risk platform combining local-first LLM semant
 [![Next.js 15](https://img.shields.io/badge/Next.js-15-black.svg)](https://nextjs.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-1.0-emerald.svg)](https://fastapi.tiangolo.com/)
 [![DuckDB](https://img.shields.io/badge/DuckDB-OLAP-amber.svg)](https://duckdb.org/)
-[![Tests Passing](https://img.shields.io/badge/Tests-106%2F106%20Passing-emerald.svg)](backend/tests/)
+[![Tests Passing](https://img.shields.io/badge/Tests-119%2F119%20Passing-emerald.svg)](backend/tests/)
 [![Features](https://img.shields.io/badge/Features-21%20Documented-cyan.svg)](docs/features/)
 
 ---
@@ -122,7 +122,7 @@ RiskLattice provides dedicated, exhaustive technical documentation for each of i
 | **09** | [Scenario Diffing & A/B Attribution](docs/features/09_scenario_diffing_and_ab_attribution.md) | Side-by-side scenario comparison, Shapley / Euler marginal risk decomposition, and hop-by-hop delta waterfall | `backend/app/engine/diffing.py` |
 | **10** | [Board-Ready Executive Memo Generator](docs/features/10_board_ready_executive_memo.md) | Automated C-suite stress briefing with Markdown, HTML, and PDF export formatting regulatory disclosures and mitigation actions | `backend/app/services/report_generator_service.py` |
 | **11** | [Four-Eyes Governance & Audit Vault](docs/features/11_four_eyes_audit_vault.md) | Cryptographic SHA-256 audit trail, dual-key signoff workflow (Draft $\to$ Under Review $\to$ Approved), Basel III / SR 11-7 compliance | `backend/app/services/audit_vault_service.py` |
-| **12** | [Google Workspace SSO & RBAC](docs/features/12_google_workspace_sso_and_rbac.md) | Institutional OAuth2 authentication with JWT verification and 4-tier role-based access control (CRO, PM, Analyst, Auditor) | `backend/app/services/auth_service.py` |
+| **12** | [Google Workspace SSO & Institutional Auth](docs/features/12_google_workspace_sso_and_rbac.md) | Dual-option authentication: Google Workspace SSO (GIS SDK) + Proprietary Salted Bcrypt (`rounds=10`) & JWT in DuckDB with 4-tier RBAC (CRO, PM, Analyst, Auditor) | `backend/app/services/auth_service.py` |
 | **13** | [Endogenous Market Impact & Liquidity](docs/features/13_endogenous_market_impact_and_liquidity.md) | Almgren-Chriss (2000) optimal liquidation, temporary/permanent slippage, fire-sale feedback $\xi$, and ISDA SIMM margin call spiral | `backend/app/engine/liquidity.py` |
 | **14** | [Autonomous SEC EDGAR 10-K/8-K Crawler](docs/features/14_autonomous_sec_edgar_crawler.md) | Continuous SEC crawler polling Forms 10-K, 10-Q, 8-K with verbatim quote matching and confidence-scored supply chain edge discovery | `backend/app/services/edgar_crawler_service.py` |
 | **15** | [Interactive Geospatial World Map](docs/features/15_interactive_geospatial_world_map.md) | Interactive WGS84 Mercator projection of fab clusters, maritime straits, global container ports, and critical logistics corridors | `frontend/src/components/GeospatialMap.tsx` |
@@ -857,7 +857,87 @@ npm run start
 
 ---
 
-### Frontend Navigation Tabs & Workspaces
+### Option C: Local Kubernetes Cluster Launch (Kind - Production-Parity Orchestration)
+
+RiskLattice includes a complete local Kubernetes harness running on `kind` with zero-trust network policies, configuration secrets, readiness probes, and host port mappings:
+
+```bash
+cd /Users/dpcubed/projects/risk-lattice
+
+# Automated end-to-end build, deploy, and verification test
+make k8s-test
+```
+
+This single command:
+1. Provisions a local multi-port Kind cluster (`risk-lattice-local`).
+2. Builds optimized Docker images for `risk-lattice-backend:latest` and `risk-lattice-frontend:latest`.
+3. Sideloads images directly into the cluster nodes without requiring an external container registry.
+4. Applies `namespace.yaml`, `configmap.yaml`, `secret.yaml`, `backend.yaml`, and `frontend.yaml`.
+5. Monitors rollout health probes across the pods.
+6. Executes automated curl tests validating backend health (`/api/v1/health`), proprietary JWT authentication (`/api/v1/auth/login`), 4-hop multi-asset simulation (`/api/v1/simulate`), and Next.js frontend SSR.
+
+- **Frontend on Kubernetes**: [http://localhost:30080](http://localhost:30080)
+- **Backend on Kubernetes**: [http://localhost:30081/docs](http://localhost:30081/docs)
+- **Tear down cluster**: `make k8s-delete`
+
+---
+
+### Option D: Standardized Master `Makefile` Operations
+
+RiskLattice provides an enterprise `Makefile` standardizing development, testing, builds, and orchestration:
+
+```bash
+cd /Users/dpcubed/projects/risk-lattice
+
+make help           # List all available targets and descriptions
+make setup          # Install Python .venv, pip dependencies, and npm modules
+make doctor         # Run system preflight checks (Python, Node, DuckDB, Docker, Ports)
+make seed           # Seed DuckDB schema and 2,520-day returns dataset
+make synthetic      # Generate all 9 machine-readable test fixtures & run tests
+make test           # Run complete 119-test backend test suite (unit + integration + chaos)
+make dev            # Run backend and frontend concurrently
+make docker-up      # Launch containerized stack via docker compose
+make k8s-test       # Deploy and test full flow on local Kubernetes
+make clean          # Clean caches, logs, and build artifacts
+```
+
+---
+
+### Enterprise Authentication & Dual-Option Login
+
+RiskLattice supports two enterprise-grade authentication pathways out of the box:
+
+```
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                                DUAL AUTHENTICATION SYSTEM                              │
+├───────────────────────────────────────────┬────────────────────────────────────────────┤
+│   OPTION 1: Google Identity SDK (SSO)     │   OPTION 2: Proprietary Auth & JWT         │
+├───────────────────────────────────────────┼────────────────────────────────────────────┤
+│ • Google Workspace OAuth 2.0 GIS SDK      │ • Email + Salted Bcrypt Password Hashing   │
+│ • Domain-gated institutional login        │ • Signed HS256 JWT Token Sessions (24h)   │
+│ • Sandboxed persona quick-switch:         │ • Persistent DuckDB tables:                │
+│   - Chief Risk Officer (Signoff authority)│   - users (hashed credentials & status)    │
+│   - Portfolio Manager (Scenario builder)  │   - user_sessions (revocation tracking)   │
+│   - Quantitative Analyst (Advisory pod)   │   - user_audit_logs (compliance audit log) │
+│   - Compliance Auditor (Read-only vault)  │ • Pre-seeded institutional accounts:       │
+│                                           │   - cro@risklattice.com / cro123!          │
+│                                           │   - pm@risklattice.com / pm123!            │
+│                                           │   - analyst@risklattice.com / analyst123!  │
+│                                           │   - auditor@risklattice.com / auditor123!  │
+└───────────────────────────────────────────┴────────────────────────────────────────────┘
+```
+
+---
+
+### Full-Stack Debugging & IDE Diagnostics
+
+For comprehensive backend, frontend, database, SSE, and Kubernetes debugging, see our master **[Full-Stack Debugging Guide](docs/debugging_guide.md)**.
+
+Pre-configured VS Code debug targets are provided in [`.vscode/launch.json`](.vscode/launch.json):
+- `Backend: FastAPI Server` (breakpoints in route handlers and math engines)
+- `Backend: Current Pytest File` (isolated unit test debugging)
+- `Frontend: Next.js Debug` (Chrome DevTools and server components)
+- `Full-Stack: Backend + Frontend` (compound simultaneous debugging)
 
 The Next.js 15 frontend ([http://localhost:5050](http://localhost:5050)) provides 11 integrated risk workspaces and 2 governance modals:
 
