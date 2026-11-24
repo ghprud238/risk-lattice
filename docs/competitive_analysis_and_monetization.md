@@ -117,6 +117,44 @@ DEPTH         │
 
 ---
 
+### 2.4 Ecosystem Positioning: RiskLattice vs. Compound AI (`getcompound.ai`)
+
+A critical development in institutional finance is the emergence of vertical AI platforms founded by top AI researchers (such as **Compound AI**, founded by ex-Google Brain, DeepMind, Coatue, and Y Combinator alumni). Understanding how RiskLattice fits into this new landscape clarifies both its competitive boundaries and its integration opportunities:
+
+```
+┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                              THE MODERN AI-NATIVE BUY-SIDE WORKFLOW                                    │
+├─────────────────────────────────────────────────┬──────────────────────────────────────────────────────┤
+│             COMPOUND AI (getcompound.ai)        │                    RISKLATTICE                       │
+│        "Front-Office Deal & Underwriting AI"    │        "Middle-Office Risk & Contagion Quant"        │
+├─────────────────────────────────────────────────┼──────────────────────────────────────────────────────┤
+│ • Focus: Deal Execution & Fundamental Modeling  │ • Focus: Macro Stress-Testing & Tail-Risk Governance │
+│ • Primary Persona: PE Associate, M&A Banker     │ • Primary Persona: Chief Risk Officer, Quant PM      │
+│ • Input: 10,000-page Virtual Data Rooms (VDRs), │ • Input: Multi-tier supply chains, satellite AIS,    │
+│   CIMs, financial statements, broker models     │   macro factor indices, portfolio trade blotters     │
+│ • Moat: Headless Excel/PowerPoint engine with   │ • Moat: Pure AST 4-hop graph propagation, Student-t  │
+│   cell-level precedent tracing & PE Bench       │   Copula Monte Carlo, Almgren-Chriss liquidity       │
+│ • Output: Editable LBO models, Investment       │ • Output: Non-linear PnL waterfalls, 99% CVaR,       │
+│   Committee (IC) PowerPoint pitch decks         │   Fed CCAR FR Y-14A packets, SHA-256 audit seals     │
+├─────────────────────────────────────────────────┴──────────────────────────────────────────────────────┤
+│ 🤝 THE INTEGRATION THESIS:                                                                             │
+│ Compound AI models the UPSIDE (Base-case underwriting); RiskLattice models the DOWNSIDE (Tail risk).  │
+│ 1. Compound extracts confidential supplier BOM contracts from private data rooms.                      │
+│ 2. RiskLattice subjects those contracts to multi-hop physical choke point shocks and Copula math.      │
+│ 3. Stressed cash flow haircuts feed back into Compound's Investment Committee memo.                   │
+└────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+#### Key Commonalities & Shared Philosophy:
+1. **The Anti-Hallucination Imperative**: Both platforms reject the idea of letting an LLM generate unverified financial numbers. Compound built a custom headless Office engine from scratch with cell-level precedent tracing; RiskLattice implemented **ADR-002 AST isolation**, separating LLM semantic parsing from deterministic NumPy/SciPy math.
+2. **Verbatim Auditability**: Compound links every data cell back to the exact page of a confidential data room; RiskLattice links every supply chain graph edge to exact character-offset citations in SEC 10-K disclosures.
+
+#### Why They Do Not Compete:
+- **Compound AI is not a risk engine**: It does not simulate 4-hop network graph cascades, does not run 10,000-path Student-$t$ Copula Monte Carlo simulations, does not monitor live AIS vessel queues in the Taiwan Strait, and does not model Almgren-Chriss fire-sale liquidity spirals or Basel III capital relief.
+- **RiskLattice is not an office document generator**: It does not parse 15,000-file data rooms, does not generate editable `.xlsx` LBO debt schedules, and does not create 80-page marketing pitch decks.
+
+---
+
 ## 3. Potential Commercial Monetization Opportunities
 
 RiskLattice is structured around **four institutional revenue tiers** and **three high-margin expansion vectors**:
